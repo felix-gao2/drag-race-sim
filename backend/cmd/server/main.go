@@ -4,6 +4,7 @@ import (
 	"log"
 	"net/http"
 
+	"drag-race-sim/internal/api"
 	"drag-race-sim/internal/db"
 
 	"github.com/gin-gonic/gin"
@@ -30,11 +31,22 @@ func main() {
 		log.Fatalf("seed: %v", err)
 	}
 
+	h := &api.Handler{DB: database}
+
 	r := gin.Default()
 
 	r.GET("/health", func(c *gin.Context) {
 		c.JSON(http.StatusOK, gin.H{"status": "ok"})
 	})
+
+	v1 := r.Group("/api")
+	{
+		v1.GET("/makes", h.GetMakes)
+		v1.GET("/models", h.GetModels)
+		v1.GET("/years", h.GetYears)
+		v1.GET("/trims", h.GetTrims)
+		v1.GET("/cars/:id", h.GetCar)
+	}
 
 	log.Println("server starting on :8000")
 	if err := r.Run(":8000"); err != nil {
