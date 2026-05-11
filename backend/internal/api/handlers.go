@@ -5,6 +5,7 @@ import (
 	"strconv"
 
 	"drag-race-sim/internal/db"
+	"drag-race-sim/internal/sim"
 
 	"github.com/gin-gonic/gin"
 	"github.com/jmoiron/sqlx"
@@ -102,6 +103,56 @@ func (h *Handler) PostRace(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, gin.H{"slug": slug})
+}
+
+func (h *Handler) GetRace(c *gin.Context) {
+	slug := c.Param("slug")
+
+	race, err := db.GetRaceBySlug(h.DB, slug)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+	if race == nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "race not found"})
+		return
+	}
+
+	carA, err := db.GetCarByID(h.DB, race.CarAID)
+	if err != nil || carA == nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "car_a missing"})
+		return
+	}
+	carB, err := db.GetCarByID(h.DB, race.CarBID)
+	if err != nil || carB == nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "car_b missing"})
+		return
+	}
+
+	result, err := sim.Run(
+		sim.CarInput{ZeroToSixty: carA.ZeroToSixty, QuarterMile: carA.QuarterMile},
+		sim.CarInput{ZeroToSixty: carB.ZeroToSixty, QuarterMile: carB.QuarterMile},
+	)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "simulation failed: " + err.Error()})
+		return
+	}
+
+	var winnerID *int
+	switch result.Winner {
+	case "a":
+		winnerID = &carA.ID
+	case "b":
+		winnerID = &carB.ID
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"car_a":      carA,
+		"car_b":      carB,
+		"telemetry":  result.Telemetry,
+		"winner_id":  winnerID,
+		"margin_sec": result.MarginSec,
+	})
 }
 
 func (h *Handler) GetCar(c *gin.Context) {
