@@ -73,6 +73,37 @@ func (h *Handler) GetTrims(c *gin.Context) {
 	c.JSON(http.StatusOK, trims)
 }
 
+func (h *Handler) PostRace(c *gin.Context) {
+	var body struct {
+		CarAID int `json:"car_a_id" binding:"required"`
+		CarBID int `json:"car_b_id" binding:"required"`
+	}
+	if err := c.ShouldBindJSON(&body); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	carA, err := db.GetCarByID(h.DB, body.CarAID)
+	if err != nil || carA == nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "car_a not found"})
+		return
+	}
+	carB, err := db.GetCarByID(h.DB, body.CarBID)
+	if err != nil || carB == nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "car_b not found"})
+		return
+	}
+
+	slug := buildRaceSlug(carA, carB)
+
+	if err := db.CreateRace(h.DB, slug, carA.ID, carB.ID); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"slug": slug})
+}
+
 func (h *Handler) GetCar(c *gin.Context) {
 	idStr := c.Param("id")
 	id, err := strconv.Atoi(idStr)

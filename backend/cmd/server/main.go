@@ -46,6 +46,7 @@ func main() {
 		v1.GET("/years", h.GetYears)
 		v1.GET("/trims", h.GetTrims)
 		v1.GET("/cars/:id", h.GetCar)
+		v1.POST("/races", h.PostRace)
 	}
 
 	log.Println("server starting on :8000")
