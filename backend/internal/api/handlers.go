@@ -5,6 +5,7 @@ import (
 	"strconv"
 
 	"drag-race-sim/internal/db"
+	"drag-race-sim/internal/og"
 	"drag-race-sim/internal/sim"
 
 	"github.com/gin-gonic/gin"
@@ -13,6 +14,15 @@ import (
 
 type Handler struct {
 	DB *sqlx.DB
+}
+
+func (h *Handler) GetOGImage(c *gin.Context) {
+	data, err := og.Placeholder()
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+	c.Data(http.StatusOK, "image/png", data)
 }
 
 func (h *Handler) GetMakes(c *gin.Context) {
