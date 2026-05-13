@@ -11,7 +11,7 @@ Web app for comparing two real-world cars in a 1/4 mile drag race. Users pick Ca
 ## Tech Stack
 
 - **Backend:** Go + Gin, SQLite via `database/sql` + `sqlx`, deployed to Fly.io
-- **Frontend:** React + Vite + TypeScript, Tailwind CSS (dark theme), Recharts, deployed to Vercel
+- **Frontend:** React + Vite + JavaScript, Tailwind CSS (dark theme), Recharts, deployed to Vercel
 
 ## File Layout
 
@@ -30,7 +30,7 @@ Web app for comparing two real-world cars in a 1/4 mile drag race. Users pick Ca
   /src
     /pages      — Landing, RaceSetup, RaceView
     /components — CarPanel, Cascade, ChristmasTree, RaceAnimation, TelemetryChart
-    /api        — typed fetch wrappers
+    /api        — fetch wrappers
     /lib        — slug helpers, formatters
   package.json
   vite.config.ts
@@ -72,7 +72,7 @@ Solve for `v_term` and `k` numerically (Newton-Raphson or bisection) using the t
 
 **Phase 1 — Backend:** Gin skeleton → schema + seed → all API endpoints → simulation → race creation/slug → OG image (basic or placeholder)
 
-**Phase 1 — Frontend:** Vite + React + TS + Tailwind → routing → landing (minimal) → cascading dropdowns wired to API → car stats panel → Start Race → race view (rectangles as cars, basic results, basic chart) → Share button
+**Phase 1 — Frontend:** Vite + React + JS + Tailwind → routing → landing (minimal) → cascading dropdowns wired to API → car stats panel → Start Race → race view (rectangles as cars, basic results, basic chart) → Share button
 
 **Phase 2:** Polish landing (looping car animation), drag-strip background, Christmas tree countdown, SVG car sprites, scrolling asphalt, live HUD, scrubber, styled OG images.
 
@@ -107,7 +107,7 @@ Solve for `v_term` and `k` numerically (Newton-Raphson or bisection) using the t
 - Git author is always Felix Gao (local git config) — never override or set a different committer
 - Commit as often as possible — every logical unit of work, no matter how small
 - Commit messages: short, human, lowercase imperative ("add filter row to modal" not "Implement FilterChip component with AnimatePresence transition")
-- Always run `npm run build` or `npm run dev` + `tsc --noEmit` after changes before declaring done
+- Always run `npm run build` or `npm run dev` after changes before declaring done
 - Update `plan.md` at the end of every session (session log + next checklist)
 
 ## Session Hygiene

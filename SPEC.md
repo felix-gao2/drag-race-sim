@@ -14,7 +14,7 @@ Differentiator from Motor Matchup: not adding features on top of theirs (mods, t
 - Deployed to Fly.io
 
 **Frontend**
-- React + Vite + TypeScript
+- React + Vite + JavaScript
 - Tailwind CSS (dark theme)
 - Recharts (telemetry chart)
 - Deployed to Vercel
@@ -189,7 +189,7 @@ Reachable via Start Race or a shared link. Fetches `/api/races/:slug` on mount.
 6. OG image generation — basic version using Go's `image` + `image/draw` packages, or a static placeholder image as a temporary fallback
 
 **Frontend**
-1. Vite + React + TS + Tailwind skeleton
+1. Vite + React + JS + Tailwind skeleton
 2. Routing: `/`, `/race`, `/race/:slug`
 3. Landing page — minimal: title, description, button (no animation yet)
 4. Race setup page — cascading dropdowns wired to the API end-to-end
@@ -243,7 +243,7 @@ Reachable via Start Race or a shared link. Fetches `/api/races/:slug` on mount.
   /src
     /pages        Landing, RaceSetup, RaceView
     /components   CarPanel, Cascade, ChristmasTree, RaceAnimation, TelemetryChart
-    /api          typed fetch wrappers
+    /api          fetch wrappers
     /lib          slug helpers, formatters
   package.json
   vite.config.ts
