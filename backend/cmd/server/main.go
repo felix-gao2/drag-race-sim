@@ -7,6 +7,7 @@ import (
 	"drag-race-sim/internal/api"
 	"drag-race-sim/internal/db"
 
+	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 	"github.com/jmoiron/sqlx"
 	_ "modernc.org/sqlite"
@@ -34,6 +35,11 @@ func main() {
 	h := &api.Handler{DB: database}
 
 	r := gin.Default()
+	r.Use(cors.New(cors.Config{
+		AllowOrigins: []string{"http://localhost:5173"},
+		AllowMethods: []string{"GET", "POST"},
+		AllowHeaders: []string{"Content-Type"},
+	}))
 
 	r.GET("/health", func(c *gin.Context) {
 		c.JSON(http.StatusOK, gin.H{"status": "ok"})
