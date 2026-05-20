@@ -40,9 +40,14 @@ func GetYears(db *sqlx.DB, make, model string) ([]int, error) {
 	return years, err
 }
 
-func GetTrims(db *sqlx.DB, make, model string, year int) ([]string, error) {
-	var trims []string
-	err := db.Select(&trims, `SELECT DISTINCT trim FROM cars WHERE make = ? AND model = ? AND year = ? ORDER BY trim`, make, model, year)
+type TrimOption struct {
+	ID   int    `db:"id"   json:"id"`
+	Trim string `db:"trim" json:"trim"`
+}
+
+func GetTrims(db *sqlx.DB, make, model string, year int) ([]TrimOption, error) {
+	var trims []TrimOption
+	err := db.Select(&trims, `SELECT id, trim FROM cars WHERE make = ? AND model = ? AND year = ? ORDER BY trim`, make, model, year)
 	return trims, err
 }
 

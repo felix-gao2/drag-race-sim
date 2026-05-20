@@ -15,6 +15,7 @@ export const getModels = (make) =>
 export const getYears = (make, model) =>
   get(`/api/years?make=${encodeURIComponent(make)}&model=${encodeURIComponent(model)}`)
 
+// returns [{id, trim}, ...]
 export const getTrims = (make, model, year) =>
   get(`/api/trims?make=${encodeURIComponent(make)}&model=${encodeURIComponent(model)}&year=${year}`)
 
