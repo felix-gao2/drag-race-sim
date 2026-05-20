@@ -1,4 +1,4 @@
-@import url("https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;900&family=Barlow:wght@400;500;600&family=DM+Mono:wght@400;500&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Anton&family=JetBrains+Mono:wght@400;500&family=Barlow+Condensed:wght@400;600;700;900&family=Barlow:wght@400;500;600&family=DM+Mono:wght@400;500&display=swap");
 @import "tailwindcss";
 
 @theme {
@@ -31,14 +31,40 @@ html, body, #root {
   -webkit-font-smoothing: antialiased;
 }
 
-/* Subtle noise grain overlay */
+/* Grain overlay — 2.5% opacity */
 body::before {
   content: "";
   position: fixed;
   inset: 0;
-  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='1'/%3E%3C/svg%3E");
   background-size: 200px 200px;
   pointer-events: none;
   z-index: 9999;
-  opacity: 0.35;
+  opacity: 0.025;
+}
+
+/* Landing animations */
+@keyframes carDrive {
+  from { transform: translateX(-460px); }
+  to   { transform: translateX(calc(100vw + 20px)); }
+}
+
+@keyframes laneScroll1 {
+  from { background-position: 0 0; }
+  to   { background-position: -80px 0; }
+}
+
+@keyframes laneScroll2 {
+  from { background-position: 0 0; }
+  to   { background-position: -60px 0; }
+}
+
+@keyframes particleFly {
+  0%   { transform: translate(0, 0); opacity: 0.9; }
+  100% { transform: translate(var(--dx), var(--dy)); opacity: 0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .car-anim  { animation: none !important; transform: translateX(45vw) !important; }
+  .lane-anim { animation: none !important; }
 }
