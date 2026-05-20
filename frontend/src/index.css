@@ -1,4 +1,4 @@
-@import url("https://fonts.googleapis.com/css2?family=Anton&family=JetBrains+Mono:wght@400;500&family=Barlow+Condensed:wght@400;600;700;900&family=Barlow:wght@400;500;600&family=DM+Mono:wght@400;500&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&display=swap");
 @import "tailwindcss";
 
 @theme {
@@ -43,28 +43,13 @@ body::before {
   opacity: 0.025;
 }
 
-/* Landing animations */
-@keyframes carDrive {
-  from { transform: translateX(-460px); }
-  to   { transform: translateX(calc(100vw + 20px)); }
+/* Landing — discrete car pass */
+@keyframes carPassX {
+  from { transform: translate(-200px, -50%); }
+  to   { transform: translate(calc(100vw + 200px), -50%); }
 }
 
-@keyframes laneScroll1 {
-  from { background-position: 0 0; }
-  to   { background-position: -80px 0; }
-}
-
-@keyframes laneScroll2 {
-  from { background-position: 0 0; }
-  to   { background-position: -60px 0; }
-}
-
-@keyframes particleFly {
-  0%   { transform: translate(0, 0); opacity: 0.9; }
-  100% { transform: translate(var(--dx), var(--dy)); opacity: 0; }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .car-anim  { animation: none !important; transform: translateX(45vw) !important; }
-  .lane-anim { animation: none !important; }
+@keyframes ctaPulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(220,38,38,0.5); }
+  50%       { box-shadow: 0 0 0 14px rgba(220,38,38,0); }
 }
