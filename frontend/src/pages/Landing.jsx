@@ -171,29 +171,24 @@ export default function Landing() {
       </div>
 
       {/* ── title ── */}
-      <div style={{ position: 'absolute', top: '17vh', left: 0, right: 0, textAlign: 'center' }}>
+      <div style={{
+        position: 'absolute', top: '30vh', left: 0, right: 0,
+        display: 'flex', justifyContent: 'center',
+        transform: 'translateY(-1em)',
+      }}>
         <h1 style={{
           fontFamily: DISPLAY,
-          fontSize: 'clamp(80px, 11vw, 180px)',
+          fontSize: 'clamp(72px, 9vw, 140px)',
           lineHeight: 0.95,
-          letterSpacing: '-0.01em',
+          letterSpacing: '-0.02em',
           textTransform: 'uppercase',
           margin: 0,
           userSelect: 'none',
           whiteSpace: 'nowrap',
+          maxWidth: 1100,
+          color: '#dc2626',
         }}>
-          <span style={{
-            color: 'transparent',
-            WebkitTextStroke: '2px #dc2626',
-          }}>DRAG </span>
-          <span style={{
-            color: '#dc2626',
-            WebkitTextStroke: '0',
-          }}>RACE</span>
-          <span style={{
-            color: 'transparent',
-            WebkitTextStroke: '2px #dc2626',
-          }}> SIM</span>
+          DRAG RACE SIM
         </h1>
       </div>
 
