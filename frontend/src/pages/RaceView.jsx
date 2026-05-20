@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { getRace } from '../api'
+import TelemetryChart from '../components/TelemetryChart'
 
 const ACCENT = { a: 'var(--color-car-a)', b: 'var(--color-car-b)' }
 
@@ -118,7 +119,7 @@ function StatRow({ label, a, b }) {
   )
 }
 
-function Results({ carA, carB, winnerId, marginSec, onRaceAgain }) {
+function Results({ carA, carB, winnerId, marginSec, telemetry, onRaceAgain }) {
   const [copied, setCopied] = useState(false)
 
   const winnerSide = winnerId === carA.id ? 'a' : winnerId === carB.id ? 'b' : null
@@ -213,6 +214,13 @@ function Results({ carA, carB, winnerId, marginSec, onRaceAgain }) {
           b={carB.trap_mph != null ? `${carB.trap_mph} mph` : '—'}
         />
       </div>
+
+      {/* chart */}
+      <TelemetryChart
+        telemetry={telemetry}
+        labelA={carLabel(carA)}
+        labelB={carLabel(carB)}
+      />
 
       {/* actions */}
       <div style={{ display: 'flex', gap: '0.75rem', justifyContent: 'center' }}>
@@ -351,6 +359,7 @@ export default function RaceView() {
           carB={car_b}
           winnerId={winner_id}
           marginSec={margin_sec}
+          telemetry={telemetry}
           onRaceAgain={() => navigate('/race')}
         />
       )}
