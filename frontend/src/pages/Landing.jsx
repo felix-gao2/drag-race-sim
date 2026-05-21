@@ -20,7 +20,7 @@ function ETStrip() {
 }
 
 const MONO = `'JetBrains Mono', monospace`
-const DISPLAY = `'Druk Wide Bold', 'PP Neue Machina', ui-sans-serif, sans-serif`
+const DISPLAY = `'Anton', sans-serif`
 
 export default function Landing() {
   const navigate = useNavigate()
@@ -112,11 +112,12 @@ export default function Landing() {
         <h1 style={{
           margin: 0, marginTop: 32,
           fontFamily: DISPLAY,
-          fontSize: 'clamp(72px, 9vw, 140px)',
+          fontWeight: 400,
+          fontSize: 'clamp(64px, 10vw, 160px)',
           lineHeight: 0.95,
-          letterSpacing: '-0.02em',
+          letterSpacing: '0.02em',
           textTransform: 'uppercase',
-          color: '#dc2626',
+          color: '#f5f5f4',
           userSelect: 'none',
           whiteSpace: 'nowrap',
         }}>
