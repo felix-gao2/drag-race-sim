@@ -43,10 +43,10 @@ body::before {
   opacity: 0.025;
 }
 
-/* Landing — discrete car pass */
-@keyframes carPassX {
-  from { transform: translate(-200px, -50%); }
-  to   { transform: translate(calc(100vw + 200px), -50%); }
+/* Landing — staged launch */
+@keyframes carLaunch {
+  from { transform: translateX(18vw) translateY(-100%); }
+  to   { transform: translateX(130vw) translateY(-100%); }
 }
 
 @keyframes ctaPulse {

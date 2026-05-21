@@ -8,83 +8,131 @@ function reducedMotion() {
     window.matchMedia('(prefers-reduced-motion: reduce)').matches
 }
 
-// ── Discrete pass animation ───────────────────────────────────────────────────
-// Sequence: drive 1s → trail fades 2s → stillness 4s → repeat
+// ── Car animation: staged 2s → launch 0.7s → streak fades 1.5s → pause 3s ────
 function useCarAnimation(rm) {
-  const [driving, setDriving] = useState(false)
-  const [trailOpacity, setTrailOpacity] = useState(0)
+  const [launching, setLaunching] = useState(false)
+  const [streakOpacity, setStreakOpacity] = useState(0)
   const t = useRef(null)
 
   useEffect(() => {
     if (rm) return
-    const pass = () => {
-      setDriving(true)
+    const cycle = () => {
+      setLaunching(false)
+      setStreakOpacity(0)
       t.current = setTimeout(() => {
-        setDriving(false)
-        setTrailOpacity(1)
-        requestAnimationFrame(() =>
-          requestAnimationFrame(() => setTrailOpacity(0))
-        )
-        t.current = setTimeout(pass, 6100) // 2s fade + 4s still + 0.1 buffer
-      }, 1000)
+        setLaunching(true)
+        setStreakOpacity(1)
+        t.current = setTimeout(() => {
+          setLaunching(false)
+          requestAnimationFrame(() =>
+            requestAnimationFrame(() => setStreakOpacity(0))
+          )
+          t.current = setTimeout(cycle, 4500) // 1.5s fade + 3s pause
+        }, 700)
+      }, 2000)
     }
-    t.current = setTimeout(pass, 800)
+    t.current = setTimeout(cycle, 800)
     return () => clearTimeout(t.current)
   }, [rm])
 
-  return { driving, trailOpacity }
+  return { launching, streakOpacity }
 }
 
-// ── Car SVG — top fuel dragster ───────────────────────────────────────────────
-function CarSVG({ width = 140 }) {
-  // viewBox: 320×60 — long narrow body, huge rear slicks, tiny front wheels
+// ── Car SVG — top fuel dragster (detailed side profile) ──────────────────────
+function DragsterSVG({ width = 280 }) {
+  const h = Math.round(width * 170 / 560)
+  // viewBox 560×170 → rendered 280×85. Scale: 0.5px per unit.
+  // Ground line at y=163. Rear slick r=80 (80px diam). Front wheel r=24 (24px diam).
   return (
-    <svg viewBox="0 0 320 60" width={width} height={Math.round(width * 60 / 320)}
-      xmlns="http://www.w3.org/2000/svg" style={{ display: 'block', flexShrink: 0 }}>
+    <svg viewBox="0 0 560 170" width={width} height={h}
+      xmlns="http://www.w3.org/2000/svg"
+      style={{ display: 'block', overflow: 'visible' }}>
 
-      {/* ── parachute pack (rear-left) ── */}
-      <ellipse cx="8" cy="30" rx="7" ry="5" fill="#2a2a2a" />
-      <rect x="8" y="28" width="10" height="4" fill="#2a2a2a" />
+      {/* ground contact shadow */}
+      <ellipse cx="285" cy="164" rx="230" ry="5" fill="rgba(0,0,0,0.38)" />
 
-      {/* ── main body ── */}
-      {/* low slab chassis */}
-      <path d="M 16,28 L 240,24 L 260,18 L 288,16 L 304,20 L 308,26 L 308,38 L 260,38 Q 246,50 224,38 L 68,38 Q 54,50 32,38 L 16,38 Z" fill="#f5f5f4" />
+      {/* ── rear slick (80px diam rendered) ── */}
+      <circle cx="115" cy="83" r="80" fill="#111" />
+      <circle cx="115" cy="83" r="56" fill="#161616" />
+      <circle cx="115" cy="83" r="28" fill="#1e1e1e" />
+      <circle cx="115" cy="83" r="11" fill="#252525" />
+      <path d="M 50,52 A 80,80 0 0,1 96,13" fill="none" stroke="#2c2c2c" strokeWidth="5" strokeLinecap="round"/>
+      <path d="M 36,105 A 80,80 0 0,1 37,63" fill="none" stroke="#2c2c2c" strokeWidth="5" strokeLinecap="round"/>
 
-      {/* ── red side stripe ── */}
-      <path d="M 60,28 L 220,25 L 220,36 L 60,36 Z" fill="#dc2626" opacity="0.92" />
+      {/* ── rear wing / spoiler ── */}
+      <path d="M 58,71 L 188,64 L 188,54 L 58,61 Z" fill="#d4d4d4" />
+      <rect x="57" y="61" width="7" height="22" rx="1" fill="#c4c4c4" />
+      <rect x="188" y="54" width="7" height="22" rx="1" fill="#c4c4c4" />
+      <line x1="80" y1="61" x2="88" y2="100" stroke="#aaa" strokeWidth="2.5" strokeLinecap="round"/>
+      <line x1="168" y1="57" x2="175" y2="99" stroke="#aaa" strokeWidth="2.5" strokeLinecap="round"/>
 
-      {/* ── engine block bump (top-center) ── */}
-      <path d="M 180,16 L 230,14 L 240,18 L 240,24 L 180,24 Z" fill="#e5e5e3" />
-      {/* injector hat */}
-      <rect x="195" y="9" width="30" height="8" rx="1" fill="#d4d4d2" />
-      <rect x="200" y="6" width="20" height="5" rx="1" fill="#c4c4c2" />
+      {/* ── main body / chassis slab ── */}
+      <path d="
+        M 70,100 L 202,93 L 282,90 L 385,87 L 458,89 L 515,96 L 548,103 L 556,107 L 558,109 L 556,112
+        L 550,115 L 515,117 L 458,119 L 385,121 L 282,123 L 202,125 L 70,128
+        Q 62,128 58,120 L 58,108 Q 62,100 70,100 Z
+      " fill="#f5f5f4" />
 
-      {/* ── exhaust pipes (top, pairs) ── */}
-      <rect x="148" y="10" width="4" height="14" rx="1" fill="#1a1a1a" />
-      <rect x="155" y="10" width="4" height="14" rx="1" fill="#1a1a1a" />
-      <rect x="162" y="11" width="4" height="13" rx="1" fill="#1a1a1a" />
-      <rect x="169" y="11" width="4" height="13" rx="1" fill="#1a1a1a" />
+      {/* ── red stripe full length ── */}
+      <path d="
+        M 70,115 L 202,110 L 282,108 L 385,106 L 458,107 L 515,111 L 548,113 L 550,116
+        L 515,118 L 458,120 L 385,122 L 282,124 L 202,126 L 70,128 Z
+      " fill="#dc2626" />
 
-      {/* ── cockpit canopy ── */}
-      <path d="M 256,18 L 290,16 L 303,20 L 303,26 L 256,26 Z" fill="#111" opacity="0.82" />
+      {/* ── engine block under blower ── */}
+      <path d="M 265,90 L 390,85 L 398,92 L 398,112 L 265,115 Z" fill="#e0e0de" />
 
-      {/* ── rear slick (large) ── */}
-      <circle cx="46" cy="38" r="18" fill="#111" />
-      <circle cx="46" cy="38" r="11" fill="#1c1c1c" />
-      <circle cx="46" cy="38" r="4" fill="#2e2e2e" />
-      {/* tire lettering highlight */}
-      <path d="M 30,30 A 18,18 0 0 1 46,20" fill="none" stroke="#3a3a3a" strokeWidth="2.5" />
+      {/* ── supercharger / blower ── */}
+      <rect x="278" y="66" width="105" height="26" rx="3" fill="#d0d0ce" />
+      <rect x="288" y="56" width="85" height="14" rx="2" fill="#c8c8c6" />
+      {/* injector stacks */}
+      {[293, 305, 317, 329, 341, 353, 365].map((x, i) => (
+        <rect key={i} x={x} y="45" width="7" height="14" rx="1" fill="#1c1c1c" />
+      ))}
+      {/* blower ribbing */}
+      {[291, 303, 315, 327, 339, 351, 363, 375].map((x, i) => (
+        <line key={i} x1={x} y1="66" x2={x} y2="92" stroke="#bbb" strokeWidth="0.75" />
+      ))}
 
-      {/* ── front wheel (small) ── */}
-      <circle cx="290" cy="36" r="8" fill="#111" />
-      <circle cx="290" cy="36" r="4.5" fill="#1c1c1c" />
-      <circle cx="290" cy="36" r="1.8" fill="#2e2e2e" />
+      {/* ── zoomie exhaust headers (4 pipes, angle up-rearward) ── */}
+      {[0, 10, 20, 30].map((off, i) => (
+        <path key={i}
+          d={`M ${260 + off},113 Q ${248 + off},97 ${234 + off},80`}
+          fill="none" stroke="#1e1e1e" strokeWidth="6" strokeLinecap="round"
+        />
+      ))}
 
-      {/* ── thin front nose extension ── */}
-      <path d="M 304,26 L 316,26 L 318,30 L 316,34 L 304,34 Z" fill="#e8e8e6" />
+      {/* ── open cockpit / exposed roll cage ── */}
+      <path d="M 422,100 Q 422,72 440,69 Q 458,66 462,100"
+        fill="none" stroke="#3a3a3a" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round"/>
+      <line x1="424" y1="87" x2="460" y2="85" stroke="#3a3a3a" strokeWidth="2.5"/>
+      {/* windscreen / head fairing */}
+      <path d="M 462,69 L 492,80 L 488,100 L 462,100 Z" fill="#111" opacity="0.78"/>
+      {/* driver helmet */}
+      <ellipse cx="443" cy="89" rx="13" ry="12" fill="#222" />
+      <path d="M 431,85 Q 443,75 455,85" fill="none" stroke="#3a3a3a" strokeWidth="2"/>
 
-      {/* ── rear brake-light ── */}
-      <rect x="14" y="26" width="4" height="12" rx="1" fill="#dc2626" />
+      {/* ── needle nose cone (extends past front wheel) ── */}
+      <path d="M 513,97 L 558,107 L 558,113 L 513,118 Z" fill="#e8e8e6"/>
+      <line x1="513" y1="109" x2="557" y2="110" stroke="#dc2626" strokeWidth="1.5" opacity="0.5"/>
+
+      {/* ── front stub axle ── */}
+      <line x1="478" y1="116" x2="491" y2="127" stroke="#555" strokeWidth="2.5" strokeLinecap="round"/>
+
+      {/* ── front wheel (24px diam rendered) ── */}
+      <circle cx="491" cy="139" r="24" fill="#111" />
+      <circle cx="491" cy="139" r="15" fill="#1c1c1c" />
+      <circle cx="491" cy="139" r="6" fill="#222" />
+      <circle cx="491" cy="139" r="2.5" fill="#2d2d2d" />
+
+      {/* ── parachute packs ── */}
+      <ellipse cx="38" cy="113" rx="22" ry="12" fill="#262626" />
+      <rect x="38" y="104" width="27" height="18" rx="3" fill="#262626" />
+      <line x1="48" y1="105" x2="64" y2="110" stroke="#333" strokeWidth="1.5"/>
+      <line x1="48" y1="121" x2="64" y2="117" stroke="#333" strokeWidth="1.5"/>
+
+      {/* ── rear brake light ── */}
+      <rect x="60" y="117" width="5" height="9" rx="1" fill="#dc2626" />
     </svg>
   )
 }
@@ -109,7 +157,7 @@ export default function Landing() {
   const navigate = useNavigate()
   const [ctaHover, setCtaHover] = useState(false)
   const rm = reducedMotion()
-  const { driving, trailOpacity } = useCarAnimation(rm)
+  const { launching, streakOpacity } = useCarAnimation(rm)
 
   return (
     <div style={{
@@ -221,39 +269,39 @@ export default function Landing() {
 
       {/* ── car pass layer ── */}
       <div style={{ position: 'absolute', inset: 0, pointerEvents: 'none' }}>
-        {/* trailing red streak — stays at 50vh after car exits */}
+        {/* 60vw red streak, lingers after launch */}
         <div style={{
           position: 'absolute',
-          right: 0,
-          top: '55vh',
-          width: '30vw',
-          height: 4,
-          background: 'linear-gradient(to left, transparent, rgba(220,38,38,0.75))',
-          filter: 'blur(4px)',
-          opacity: trailOpacity,
-          transition: 'opacity 2s linear',
-          transform: 'translateY(-50%)',
+          top: 'calc(60vh - 24px)',
+          left: 0,
+          width: '60vw',
+          height: 8,
+          transform: 'translateX(18vw)',
+          background: 'linear-gradient(to right, transparent 0%, rgba(220,38,38,0.9) 100%)',
+          filter: 'blur(6px)',
+          opacity: streakOpacity,
+          transition: launching ? 'none' : 'opacity 1.5s linear',
         }} />
 
         {/* car — static center for reduced-motion, animated otherwise */}
         {rm ? (
           <div style={{
             position: 'absolute',
-            top: '55vh',
+            top: '60vh',
             left: '50%',
-            transform: 'translate(-50%, -50%)',
+            transform: 'translateX(-50%) translateY(-100%)',
           }}>
-            <CarSVG width={140} />
+            <DragsterSVG width={280} />
           </div>
         ) : (
           <div style={{
             position: 'absolute',
-            top: '55vh',
+            top: '60vh',
             left: 0,
-            animation: driving ? 'carPassX 1.0s cubic-bezier(0.1, 0.8, 0.2, 1) forwards' : 'none',
-            transform: driving ? undefined : 'translate(-200px, -50%)',
+            animation: launching ? 'carLaunch 0.7s cubic-bezier(0.5,0,0.75,0) forwards' : 'none',
+            transform: launching ? undefined : 'translateX(18vw) translateY(-100%)',
           }}>
-            <CarSVG width={140} />
+            <DragsterSVG width={280} />
           </div>
         )}
       </div>
