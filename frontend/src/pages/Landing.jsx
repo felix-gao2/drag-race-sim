@@ -102,12 +102,12 @@ export default function Landing() {
       <div style={{
         position: 'relative', zIndex: 10,
         flex: 1,
-        display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
+        display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'flex-start',
       }}>
 
-        {/* 2. title with baseline rules */}
+        {/* 2. title — centered in the zone above the Lottie */}
+        <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', width: '100%' }}>
         <div style={{
-          marginTop: 24,
           width: '100%',
           display: 'flex',
           alignItems: 'baseline',
@@ -132,9 +132,10 @@ export default function Landing() {
           <div style={{ flex: 1, height: 1, background: 'rgba(250,204,21,0.3)', marginLeft: 16 }} />
         </div>
 
+        </div>{/* end title zone */}
+
         {/* 3. Lottie */}
         <div style={{
-          marginTop: 16,
           pointerEvents: 'none',
           flexShrink: 0,
         }}>
