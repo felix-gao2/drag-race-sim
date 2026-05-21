@@ -27,7 +27,18 @@ function ETStrip() {
   }, [])
 
   const et = (s.ms / 1000).toFixed(3)
-  return <>{`ET ${et}s  ·  60FT ${s.ft60 ?? '—'}  ·  1/8 ${s.eighth ?? '—'}  ·  TRAP ${s.trap ?? '—'} MPH`}</>
+  const Y = ({ v }) => v === '—'
+    ? <span>{v}</span>
+    : <span style={{ color: '#facc15' }}>{v}</span>
+  return <>
+    ET <Y v={`${et}s`} />
+    {'  ·  '}
+    60FT <Y v={s.ft60 ?? '—'} />
+    {'  ·  '}
+    1/8 <Y v={s.eighth ?? '—'} />
+    {'  ·  '}
+    TRAP <Y v={s.trap ?? '—'} /> MPH
+  </>
 }
 
 const MONO = `'JetBrains Mono', monospace`
