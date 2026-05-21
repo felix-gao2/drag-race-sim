@@ -206,9 +206,9 @@ export default function Landing() {
         top: 'calc(55vh - 80px)',
         left: '50%',
         transform: 'translateX(-50%)',
-        width: 300,
+        width: 600,
         height: 160,
-        background: 'radial-gradient(ellipse 150px 80px at center, rgba(220,38,38,0.18) 0%, transparent 100%)',
+        background: 'radial-gradient(ellipse 300px 80px at center, rgba(220,38,38,0.18) 0%, transparent 100%)',
         zIndex: 1,
         pointerEvents: 'none',
       }} />
@@ -269,12 +269,12 @@ export default function Landing() {
 
       {/* ── car pass layer ── */}
       <div style={{ position: 'absolute', inset: 0, pointerEvents: 'none' }}>
-        {/* 60vw red streak, lingers after launch */}
+        {/* 80vw red streak, lingers after launch */}
         <div style={{
           position: 'absolute',
           top: 'calc(60vh - 24px)',
           left: 0,
-          width: '60vw',
+          width: '80vw',
           height: 8,
           transform: 'translateX(18vw)',
           background: 'linear-gradient(to right, transparent 0%, rgba(220,38,38,0.9) 100%)',
@@ -300,6 +300,9 @@ export default function Landing() {
             left: 0,
             animation: launching ? 'carLaunch 0.7s cubic-bezier(0.5,0,0.75,0) forwards' : 'none',
             transform: launching ? undefined : 'translateX(18vw) translateY(-100%)',
+            filter: launching
+              ? 'blur(1.5px) drop-shadow(0 12px 20px rgba(0,0,0,0.7)) drop-shadow(-2px 0 8px rgba(220,38,38,0.4))'
+              : 'drop-shadow(0 12px 20px rgba(0,0,0,0.7)) drop-shadow(-1px 0 0 rgba(245,245,244,0.25)) drop-shadow(0 -1px 0 rgba(245,245,244,0.15))',
           }}>
             <DragsterSVG width={280} />
           </div>
