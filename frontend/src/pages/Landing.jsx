@@ -4,11 +4,6 @@ import { DotLottieReact } from '@lottiefiles/dotlottie-react'
 
 const CAR_COUNT = 1017
 
-function reducedMotion() {
-  return typeof window !== 'undefined' &&
-    window.matchMedia('(prefers-reduced-motion: reduce)').matches
-}
-
 function ETStrip() {
   const [ms, setMs] = useState(0)
   useEffect(() => {
@@ -25,7 +20,6 @@ const DISPLAY = `'Anton', sans-serif`
 export default function Landing() {
   const navigate = useNavigate()
   const [ctaHover, setCtaHover] = useState(false)
-  const rm = reducedMotion()
 
   return (
     <div style={{
@@ -84,10 +78,10 @@ export default function Landing() {
         padding: '24px',
         flexShrink: 0,
       }}>
-        <span style={{ fontFamily: MONO, fontSize: 11, color: '#6b7280', letterSpacing: '0.15em' }}>
+        <span style={{ fontFamily: MONO, fontSize: 11, color: '#525252', letterSpacing: '0.15em' }}>
           v0.1.0 // {CAR_COUNT} CARS
         </span>
-        <span style={{ fontFamily: MONO, fontSize: 11, color: '#404040', letterSpacing: '0.15em' }}>
+        <span style={{ fontFamily: MONO, fontSize: 11, color: '#525252', letterSpacing: '0.15em' }}>
           SYS — READY
         </span>
       </div>
@@ -102,7 +96,7 @@ export default function Landing() {
         {/* 2. tagline */}
         <p style={{
           margin: 0,
-          fontFamily: MONO, fontSize: 12, color: '#6b7280',
+          fontFamily: MONO, fontSize: 12, color: '#525252',
           letterSpacing: '0.3em', textTransform: 'uppercase',
         }}>
           ¼ MILE · SIDE BY SIDE · DIG START
@@ -127,22 +121,21 @@ export default function Landing() {
         {/* 4. Lottie */}
         <div style={{
           marginTop: 48,
-          width: 'min(720px, 70vw)',
           pointerEvents: 'none',
           flexShrink: 0,
         }}>
           <DotLottieReact
             src="/car.lottie"
-            loop={!rm}
-            autoplay={!rm}
-            style={{ width: '100%', height: 'auto', display: 'block' }}
+            loop
+            autoplay
+            style={{ width: 'min(720px, 70vw)', height: 'auto' }}
           />
         </div>
 
         {/* 5. subtitle */}
         <p style={{
           margin: 0, marginTop: 32,
-          fontFamily: MONO, fontSize: 10, color: '#737373',
+          fontFamily: MONO, fontSize: 10, color: '#525252',
           letterSpacing: '0.22em', textTransform: 'uppercase',
         }}>
           PICK TWO. RUN THE QUARTER. SEE WHO WINS.
@@ -205,7 +198,7 @@ export default function Landing() {
         display: 'flex', alignItems: 'center', justifyContent: 'center',
       }}>
         <span style={{
-          fontFamily: MONO, fontSize: 10, color: '#404040', letterSpacing: '0.15em',
+          fontFamily: MONO, fontSize: 10, color: '#525252', letterSpacing: '0.15em',
         }}>
           <ETStrip />
         </span>
