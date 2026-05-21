@@ -149,7 +149,7 @@ export default function Landing() {
 
         {/* 4. subtitle */}
         <p style={{
-          margin: 0, marginTop: 32,
+          margin: 0, marginTop: 48,
           fontFamily: MONO, fontSize: 14, color: '#a3a3a3',
           letterSpacing: '0.25em', textTransform: 'uppercase',
         }}>
