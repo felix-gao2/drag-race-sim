@@ -55,16 +55,8 @@ export default function Landing() {
         <rect width="100%" height="100%" filter="url(#skyGrain)" opacity="0.015"/>
       </svg>
 
-      {/* ── background: perspective lane lines ── */}
-      <svg
-        style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', zIndex: 1, pointerEvents: 'none' }}
-        xmlns="http://www.w3.org/2000/svg"
-      >
-        <line x1="50%" y1="55%" x2="30%" y2="100%" stroke="#2a2a2a" strokeWidth="1"/>
-        <line x1="50%" y1="55%" x2="70%" y2="100%" stroke="#2a2a2a" strokeWidth="1"/>
-      </svg>
 
-      {/* ── background: corner vignette ── */}
+{/* ── background: corner vignette ── */}
       <div style={{
         position: 'absolute', inset: 0,
         background: 'radial-gradient(ellipse at center, transparent 55%, rgba(0,0,0,0.4) 100%)',
