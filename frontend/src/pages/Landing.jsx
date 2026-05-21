@@ -113,6 +113,7 @@ export default function Landing() {
           letterSpacing: '0.02em',
           textTransform: 'uppercase',
           color: '#f5f5f4',
+          textShadow: '0 0 40px rgba(250,204,21,0.15), 0 0 80px rgba(250,204,21,0.08)',
           userSelect: 'none',
           whiteSpace: 'nowrap',
         }}>
