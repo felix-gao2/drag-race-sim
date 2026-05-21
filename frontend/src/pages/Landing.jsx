@@ -42,6 +42,8 @@ export default function Landing() {
       position: 'relative',
       minHeight: '100vh',
       background: '#0a0a0a',
+      backgroundImage: 'radial-gradient(circle, rgba(255,255,255,0.04) 1px, transparent 1px)',
+      backgroundSize: '32px 32px',
       color: '#f5f5f4',
       overflow: 'hidden',
       display: 'grid',
