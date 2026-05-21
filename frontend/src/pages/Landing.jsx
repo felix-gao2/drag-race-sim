@@ -9,7 +9,6 @@ function reducedMotion() {
     window.matchMedia('(prefers-reduced-motion: reduce)').matches
 }
 
-// ── ET strip ──────────────────────────────────────────────────────────────────
 function ETStrip() {
   const [ms, setMs] = useState(0)
   useEffect(() => {
@@ -20,7 +19,6 @@ function ETStrip() {
   return <>{`ET ${et}s  ·  60FT —  ·  1/8 —  ·  TRAP — MPH`}</>
 }
 
-// ── Landing ───────────────────────────────────────────────────────────────────
 const MONO = `'JetBrains Mono', monospace`
 const DISPLAY = `'Druk Wide Bold', 'PP Neue Machina', ui-sans-serif, sans-serif`
 
@@ -36,12 +34,14 @@ export default function Landing() {
       background: '#0a0a0a',
       color: '#f5f5f4',
       overflow: 'hidden',
+      display: 'flex',
+      flexDirection: 'column',
     }}>
 
-      {/* ── dragstrip: asphalt floor (bottom 45vh) ── */}
+      {/* ── background: asphalt floor ── */}
       <div style={{
         position: 'absolute', bottom: 0, left: 0, right: 0, height: '45vh',
-        background: '#0d0d0d', zIndex: 0,
+        background: '#0d0d0d', zIndex: 0, pointerEvents: 'none',
       }} />
       <div style={{
         position: 'absolute', bottom: 0, left: 0, right: 0, height: '45vh',
@@ -49,7 +49,7 @@ export default function Landing() {
         zIndex: 0, pointerEvents: 'none',
       }} />
 
-      {/* ── dragstrip: noise grain on sky ── */}
+      {/* ── background: noise grain on sky ── */}
       <svg
         style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '55vh', zIndex: 0, pointerEvents: 'none' }}
         xmlns="http://www.w3.org/2000/svg"
@@ -61,7 +61,7 @@ export default function Landing() {
         <rect width="100%" height="100%" filter="url(#skyGrain)" opacity="0.015"/>
       </svg>
 
-      {/* ── dragstrip: perspective lane lines converging to horizon ── */}
+      {/* ── background: perspective lane lines ── */}
       <svg
         style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', zIndex: 1, pointerEvents: 'none' }}
         xmlns="http://www.w3.org/2000/svg"
@@ -70,62 +70,19 @@ export default function Landing() {
         <line x1="50%" y1="55%" x2="70%" y2="100%" stroke="#2a2a2a" strokeWidth="1"/>
       </svg>
 
-      {/* ── ground line at 50vh ── */}
-      <div style={{
-        position: 'absolute',
-        top: '50vh',
-        left: 0,
-        right: 0,
-        height: 1,
-        background: '#2a2a2a',
-        zIndex: 1,
-        pointerEvents: 'none',
-      }} />
-
-      {/* ── dragstrip: horizon red ambient glow ── */}
-      <div style={{
-        position: 'absolute',
-        top: 'calc(55vh - 80px)',
-        left: '50%',
-        transform: 'translateX(-50%)',
-        width: 600,
-        height: 160,
-        background: 'radial-gradient(ellipse 300px 80px at center, rgba(220,38,38,0.18) 0%, transparent 100%)',
-        zIndex: 1,
-        pointerEvents: 'none',
-      }} />
-
-      {/* ── corner vignette ── */}
+      {/* ── background: corner vignette ── */}
       <div style={{
         position: 'absolute', inset: 0,
         background: 'radial-gradient(ellipse at center, transparent 55%, rgba(0,0,0,0.4) 100%)',
-        zIndex: 2,
-        pointerEvents: 'none',
+        zIndex: 2, pointerEvents: 'none',
       }} />
 
-      {/* ── Lottie car — sits on the 50vh ground line ── */}
+      {/* ── 1. top status bar ── */}
       <div style={{
-        position: 'absolute',
-        bottom: '50vh',
-        left: '50%',
-        transform: 'translateX(-50%)',
-        width: 'min(720px, 70vw)',
-        zIndex: 3,
-        pointerEvents: 'none',
-      }}>
-        <DotLottieReact
-          src="/car.lottie"
-          loop={!rm}
-          autoplay={!rm}
-          style={{ width: '100%', height: 'auto', display: 'block' }}
-        />
-      </div>
-
-      {/* ── top bar ── */}
-      <div style={{
-        position: 'absolute', top: '1.5rem', left: '1.75rem', right: '1.75rem',
+        position: 'relative', zIndex: 10,
         display: 'flex', justifyContent: 'space-between', alignItems: 'center',
-        zIndex: 10,
+        padding: '24px',
+        flexShrink: 0,
       }}>
         <span style={{ fontFamily: MONO, fontSize: 11, color: '#6b7280', letterSpacing: '0.15em' }}>
           v0.1.0 // {CAR_COUNT} CARS
@@ -135,60 +92,68 @@ export default function Landing() {
         </span>
       </div>
 
-      {/* ── kicker ── */}
-      <div style={{ position: 'absolute', top: '10vh', left: 0, right: 0, textAlign: 'center', zIndex: 10 }}>
+      {/* ── 2–6. center content column ── */}
+      <div style={{
+        position: 'relative', zIndex: 10,
+        flex: 1,
+        display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
+      }}>
+
+        {/* 2. tagline */}
         <p style={{
-          fontFamily: MONO, fontSize: 11, color: '#6b7280',
-          letterSpacing: '0.3em', textTransform: 'uppercase', margin: 0,
+          margin: 0,
+          fontFamily: MONO, fontSize: 12, color: '#6b7280',
+          letterSpacing: '0.3em', textTransform: 'uppercase',
         }}>
           ¼ MILE · SIDE BY SIDE · DIG START
         </p>
-      </div>
 
-      {/* ── title ── */}
-      <div style={{
-        position: 'absolute', top: '25vh', left: 0, right: 0,
-        display: 'flex', justifyContent: 'center',
-        transform: 'translateY(-1em)',
-        zIndex: 10,
-      }}>
+        {/* 3. title */}
         <h1 style={{
+          margin: 0, marginTop: 32,
           fontFamily: DISPLAY,
           fontSize: 'clamp(72px, 9vw, 140px)',
           lineHeight: 0.95,
           letterSpacing: '-0.02em',
           textTransform: 'uppercase',
-          margin: 0,
+          color: '#dc2626',
           userSelect: 'none',
           whiteSpace: 'nowrap',
-          maxWidth: 1100,
-          color: '#dc2626',
         }}>
           DRAG RACE SIM
         </h1>
-      </div>
 
-      {/* ── tagline ── */}
-      <div style={{ position: 'absolute', top: '68vh', left: 0, right: 0, textAlign: 'center', zIndex: 10 }}>
+        {/* 4. Lottie */}
+        <div style={{
+          marginTop: 48,
+          width: 'min(720px, 70vw)',
+          pointerEvents: 'none',
+          flexShrink: 0,
+        }}>
+          <DotLottieReact
+            src="/car.lottie"
+            loop={!rm}
+            autoplay={!rm}
+            style={{ width: '100%', height: 'auto', display: 'block' }}
+          />
+        </div>
+
+        {/* 5. subtitle */}
         <p style={{
+          margin: 0, marginTop: 32,
           fontFamily: MONO, fontSize: 10, color: '#737373',
-          letterSpacing: '0.22em', textTransform: 'uppercase', margin: 0,
+          letterSpacing: '0.22em', textTransform: 'uppercase',
         }}>
           PICK TWO. RUN THE QUARTER. SEE WHO WINS.
         </p>
-      </div>
 
-      {/* ── CTA ── */}
-      <div style={{
-        position: 'absolute', top: '75vh', left: 0, right: 0,
-        display: 'flex', justifyContent: 'center', transform: 'translateY(-50%)',
-        zIndex: 10,
-      }}>
+        {/* 6. CTA */}
         <button
           onClick={() => navigate('/race')}
           onMouseEnter={() => setCtaHover(true)}
           onMouseLeave={() => setCtaHover(false)}
           style={{
+            marginTop: 24,
             fontFamily: MONO,
             fontSize: 11,
             fontWeight: 500,
@@ -226,11 +191,13 @@ export default function Landing() {
             <rect x="12" y="12" width="4" height="4" fill="#0a0a0a"/>
           </svg>
         </button>
+
       </div>
 
-      {/* ── telemetry strip ── */}
+      {/* ── 7. bottom telemetry strip ── */}
       <div style={{
-        position: 'absolute', bottom: 0, left: 0, right: 0,
+        position: 'relative', zIndex: 10,
+        flexShrink: 0,
         background: '#060606',
         borderTop: '1px solid #131313',
         padding: '0.45rem 1.75rem',
@@ -242,6 +209,7 @@ export default function Landing() {
           <ETStrip />
         </span>
       </div>
+
     </div>
   )
 }
