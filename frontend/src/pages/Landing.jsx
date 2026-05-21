@@ -49,12 +49,10 @@ export default function Landing() {
   const [ctaHover, setCtaHover] = useState(false)
 
   return (
-    <div style={{
+    <div className="hero" style={{
       position: 'relative',
       minHeight: '100vh',
       background: '#0a0a0a',
-      backgroundImage: 'radial-gradient(ellipse at center, transparent 0%, rgba(0,0,0,0.5) 100%), radial-gradient(circle, rgba(255,255,255,0.04) 1px, transparent 1px)',
-      backgroundSize: '100% 100%, 32px 32px',
       color: '#f5f5f4',
       overflow: 'hidden',
       display: 'grid',
