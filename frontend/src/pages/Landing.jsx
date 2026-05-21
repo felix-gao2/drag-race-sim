@@ -4,14 +4,30 @@ import { DotLottieReact } from '@lottiefiles/dotlottie-react'
 
 const CAR_COUNT = 1017
 
+const RESET = { ms: 0, ft60: null, eighth: null, trap: null }
+
 function ETStrip() {
-  const [ms, setMs] = useState(0)
+  const [s, setS] = useState(RESET)
+
   useEffect(() => {
-    const id = setInterval(() => setMs(m => (m + 16) % 13800), 16)
+    const id = setInterval(() => {
+      setS(prev => {
+        const ms = prev.ms + 80
+        if (ms >= 10000) return RESET
+        const et = ms / 1000
+        return {
+          ms,
+          ft60:   prev.ft60   ?? (et >= 1.2 ? (1.15 + Math.random() * 0.30).toFixed(3) : null),
+          eighth: prev.eighth ?? (et >= 5.5 ? (5.40 + Math.random() * 0.40).toFixed(3) : null),
+          trap:   prev.trap   ?? (et >= 9.0 ? (145  + Math.random() * 20  ).toFixed(1) : null),
+        }
+      })
+    }, 80)
     return () => clearInterval(id)
   }, [])
-  const et = (ms / 1000).toFixed(3)
-  return <>{`ET ${et}s  ·  60FT —  ·  1/8 —  ·  TRAP — MPH`}</>
+
+  const et = (s.ms / 1000).toFixed(3)
+  return <>{`ET ${et}s  ·  60FT ${s.ft60 ?? '—'}  ·  1/8 ${s.eighth ?? '—'}  ·  TRAP ${s.trap ?? '—'} MPH`}</>
 }
 
 const MONO = `'JetBrains Mono', monospace`
@@ -193,7 +209,7 @@ export default function Landing() {
         display: 'flex', alignItems: 'center', justifyContent: 'center',
       }}>
         <span style={{
-          fontFamily: MONO, fontSize: 10, color: '#525252', letterSpacing: '0.15em',
+          fontFamily: MONO, fontSize: 11, color: '#525252', letterSpacing: '0.25em',
         }}>
           <ETStrip />
         </span>
