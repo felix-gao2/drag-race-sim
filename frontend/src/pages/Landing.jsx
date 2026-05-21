@@ -38,104 +38,6 @@ function useCarAnimation(rm) {
   return { launching, streakOpacity }
 }
 
-// ── Car SVG — top fuel dragster (detailed side profile) ──────────────────────
-function DragsterSVG({ width = 280 }) {
-  const h = Math.round(width * 170 / 560)
-  // viewBox 560×170 → rendered 280×85. Scale: 0.5px per unit.
-  // Ground line at y=163. Rear slick r=80 (80px diam). Front wheel r=24 (24px diam).
-  return (
-    <svg viewBox="0 0 560 170" width={width} height={h}
-      xmlns="http://www.w3.org/2000/svg"
-      style={{ display: 'block', overflow: 'visible' }}>
-
-      {/* ground contact shadow */}
-      <ellipse cx="285" cy="164" rx="230" ry="5" fill="rgba(0,0,0,0.38)" />
-
-      {/* ── rear slick (80px diam rendered) ── */}
-      <circle cx="115" cy="83" r="80" fill="#111" />
-      <circle cx="115" cy="83" r="56" fill="#161616" />
-      <circle cx="115" cy="83" r="28" fill="#1e1e1e" />
-      <circle cx="115" cy="83" r="11" fill="#252525" />
-      <path d="M 50,52 A 80,80 0 0,1 96,13" fill="none" stroke="#2c2c2c" strokeWidth="5" strokeLinecap="round"/>
-      <path d="M 36,105 A 80,80 0 0,1 37,63" fill="none" stroke="#2c2c2c" strokeWidth="5" strokeLinecap="round"/>
-
-      {/* ── rear wing / spoiler ── */}
-      <path d="M 58,71 L 188,64 L 188,54 L 58,61 Z" fill="#d4d4d4" />
-      <rect x="57" y="61" width="7" height="22" rx="1" fill="#c4c4c4" />
-      <rect x="188" y="54" width="7" height="22" rx="1" fill="#c4c4c4" />
-      <line x1="80" y1="61" x2="88" y2="100" stroke="#aaa" strokeWidth="2.5" strokeLinecap="round"/>
-      <line x1="168" y1="57" x2="175" y2="99" stroke="#aaa" strokeWidth="2.5" strokeLinecap="round"/>
-
-      {/* ── main body / chassis slab ── */}
-      <path d="
-        M 70,100 L 202,93 L 282,90 L 385,87 L 458,89 L 515,96 L 548,103 L 556,107 L 558,109 L 556,112
-        L 550,115 L 515,117 L 458,119 L 385,121 L 282,123 L 202,125 L 70,128
-        Q 62,128 58,120 L 58,108 Q 62,100 70,100 Z
-      " fill="#f5f5f4" />
-
-      {/* ── red stripe full length ── */}
-      <path d="
-        M 70,115 L 202,110 L 282,108 L 385,106 L 458,107 L 515,111 L 548,113 L 550,116
-        L 515,118 L 458,120 L 385,122 L 282,124 L 202,126 L 70,128 Z
-      " fill="#dc2626" />
-
-      {/* ── engine block under blower ── */}
-      <path d="M 265,90 L 390,85 L 398,92 L 398,112 L 265,115 Z" fill="#e0e0de" />
-
-      {/* ── supercharger / blower ── */}
-      <rect x="278" y="66" width="105" height="26" rx="3" fill="#d0d0ce" />
-      <rect x="288" y="56" width="85" height="14" rx="2" fill="#c8c8c6" />
-      {/* injector stacks */}
-      {[293, 305, 317, 329, 341, 353, 365].map((x, i) => (
-        <rect key={i} x={x} y="45" width="7" height="14" rx="1" fill="#1c1c1c" />
-      ))}
-      {/* blower ribbing */}
-      {[291, 303, 315, 327, 339, 351, 363, 375].map((x, i) => (
-        <line key={i} x1={x} y1="66" x2={x} y2="92" stroke="#bbb" strokeWidth="0.75" />
-      ))}
-
-      {/* ── zoomie exhaust headers (4 pipes, angle up-rearward) ── */}
-      {[0, 10, 20, 30].map((off, i) => (
-        <path key={i}
-          d={`M ${260 + off},113 Q ${248 + off},97 ${234 + off},80`}
-          fill="none" stroke="#1e1e1e" strokeWidth="6" strokeLinecap="round"
-        />
-      ))}
-
-      {/* ── open cockpit / exposed roll cage ── */}
-      <path d="M 422,100 Q 422,72 440,69 Q 458,66 462,100"
-        fill="none" stroke="#3a3a3a" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round"/>
-      <line x1="424" y1="87" x2="460" y2="85" stroke="#3a3a3a" strokeWidth="2.5"/>
-      {/* windscreen / head fairing */}
-      <path d="M 462,69 L 492,80 L 488,100 L 462,100 Z" fill="#111" opacity="0.78"/>
-      {/* driver helmet */}
-      <ellipse cx="443" cy="89" rx="13" ry="12" fill="#222" />
-      <path d="M 431,85 Q 443,75 455,85" fill="none" stroke="#3a3a3a" strokeWidth="2"/>
-
-      {/* ── needle nose cone (extends past front wheel) ── */}
-      <path d="M 513,97 L 558,107 L 558,113 L 513,118 Z" fill="#e8e8e6"/>
-      <line x1="513" y1="109" x2="557" y2="110" stroke="#dc2626" strokeWidth="1.5" opacity="0.5"/>
-
-      {/* ── front stub axle ── */}
-      <line x1="478" y1="116" x2="491" y2="127" stroke="#555" strokeWidth="2.5" strokeLinecap="round"/>
-
-      {/* ── front wheel (24px diam rendered) ── */}
-      <circle cx="491" cy="139" r="24" fill="#111" />
-      <circle cx="491" cy="139" r="15" fill="#1c1c1c" />
-      <circle cx="491" cy="139" r="6" fill="#222" />
-      <circle cx="491" cy="139" r="2.5" fill="#2d2d2d" />
-
-      {/* ── parachute packs ── */}
-      <ellipse cx="38" cy="113" rx="22" ry="12" fill="#262626" />
-      <rect x="38" y="104" width="27" height="18" rx="3" fill="#262626" />
-      <line x1="48" y1="105" x2="64" y2="110" stroke="#333" strokeWidth="1.5"/>
-      <line x1="48" y1="121" x2="64" y2="117" stroke="#333" strokeWidth="1.5"/>
-
-      {/* ── rear brake light ── */}
-      <rect x="60" y="117" width="5" height="9" rx="1" fill="#dc2626" />
-    </svg>
-  )
-}
 
 
 // ── ET strip ──────────────────────────────────────────────────────────────────
@@ -291,7 +193,16 @@ export default function Landing() {
             left: '50%',
             transform: 'translateX(-50%) translateY(-100%)',
           }}>
-            <DragsterSVG width={280} />
+            <img
+              src="/Ford-GT.png"
+              alt="Ford GT"
+              width={440}
+              style={{
+                display: 'block',
+                mixBlendMode: 'multiply',
+                filter: 'drop-shadow(0 12px 20px rgba(0,0,0,0.7)) drop-shadow(-1px 0 0 rgba(245,245,244,0.25)) drop-shadow(0 -1px 0 rgba(245,245,244,0.15))',
+              }}
+            />
           </div>
         ) : (
           <div style={{
@@ -300,11 +211,19 @@ export default function Landing() {
             left: 0,
             animation: launching ? 'carLaunch 0.7s cubic-bezier(0.5,0,0.75,0) forwards' : 'none',
             transform: launching ? undefined : 'translateX(18vw) translateY(-100%)',
-            filter: launching
-              ? 'blur(1.5px) drop-shadow(0 12px 20px rgba(0,0,0,0.7)) drop-shadow(-2px 0 8px rgba(220,38,38,0.4))'
-              : 'drop-shadow(0 12px 20px rgba(0,0,0,0.7)) drop-shadow(-1px 0 0 rgba(245,245,244,0.25)) drop-shadow(0 -1px 0 rgba(245,245,244,0.15))',
           }}>
-            <DragsterSVG width={280} />
+            <img
+              src="/Ford-GT.png"
+              alt="Ford GT"
+              width={440}
+              style={{
+                display: 'block',
+                mixBlendMode: 'multiply',
+                filter: launching
+                  ? 'blur(1.5px) drop-shadow(0 12px 20px rgba(0,0,0,0.7)) drop-shadow(-2px 0 8px rgba(220,38,38,0.4))'
+                  : 'drop-shadow(0 12px 20px rgba(0,0,0,0.7)) drop-shadow(-1px 0 0 rgba(245,245,244,0.25)) drop-shadow(0 -1px 0 rgba(245,245,244,0.15))',
+              }}
+            />
           </div>
         )}
       </div>
