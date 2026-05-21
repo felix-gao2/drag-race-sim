@@ -76,6 +76,7 @@ export default function Landing() {
         position: 'relative', zIndex: 10,
         display: 'flex', justifyContent: 'space-between', alignItems: 'center',
         padding: '24px',
+        borderBottom: '1px solid #1f1f1f',
         flexShrink: 0,
       }}>
         <span style={{ fontFamily: MONO, fontSize: 11, color: '#525252', letterSpacing: '0.15em' }}>
@@ -194,7 +195,8 @@ export default function Landing() {
         flexShrink: 0,
         background: '#060606',
         borderTop: '1px solid #131313',
-        padding: '0.45rem 1.75rem',
+        borderBottom: '1px solid #1f1f1f',
+        padding: '0.45rem 1.75rem 24px',
         display: 'flex', alignItems: 'center', justifyContent: 'center',
       }}>
         <span style={{
