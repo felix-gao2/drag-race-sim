@@ -111,22 +111,32 @@ export default function Landing() {
           ¼ MILE · SIDE BY SIDE · DIG START
         </p>
 
-        {/* 3. title */}
-        <h1 style={{
-          margin: 0, marginTop: 24,
-          fontFamily: DISPLAY,
-          fontWeight: 400,
-          fontSize: 'clamp(64px, 10vw, 160px)',
-          lineHeight: 0.95,
-          letterSpacing: '0.02em',
-          textTransform: 'uppercase',
-          color: '#f5f5f4',
-          textShadow: '0 0 40px rgba(250,204,21,0.15), 0 0 80px rgba(250,204,21,0.08)',
-          userSelect: 'none',
-          whiteSpace: 'nowrap',
+        {/* 3. title with baseline rules */}
+        <div style={{
+          marginTop: 24,
+          width: '100%',
+          display: 'flex',
+          alignItems: 'baseline',
         }}>
-          DRAG RACE SIM
-        </h1>
+          <div style={{ flex: 1, height: 1, background: 'rgba(250,204,21,0.3)', marginRight: 16 }} />
+          <h1 style={{
+            margin: 0,
+            flexShrink: 0,
+            fontFamily: DISPLAY,
+            fontWeight: 400,
+            fontSize: 'clamp(64px, 10vw, 160px)',
+            lineHeight: 0.95,
+            letterSpacing: '0.02em',
+            textTransform: 'uppercase',
+            color: '#f5f5f4',
+            textShadow: '0 0 40px rgba(250,204,21,0.15), 0 0 80px rgba(250,204,21,0.08)',
+            userSelect: 'none',
+            whiteSpace: 'nowrap',
+          }}>
+            DRAG RACE SIM
+          </h1>
+          <div style={{ flex: 1, height: 1, background: 'rgba(250,204,21,0.3)', marginLeft: 16 }} />
+        </div>
 
         {/* 4. Lottie */}
         <div style={{
