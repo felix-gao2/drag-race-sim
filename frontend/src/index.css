@@ -48,6 +48,33 @@ body::before {
   50%       { opacity: 0.3; }
 }
 
+@keyframes sweep {
+  0%, 100% { background-position: -200% 0; }
+  50%       { background-position: 200% 0; }
+}
+
+.title {
+  position: relative;
+  display: inline-block;
+  background: linear-gradient(180deg, #ffffff 0%, #d4d4d4 50%, #a3a3a3 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.title::after {
+  content: 'DRAG RACE SIM';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(110deg, transparent 40%, rgba(250,204,21,0.4) 50%, transparent 60%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  background-size: 300% 100%;
+  animation: sweep 4s ease-in-out infinite;
+  pointer-events: none;
+}
+
 @keyframes gridScroll {
   from { background-position: 0 0; }
   to   { background-position: 0 60px; }

@@ -118,7 +118,7 @@ export default function Landing() {
       }}>
         <div style={{ width: '100%', display: 'flex', alignItems: 'baseline' }}>
           <div style={{ flex: 1, height: 1, background: 'rgba(250,204,21,0.3)', marginRight: 16 }} />
-          <h1 style={{
+          <h1 className="title" style={{
             margin: 0,
             flexShrink: 0,
             fontFamily: DISPLAY,
@@ -127,7 +127,6 @@ export default function Landing() {
             lineHeight: 0.95,
             letterSpacing: '0.02em',
             textTransform: 'uppercase',
-            color: '#f5f5f4',
             textShadow: '0 1px 0 rgba(255,255,255,0.1), 0 2px 4px rgba(0,0,0,0.8), 0 0 40px rgba(250,204,21,0.15)',
             userSelect: 'none',
             whiteSpace: 'nowrap',
