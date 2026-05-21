@@ -40,12 +40,12 @@ export default function Landing() {
   return (
     <div style={{
       position: 'relative',
-      height: '100vh',
+      minHeight: '100vh',
       background: '#0a0a0a',
       color: '#f5f5f4',
       overflow: 'hidden',
-      display: 'flex',
-      flexDirection: 'column',
+      display: 'grid',
+      gridTemplateRows: 'auto 1fr 1fr 1fr auto',
     }}>
 
       {/* ── background: asphalt floor ── */}
@@ -85,7 +85,6 @@ export default function Landing() {
         display: 'flex', justifyContent: 'space-between', alignItems: 'center',
         padding: '24px',
         borderBottom: '1px solid #1f1f1f',
-        flexShrink: 0,
       }}>
         <span style={{ fontFamily: MONO, fontSize: 11, color: '#525252', letterSpacing: '0.25em', textTransform: 'uppercase' }}>
           v0.1.0 // {CAR_COUNT} CARS
@@ -98,20 +97,12 @@ export default function Landing() {
         </span>
       </div>
 
-      {/* ── 2–6. center content column ── */}
+      {/* ── row 1: title ── */}
       <div style={{
         position: 'relative', zIndex: 10,
-        flex: 1,
-        display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'flex-start',
+        display: 'flex', alignItems: 'center', justifyContent: 'center',
       }}>
-
-        {/* 2. title — centered in the zone above the Lottie */}
-        <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', width: '100%' }}>
-        <div style={{
-          width: '100%',
-          display: 'flex',
-          alignItems: 'baseline',
-        }}>
+        <div style={{ width: '100%', display: 'flex', alignItems: 'baseline' }}>
           <div style={{ flex: 1, height: 1, background: 'rgba(250,204,21,0.3)', marginRight: 16 }} />
           <h1 style={{
             margin: 0,
@@ -131,14 +122,14 @@ export default function Landing() {
           </h1>
           <div style={{ flex: 1, height: 1, background: 'rgba(250,204,21,0.3)', marginLeft: 16 }} />
         </div>
+      </div>
 
-        </div>{/* end title zone */}
-
-        {/* 3. Lottie */}
-        <div style={{
-          pointerEvents: 'none',
-          flexShrink: 0,
-        }}>
+      {/* ── row 2: lottie ── */}
+      <div style={{
+        position: 'relative', zIndex: 10,
+        display: 'flex', alignItems: 'center', justifyContent: 'center',
+      }}>
+        <div style={{ pointerEvents: 'none' }}>
           <DotLottieReact
             src="/car.lottie"
             loop
@@ -146,23 +137,26 @@ export default function Landing() {
             style={{ width: 'min(720px, 70vw)', height: 'auto' }}
           />
         </div>
+      </div>
 
-        {/* 4. subtitle */}
+      {/* ── row 3: subtitle + CTA ── */}
+      <div style={{
+        position: 'relative', zIndex: 10,
+        display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
+        gap: 24,
+      }}>
         <p style={{
-          margin: 0, marginTop: 48,
+          margin: 0,
           fontFamily: MONO, fontSize: 14, color: '#a3a3a3',
           letterSpacing: '0.25em', textTransform: 'uppercase',
         }}>
           PICK TWO. RUN THE QUARTER. SEE WHO WINS.
         </p>
-
-        {/* 5. CTA */}
         <button
           onClick={() => navigate('/race')}
           onMouseEnter={() => setCtaHover(true)}
           onMouseLeave={() => setCtaHover(false)}
           style={{
-            marginTop: 24,
             fontFamily: MONO,
             fontSize: 15,
             fontWeight: 500,
@@ -200,13 +194,11 @@ export default function Landing() {
             <rect x="12" y="12" width="4" height="4" fill="#0a0a0a"/>
           </svg>
         </button>
-
       </div>
 
       {/* ── 6. bottom telemetry strip ── */}
       <div style={{
         position: 'relative', zIndex: 10,
-        flexShrink: 0,
         background: '#060606',
         borderTop: '1px solid #131313',
         borderBottom: '1px solid #1f1f1f',
