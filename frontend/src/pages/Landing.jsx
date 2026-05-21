@@ -97,7 +97,7 @@ export default function Landing() {
 
         {/* 3. title */}
         <h1 style={{
-          margin: 0, marginTop: 32,
+          margin: 0, marginTop: 24,
           fontFamily: DISPLAY,
           fontWeight: 400,
           fontSize: 'clamp(64px, 10vw, 160px)',
@@ -114,7 +114,7 @@ export default function Landing() {
 
         {/* 4. Lottie */}
         <div style={{
-          marginTop: 48,
+          marginTop: 16,
           pointerEvents: 'none',
           flexShrink: 0,
         }}>
