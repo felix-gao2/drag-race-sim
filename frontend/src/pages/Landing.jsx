@@ -120,20 +120,47 @@ export default function Landing() {
       overflow: 'hidden',
     }}>
 
-      {/* ── 50vh horizon line ── */}
+      {/* ── dragstrip: asphalt floor (bottom 45vh) ── */}
       <div style={{
-        position: 'absolute', top: '50%', left: 0, right: 0,
-        height: 1, background: '#1f1f1f', zIndex: 1,
+        position: 'absolute', bottom: 0, left: 0, right: 0, height: '45vh',
+        background: '#0d0d0d', zIndex: 0,
+      }} />
+      <div style={{
+        position: 'absolute', bottom: 0, left: 0, right: 0, height: '45vh',
+        background: 'radial-gradient(ellipse at 50% 100%, transparent 25%, rgba(0,0,0,0.65) 100%)',
+        zIndex: 0, pointerEvents: 'none',
       }} />
 
-      {/* ── red finish-line glow (center of horizon) ── */}
+      {/* ── dragstrip: noise grain on sky ── */}
+      <svg
+        style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '55vh', zIndex: 0, pointerEvents: 'none' }}
+        xmlns="http://www.w3.org/2000/svg"
+      >
+        <filter id="skyGrain">
+          <feTurbulence type="fractalNoise" baseFrequency="0.65" numOctaves="3" stitchTiles="stitch"/>
+          <feColorMatrix type="saturate" values="0"/>
+        </filter>
+        <rect width="100%" height="100%" filter="url(#skyGrain)" opacity="0.015"/>
+      </svg>
+
+      {/* ── dragstrip: perspective lane lines converging to horizon ── */}
+      <svg
+        style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', zIndex: 1, pointerEvents: 'none' }}
+        xmlns="http://www.w3.org/2000/svg"
+      >
+        <line x1="50%" y1="55%" x2="30%" y2="100%" stroke="#2a2a2a" strokeWidth="1"/>
+        <line x1="50%" y1="55%" x2="70%" y2="100%" stroke="#2a2a2a" strokeWidth="1"/>
+      </svg>
+
+      {/* ── dragstrip: horizon red ambient glow ── */}
       <div style={{
         position: 'absolute',
-        top: '50%', left: '50%',
-        transform: 'translate(-50%, -50%)',
-        width: 200, height: 200,
-        borderRadius: '50%',
-        background: 'radial-gradient(circle, rgba(220,38,38,0.25) 0%, transparent 70%)',
+        top: 'calc(55vh - 80px)',
+        left: '50%',
+        transform: 'translateX(-50%)',
+        width: 300,
+        height: 160,
+        background: 'radial-gradient(ellipse 150px 80px at center, rgba(220,38,38,0.18) 0%, transparent 100%)',
         zIndex: 1,
         pointerEvents: 'none',
       }} />
@@ -198,7 +225,7 @@ export default function Landing() {
         <div style={{
           position: 'absolute',
           right: 0,
-          top: '50%',
+          top: '55vh',
           width: '30vw',
           height: 4,
           background: 'linear-gradient(to left, transparent, rgba(220,38,38,0.75))',
@@ -212,7 +239,7 @@ export default function Landing() {
         {rm ? (
           <div style={{
             position: 'absolute',
-            top: '50%',
+            top: '55vh',
             left: '50%',
             transform: 'translate(-50%, -50%)',
           }}>
@@ -221,7 +248,7 @@ export default function Landing() {
         ) : (
           <div style={{
             position: 'absolute',
-            top: '50%',
+            top: '55vh',
             left: 0,
             animation: driving ? 'carPassX 1.0s cubic-bezier(0.1, 0.8, 0.2, 1) forwards' : 'none',
             transform: driving ? undefined : 'translate(-200px, -50%)',
