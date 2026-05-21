@@ -94,8 +94,11 @@ export default function Landing() {
         <span style={{ fontFamily: MONO, fontSize: 11, color: '#525252', letterSpacing: '0.25em', textTransform: 'uppercase' }}>
           ¼ MILE · SIDE BY SIDE · DIG START
         </span>
-        <span style={{ fontFamily: MONO, fontSize: 11, color: '#525252', letterSpacing: '0.25em', textTransform: 'uppercase' }}>
-          SYS — READY
+        <span style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+          <span style={{ width: 6, height: 6, borderRadius: '50%', background: '#dc2626', flexShrink: 0, animation: 'sysBlink 1.6s ease-in-out infinite' }} />
+          <span style={{ fontFamily: MONO, fontSize: 11, color: '#525252', letterSpacing: '0.25em', textTransform: 'uppercase' }}>
+            SYS — READY
+          </span>
         </span>
       </div>
 
