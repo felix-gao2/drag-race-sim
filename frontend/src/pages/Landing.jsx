@@ -87,10 +87,13 @@ export default function Landing() {
         borderBottom: '1px solid #1f1f1f',
         flexShrink: 0,
       }}>
-        <span style={{ fontFamily: MONO, fontSize: 11, color: '#525252', letterSpacing: '0.15em' }}>
+        <span style={{ fontFamily: MONO, fontSize: 11, color: '#525252', letterSpacing: '0.25em', textTransform: 'uppercase' }}>
           v0.1.0 // {CAR_COUNT} CARS
         </span>
-        <span style={{ fontFamily: MONO, fontSize: 11, color: '#525252', letterSpacing: '0.15em' }}>
+        <span style={{ fontFamily: MONO, fontSize: 11, color: '#525252', letterSpacing: '0.25em', textTransform: 'uppercase' }}>
+          ¼ MILE · SIDE BY SIDE · DIG START
+        </span>
+        <span style={{ fontFamily: MONO, fontSize: 11, color: '#525252', letterSpacing: '0.25em', textTransform: 'uppercase' }}>
           SYS — READY
         </span>
       </div>
@@ -102,16 +105,7 @@ export default function Landing() {
         display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
       }}>
 
-        {/* 2. tagline */}
-        <p style={{
-          margin: 0,
-          fontFamily: MONO, fontSize: 12, color: '#525252',
-          letterSpacing: '0.3em', textTransform: 'uppercase',
-        }}>
-          ¼ MILE · SIDE BY SIDE · DIG START
-        </p>
-
-        {/* 3. title with baseline rules */}
+        {/* 2. title with baseline rules */}
         <div style={{
           marginTop: 24,
           width: '100%',
@@ -138,7 +132,7 @@ export default function Landing() {
           <div style={{ flex: 1, height: 1, background: 'rgba(250,204,21,0.3)', marginLeft: 16 }} />
         </div>
 
-        {/* 4. Lottie */}
+        {/* 3. Lottie */}
         <div style={{
           marginTop: 16,
           pointerEvents: 'none',
@@ -152,7 +146,7 @@ export default function Landing() {
           />
         </div>
 
-        {/* 5. subtitle */}
+        {/* 4. subtitle */}
         <p style={{
           margin: 0, marginTop: 32,
           fontFamily: MONO, fontSize: 10, color: '#525252',
@@ -161,7 +155,7 @@ export default function Landing() {
           PICK TWO. RUN THE QUARTER. SEE WHO WINS.
         </p>
 
-        {/* 6. CTA */}
+        {/* 5. CTA */}
         <button
           onClick={() => navigate('/race')}
           onMouseEnter={() => setCtaHover(true)}
@@ -208,7 +202,7 @@ export default function Landing() {
 
       </div>
 
-      {/* ── 7. bottom telemetry strip ── */}
+      {/* ── 6. bottom telemetry strip ── */}
       <div style={{
         position: 'relative', zIndex: 10,
         flexShrink: 0,
