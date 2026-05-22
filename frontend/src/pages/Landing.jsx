@@ -6,14 +6,17 @@ const CAR_COUNT = 1017
 
 const RESET = { ms: 0, ft60: null, eighth: null, trap: null }
 
+const Y = v => v ? `<span style="color:#facc15">${v}</span>` : '—'
+
 function ETStrip() {
-  const [s, setS] = useState(RESET)
+  const ref = useRef(null)
+  const s = useRef(RESET)
 
   useEffect(() => {
     const id = setInterval(() => {
-      setS(prev => {
-        const ms = prev.ms + 80
-        if (ms >= 10000) return RESET
+      const prev = s.current
+      const ms = prev.ms + 80
+      s.current = ms >= 10000 ? RESET : (() => {
         const et = ms / 1000
         return {
           ms,
@@ -21,24 +24,15 @@ function ETStrip() {
           eighth: prev.eighth ?? (et >= 5.5 ? (5.40 + Math.random() * 0.40).toFixed(3) : null),
           trap:   prev.trap   ?? (et >= 9.0 ? (145  + Math.random() * 20  ).toFixed(1) : null),
         }
-      })
+      })()
+      if (!ref.current) return
+      const { ms: t, ft60, eighth, trap } = s.current
+      ref.current.innerHTML = `ET <span style="color:#facc15">${(t/1000).toFixed(3)}s</span>  ·  60FT ${Y(ft60)}  ·  1/8 ${Y(eighth)}  ·  TRAP ${Y(trap)} MPH`
     }, 80)
     return () => clearInterval(id)
   }, [])
 
-  const et = (s.ms / 1000).toFixed(3)
-  const Y = ({ v }) => v === '—'
-    ? <span>{v}</span>
-    : <span style={{ color: '#facc15' }}>{v}</span>
-  return <>
-    ET <Y v={`${et}s`} />
-    {'  ·  '}
-    60FT <Y v={s.ft60 ?? '—'} />
-    {'  ·  '}
-    1/8 <Y v={s.eighth ?? '—'} />
-    {'  ·  '}
-    TRAP <Y v={s.trap ?? '—'} /> MPH
-  </>
+  return <span ref={ref}>ET <span style={{ color: '#facc15' }}>0.000s</span>{'  ·  '}60FT —{'  ·  '}1/8 —{'  ·  '}TRAP — MPH</span>
 }
 
 const MONO = `'JetBrains Mono', monospace`
@@ -84,8 +78,8 @@ export default function Landing() {
         borderRadius: '50%',
         pointerEvents: 'none',
         zIndex: 1,
+        willChange: 'transform',
         transition: 'transform 100ms ease-out',
-        mixBlendMode: 'screen',
       }} />
 
       {/* ── particles ── */}
@@ -107,6 +101,7 @@ export default function Landing() {
             borderRadius: '50%',
             background: 'rgba(250,204,21,0.3)',
             animation: `float 12s linear ${delay} infinite`,
+            willChange: 'transform, opacity',
           }} />
         ))}
       </div>
@@ -180,7 +175,7 @@ export default function Landing() {
             lineHeight: 0.95,
             letterSpacing: '0.02em',
             textTransform: 'uppercase',
-            color: '#f5f5f4',
+            color: '#c0bdb8',
             userSelect: 'none',
             whiteSpace: 'nowrap',
           }}>

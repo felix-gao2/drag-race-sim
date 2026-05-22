@@ -70,8 +70,8 @@ body::before {
 }
 
 @keyframes titleBreathe {
-  0%, 100% { text-shadow: 0 0 30px rgba(250,204,21,0.08), 0 2px 4px rgba(0,0,0,0.6); }
-  50%       { text-shadow: 0 0 40px rgba(250,204,21,0.18), 0 2px 4px rgba(0,0,0,0.6); }
+  0%, 100% { text-shadow: 0 0 1px rgba(250,204,21,0.18), 0 0 30px rgba(250,204,21,0.06), 0 2px 4px rgba(0,0,0,0.7); }
+  50%       { text-shadow: 0 0 2px rgba(250,204,21,0.28), 0 0 40px rgba(250,204,21,0.13), 0 2px 4px rgba(0,0,0,0.7); }
 }
 
 .hero::after {
