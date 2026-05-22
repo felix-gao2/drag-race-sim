@@ -42,20 +42,31 @@ export default function Landing() {
   const navigate = useNavigate()
   const [ctaHover, setCtaHover] = useState(false)
   const glowRef = useRef(null)
+  const targetX = useRef(0)
+  const targetY = useRef(0)
+  const curX = useRef(0)
+  const curY = useRef(0)
+  const rafIdRef = useRef(null)
 
   useEffect(() => {
-    let rafId = null
     const move = e => {
-      if (rafId) return
-      rafId = requestAnimationFrame(() => {
-        if (glowRef.current) {
-          glowRef.current.style.transform = `translate3d(calc(${e.clientX}px - 50%), calc(${e.clientY}px - 50%), 0)`
-        }
-        rafId = null
-      })
+      targetX.current = e.clientX
+      targetY.current = e.clientY
+    }
+    const tick = () => {
+      curX.current += (targetX.current - curX.current) * 0.12
+      curY.current += (targetY.current - curY.current) * 0.12
+      if (glowRef.current) {
+        glowRef.current.style.transform = `translate3d(calc(${curX.current}px - 50%), calc(${curY.current}px - 50%), 0)`
+      }
+      rafIdRef.current = requestAnimationFrame(tick)
     }
     window.addEventListener('mousemove', move)
-    return () => { window.removeEventListener('mousemove', move); if (rafId) cancelAnimationFrame(rafId) }
+    rafIdRef.current = requestAnimationFrame(tick)
+    return () => {
+      window.removeEventListener('mousemove', move)
+      cancelAnimationFrame(rafIdRef.current)
+    }
   }, [])
 
   return (
@@ -73,13 +84,12 @@ export default function Landing() {
       <div ref={glowRef} style={{
         position: 'fixed',
         top: 0, left: 0,
-        width: 600, height: 600,
-        background: 'radial-gradient(circle, rgba(220,38,38,0.15) 0%, transparent 70%)',
+        width: 220, height: 220,
+        background: 'radial-gradient(circle, rgba(220,38,38,0.18) 0%, transparent 70%)',
         borderRadius: '50%',
         pointerEvents: 'none',
         zIndex: 1,
         willChange: 'transform',
-        transition: 'transform 100ms ease-out',
       }} />
 
       {/* ── particles ── */}
@@ -215,6 +225,7 @@ export default function Landing() {
         }}>
           PICK TWO. RUN THE QUARTER. SEE WHO WINS.
         </p>
+        <div style={{ animation: 'fadeIn 1.2s cubic-bezier(0.22,1,0.36,1) 1.2s both' }}>
         <button
           onClick={() => navigate('/race')}
           onMouseEnter={() => setCtaHover(true)}
@@ -234,7 +245,7 @@ export default function Landing() {
             display: 'flex', alignItems: 'center', gap: 8,
             transition: 'background 0.15s, transform 0.15s',
             transform: ctaHover ? 'scale(1.02)' : 'scale(1)',
-            animation: ctaHover ? 'none' : 'fadeIn 1.2s cubic-bezier(0.22,1,0.36,1) 1.2s both, ctaPulse 2.4s ease-in-out 2.5s infinite',
+            animation: ctaHover ? 'none' : 'ctaPulse 2.4s ease-in-out 2.5s infinite',
           }}
         >
           START RACING
@@ -257,6 +268,7 @@ export default function Landing() {
             <rect x="12" y="12" width="4" height="4" fill="#0a0a0a"/>
           </svg>
         </button>
+        </div>
       </div>
 
       {/* ── 6. bottom telemetry strip ── */}
