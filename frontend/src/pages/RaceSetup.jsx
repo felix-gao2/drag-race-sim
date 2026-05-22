@@ -237,11 +237,33 @@ export default function RaceSetup() {
             left: '9%',
             top: '50%',
             transform: 'translateY(-50%)',
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'flex-start',
+            gap: 6,
           }}>
-            <CarSilhouette
-              fillColor="rgba(220,38,38,0.2)"
-              strokeColor="rgba(220,38,38,1)"
-            />
+            {carA ? (
+              <img
+                src="/cars/placeholder-car.svg"
+                style={{ height: '7vh', width: 'auto', display: 'block' }}
+                alt=""
+              />
+            ) : (
+              <CarSilhouette
+                fillColor="rgba(220,38,38,0.2)"
+                strokeColor="rgba(220,38,38,1)"
+              />
+            )}
+            <span style={{
+              fontFamily: MONO,
+              fontSize: 11,
+              textTransform: 'uppercase',
+              letterSpacing: '0.1em',
+              color: carA ? '#dc2626' : '#525252',
+              whiteSpace: 'nowrap',
+            }}>
+              {carA ? `${carA.year} ${carA.make} ${carA.model}` : '—— EMPTY ——'}
+            </span>
           </div>
 
           {/* Car B — bottom lane, ~70% vertical */}
@@ -250,11 +272,38 @@ export default function RaceSetup() {
             left: '9%',
             top: '70%',
             transform: 'translateY(-50%)',
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'flex-start',
+            gap: 6,
           }}>
-            <CarSilhouette
-              fillColor="rgba(59,130,246,0.2)"
-              strokeColor="rgba(59,130,246,1)"
-            />
+            {carB ? (
+              <img
+                src="/cars/placeholder-car.svg"
+                style={{
+                  height: '7vh',
+                  width: 'auto',
+                  display: 'block',
+                  filter: 'hue-rotate(220deg) saturate(1.2) brightness(1.1)',
+                }}
+                alt=""
+              />
+            ) : (
+              <CarSilhouette
+                fillColor="rgba(59,130,246,0.2)"
+                strokeColor="rgba(59,130,246,1)"
+              />
+            )}
+            <span style={{
+              fontFamily: MONO,
+              fontSize: 11,
+              textTransform: 'uppercase',
+              letterSpacing: '0.1em',
+              color: carB ? '#3b82f6' : '#525252',
+              whiteSpace: 'nowrap',
+            }}>
+              {carB ? `${carB.year} ${carB.make} ${carB.model}` : '—— EMPTY ——'}
+            </span>
           </div>
         </div>
 
