@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { DotLottieReact } from '@lottiefiles/dotlottie-react'
 
@@ -47,6 +47,17 @@ const DISPLAY = `'Anton', sans-serif`
 export default function Landing() {
   const navigate = useNavigate()
   const [ctaHover, setCtaHover] = useState(false)
+  const glowRef = useRef(null)
+
+  useEffect(() => {
+    const move = e => {
+      if (glowRef.current) {
+        glowRef.current.style.transform = `translate3d(calc(${e.clientX}px - 50%), calc(${e.clientY}px - 50%), 0)`
+      }
+    }
+    window.addEventListener('mousemove', move)
+    return () => window.removeEventListener('mousemove', move)
+  }, [])
 
   return (
     <div className="hero" style={{
@@ -58,6 +69,19 @@ export default function Landing() {
       display: 'grid',
       gridTemplateRows: 'auto 1fr 1fr 1fr auto',
     }}>
+
+      {/* ── cursor glow ── */}
+      <div ref={glowRef} style={{
+        position: 'fixed',
+        top: 0, left: 0,
+        width: 600, height: 600,
+        background: 'radial-gradient(circle, rgba(220,38,38,0.15) 0%, transparent 70%)',
+        borderRadius: '50%',
+        pointerEvents: 'none',
+        zIndex: 1,
+        transition: 'transform 100ms ease-out',
+        mixBlendMode: 'screen',
+      }} />
 
       {/* ── particles ── */}
       <div style={{ position: 'absolute', inset: 0, zIndex: 0, pointerEvents: 'none' }}>
