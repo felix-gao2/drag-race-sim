@@ -181,7 +181,7 @@ export default function Landing() {
             lineHeight: 0.95,
             letterSpacing: '0.02em',
             textTransform: 'uppercase',
-            textShadow: '0 1px 0 rgba(255,255,255,0.1), 0 2px 4px rgba(0,0,0,0.8), 0 0 40px rgba(250,204,21,0.15)',
+            color: '#f5f5f4',
             userSelect: 'none',
             whiteSpace: 'nowrap',
           }}>
