@@ -302,15 +302,12 @@ export default function RaceSetup() {
         <div style={{
           display: 'grid',
           gridTemplateColumns: '1fr 1fr',
+          gap: 8,
           minHeight: 0,
-          overflow: 'auto',
+          overflow: 'hidden',
         }}>
-          <div style={{ borderRight: '1px solid #191919' }}>
-            <CarPanel side="a" onCarChange={setCarA} />
-          </div>
-          <div>
-            <CarPanel side="b" onCarChange={setCarB} />
-          </div>
+          <CarPanel side="a" onCarChange={setCarA} />
+          <CarPanel side="b" onCarChange={setCarB} />
         </div>
       </div>
 
@@ -319,9 +316,11 @@ export default function RaceSetup() {
         position: 'relative', zIndex: 10,
         background: '#060606',
         borderTop: '1px solid #131313',
-        padding: '10px 24px',
+        padding: '0 24px',
+        height: 52,
         display: 'flex', alignItems: 'center', justifyContent: 'space-between',
         flexShrink: 0,
+        gap: 16,
       }}>
         <span style={{ fontFamily: MONO, fontSize: 11, color: '#383838', letterSpacing: '0.2em', textTransform: 'uppercase' }}>
           {ready
@@ -329,9 +328,43 @@ export default function RaceSetup() {
             : 'SELECT BOTH CARS TO RACE'
           }
         </span>
-        <span style={{ fontFamily: MONO, fontSize: 11, color: '#383838', letterSpacing: '0.2em', textTransform: 'uppercase' }}>
-          {ready ? 'READY' : `${(carA ? 1 : 0) + (carB ? 1 : 0)} / 2 SELECTED`}
-        </span>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 16, flexShrink: 0 }}>
+          {error && (
+            <span style={{ fontFamily: MONO, fontSize: 10, color: '#dc2626', letterSpacing: '0.1em' }}>
+              {error}
+            </span>
+          )}
+          {ready ? (
+            <button
+              onClick={handleStart}
+              disabled={submitting}
+              style={{
+                fontFamily: MONO,
+                fontSize: 11,
+                fontWeight: 500,
+                letterSpacing: '0.2em',
+                textTransform: 'uppercase',
+                background: '#dc2626',
+                color: '#0a0a0a',
+                border: 'none',
+                borderRadius: 0,
+                padding: '10px 24px',
+                cursor: submitting ? 'not-allowed' : 'pointer',
+                transition: 'background 0.15s',
+                opacity: submitting ? 0.6 : 1,
+                whiteSpace: 'nowrap',
+              }}
+              onMouseEnter={e => { if (!submitting) e.currentTarget.style.background = '#ef4444' }}
+              onMouseLeave={e => { e.currentTarget.style.background = '#dc2626' }}
+            >
+              {submitting ? 'Starting…' : 'Start Race →'}
+            </button>
+          ) : (
+            <span style={{ fontFamily: MONO, fontSize: 11, color: '#383838', letterSpacing: '0.2em', textTransform: 'uppercase' }}>
+              {(carA ? 1 : 0) + (carB ? 1 : 0)} / 2 SELECTED
+            </span>
+          )}
+        </div>
       </div>
 
     </div>
