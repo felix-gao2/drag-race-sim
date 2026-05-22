@@ -1,17 +1,35 @@
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
+import { BrowserRouter, Routes, Route, Navigate, useLocation } from 'react-router-dom'
+import { AnimatePresence, motion } from 'framer-motion'
 import Landing from './pages/Landing'
 import RaceSetup from './pages/RaceSetup'
 import RaceView from './pages/RaceView'
 
+const pageVariants = {
+  initial: { opacity: 0, y: 8 },
+  animate: { opacity: 1, y: 0, transition: { duration: 0.3, ease: 'easeOut' } },
+  exit:    { opacity: 0, y: -8, transition: { duration: 0.2, ease: 'easeIn' } },
+}
+
+function AnimatedRoutes() {
+  const location = useLocation()
+  return (
+    <AnimatePresence mode="wait">
+      <motion.div key={location.pathname} variants={pageVariants} initial="initial" animate="animate" exit="exit">
+        <Routes location={location}>
+          <Route path="/" element={<Landing />} />
+          <Route path="/race" element={<RaceSetup />} />
+          <Route path="/race/:slug" element={<RaceView />} />
+          <Route path="*" element={<Navigate to="/" replace />} />
+        </Routes>
+      </motion.div>
+    </AnimatePresence>
+  )
+}
+
 export default function App() {
   return (
     <BrowserRouter>
-      <Routes>
-        <Route path="/" element={<Landing />} />
-        <Route path="/race" element={<RaceSetup />} />
-        <Route path="/race/:slug" element={<RaceView />} />
-        <Route path="*" element={<Navigate to="/" replace />} />
-      </Routes>
+      <AnimatedRoutes />
     </BrowserRouter>
   )
 }

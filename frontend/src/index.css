@@ -21,6 +21,10 @@
   box-sizing: border-box;
 }
 
+* {
+  transition: background-color 200ms ease, color 200ms ease, border-color 200ms ease;
+}
+
 html, body, #root {
   height: 100%;
   margin: 0;
