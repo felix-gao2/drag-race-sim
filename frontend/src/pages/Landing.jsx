@@ -59,6 +59,35 @@ export default function Landing() {
       gridTemplateRows: 'auto 1fr 1fr 1fr auto',
     }}>
 
+      {/* ── particles ── */}
+      <div style={{ position: 'absolute', inset: 0, zIndex: 0, pointerEvents: 'none' }}>
+        {[
+          { left: '5%',  delay: '-1s'  },
+          { left: '12%', delay: '-3s'  },
+          { left: '23%', delay: '-5s'  },
+          { left: '31%', delay: '-7s'  },
+          { left: '44%', delay: '-9s'  },
+          { left: '52%', delay: '-11s' },
+          { left: '61%', delay: '-2s'  },
+          { left: '68%', delay: '-4s'  },
+          { left: '76%', delay: '-6s'  },
+          { left: '84%', delay: '-8s'  },
+          { left: '91%', delay: '-10s' },
+          { left: '97%', delay: '0s'   },
+        ].map(({ left, delay }, i) => (
+          <span key={i} style={{
+            position: 'absolute',
+            bottom: -10,
+            left,
+            width: 2,
+            height: 2,
+            borderRadius: '50%',
+            background: 'rgba(250,204,21,0.3)',
+            animation: `float 12s linear ${delay} infinite`,
+          }} />
+        ))}
+      </div>
+
       {/* ── background: asphalt floor ── */}
       <div style={{
         position: 'absolute', bottom: 0, left: 0, right: 0, height: '45vh',
