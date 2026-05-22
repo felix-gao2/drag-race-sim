@@ -48,14 +48,16 @@ function Chip({ label }) {
   return (
     <span style={{
       fontFamily: MONO,
-      fontSize: 10,
-      letterSpacing: '0.16em',
+      fontSize: 11,
+      letterSpacing: '0.25em',
       textTransform: 'uppercase',
-      color: '#525252',
-      border: '1px solid #262626',
-      borderRadius: '999px',
-      padding: '5px 14px',
+      color: '#a3a3a3',
+      border: '1px solid #2a2a2a',
+      borderRadius: 2,
+      background: 'rgba(255,255,255,0.02)',
+      padding: '10px 18px',
       whiteSpace: 'nowrap',
+      display: 'inline-block',
     }}>
       {label}
     </span>
@@ -259,71 +261,39 @@ export default function RaceSetup() {
         {/* BAND 2: Settings                        */}
         {/* ─────────────────────────────────────── */}
         <div style={{
-          display: 'flex',
-          alignItems: 'center',
-          gap: 16,
-          padding: '0 24px',
           height: 80,
-          borderBottom: '1px solid #191919',
+          borderTop: '1px solid #1f1f1f',
+          borderBottom: '1px solid #1f1f1f',
+          display: 'grid',
+          gridTemplateColumns: '40% 20% 40%',
+          alignItems: 'center',
+          padding: '0 24px',
           flexShrink: 0,
           position: 'relative',
           zIndex: 5,
-          background: 'rgba(10,10,10,0.7)',
         }}>
-          {/* Pill chips */}
-          <div style={{ display: 'flex', gap: 8, alignItems: 'center', flexShrink: 0 }}>
-            <Chip label="¼ Mile" />
-            <Chip label="Dig Start" />
+          {/* Left: pill chips */}
+          <div style={{ display: 'flex', gap: 16, alignItems: 'center' }}>
+            <Chip label="DISTANCE · ¼ MILE" />
+            <Chip label="START · DIG" />
           </div>
 
-          {/* Separator */}
-          <div style={{ width: 1, height: 20, background: '#1f1f1f', flexShrink: 0 }} />
-
-          {/* Tagline */}
-          <span style={{
-            fontFamily: MONO,
-            fontSize: 11,
-            color: '#2e2e2e',
-            letterSpacing: '0.22em',
-            textTransform: 'uppercase',
-            flex: 1,
-          }}>
-            PICK TWO · RUN THE QUARTER · SEE WHO WINS
-          </span>
-
-          {/* Error */}
-          {error && (
-            <span style={{ fontFamily: MONO, fontSize: 10, color: '#dc2626', letterSpacing: '0.1em', flexShrink: 0 }}>
-              {error}
-            </span>
-          )}
-
-          {/* Start Race CTA */}
-          <button
-            onClick={handleStart}
-            disabled={!ready || submitting}
-            style={{
+          {/* Center: tagline */}
+          <div style={{ textAlign: 'center' }}>
+            <span style={{
               fontFamily: MONO,
-              fontSize: 12,
-              fontWeight: 500,
-              letterSpacing: '0.2em',
+              fontSize: 11,
               textTransform: 'uppercase',
-              background: ready ? '#dc2626' : 'transparent',
-              color: ready ? '#0a0a0a' : '#383838',
-              border: ready ? 'none' : '1px solid #242424',
-              borderRadius: 0,
-              padding: '12px 28px',
-              cursor: ready ? 'pointer' : 'not-allowed',
-              transition: 'background 0.15s, color 0.15s',
-              opacity: submitting ? 0.6 : 1,
+              letterSpacing: '0.3em',
+              color: '#525252',
               whiteSpace: 'nowrap',
-              flexShrink: 0,
-            }}
-            onMouseEnter={e => { if (ready && !submitting) e.currentTarget.style.background = '#ef4444' }}
-            onMouseLeave={e => { if (ready) e.currentTarget.style.background = '#dc2626' }}
-          >
-            {submitting ? 'Starting…' : 'Start Race →'}
-          </button>
+            }}>
+              SELECT YOUR CONTENDERS · QUARTER MILE · WINNER TAKES ALL
+            </span>
+          </div>
+
+          {/* Right: reserved */}
+          <div />
         </div>
 
         {/* ─────────────────────────────────────── */}
