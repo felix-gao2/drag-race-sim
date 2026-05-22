@@ -70,6 +70,7 @@ export default function RaceSetup() {
   const [carB, setCarB] = useState(null)
   const [submitting, setSubmitting] = useState(false)
   const [error, setError] = useState(null)
+  const [btnHover, setBtnHover] = useState(false)
 
   const ready = carA !== null && carB !== null
 
@@ -297,17 +298,77 @@ export default function RaceSetup() {
         </div>
 
         {/* ─────────────────────────────────────── */}
-        {/* BAND 3: Car panels                     */}
+        {/* BAND 3: Car panels + Start CTA         */}
         {/* ─────────────────────────────────────── */}
-        <div style={{
-          display: 'grid',
-          gridTemplateColumns: '1fr 1fr',
-          gap: 8,
-          minHeight: 0,
-          overflow: 'hidden',
-        }}>
-          <CarPanel side="a" onCarChange={setCarA} />
-          <CarPanel side="b" onCarChange={setCarB} />
+        <div style={{ display: 'flex', flexDirection: 'column', minHeight: 0 }}>
+
+          {/* Car panels */}
+          <div style={{
+            display: 'grid',
+            gridTemplateColumns: '1fr 1fr',
+            gap: 8,
+            flex: 1,
+            minHeight: 0,
+            overflow: 'hidden',
+          }}>
+            <CarPanel side="a" onCarChange={setCarA} />
+            <CarPanel side="b" onCarChange={setCarB} />
+          </div>
+
+          {/* Start Race CTA */}
+          <div style={{
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            gap: 12,
+            paddingTop: 24,
+            paddingBottom: 28,
+            flexShrink: 0,
+          }}>
+            <div style={{ animation: ready && !submitting ? 'fadeIn 0.3s ease both' : 'none' }}>
+              <button
+                onClick={handleStart}
+                disabled={!ready || submitting}
+                onMouseEnter={() => setBtnHover(true)}
+                onMouseLeave={() => setBtnHover(false)}
+                style={{
+                  fontFamily: MONO,
+                  fontSize: 15,
+                  fontWeight: 500,
+                  letterSpacing: '0.22em',
+                  textTransform: 'uppercase',
+                  background: ready ? '#dc2626' : '#1f1f1f',
+                  color: ready ? '#0a0a0a' : '#525252',
+                  border: 'none',
+                  borderRadius: 0,
+                  padding: '18px 64px',
+                  width: 400,
+                  cursor: ready ? 'pointer' : 'not-allowed',
+                  transition: 'background 0.15s',
+                  opacity: submitting ? 0.6 : 1,
+                  animation: ready && !submitting && !btnHover
+                    ? 'ctaPulse 2.4s ease-in-out infinite'
+                    : 'none',
+                }}
+              >
+                {submitting ? 'Starting…' : 'START RACE'}
+              </button>
+            </div>
+            <span style={{
+              fontFamily: MONO,
+              fontSize: 10,
+              textTransform: 'uppercase',
+              letterSpacing: '0.2em',
+              color: '#525252',
+            }}>
+              {ready ? 'READY TO RACE' : 'SELECT BOTH CARS TO CONTINUE'}
+            </span>
+            {error && (
+              <span style={{ fontFamily: MONO, fontSize: 10, color: '#dc2626', letterSpacing: '0.1em' }}>
+                {error}
+              </span>
+            )}
+          </div>
         </div>
       </div>
 
@@ -317,10 +378,9 @@ export default function RaceSetup() {
         background: '#060606',
         borderTop: '1px solid #131313',
         padding: '0 24px',
-        height: 52,
+        height: 44,
         display: 'flex', alignItems: 'center', justifyContent: 'space-between',
         flexShrink: 0,
-        gap: 16,
       }}>
         <span style={{ fontFamily: MONO, fontSize: 11, color: '#383838', letterSpacing: '0.2em', textTransform: 'uppercase' }}>
           {ready
@@ -328,43 +388,9 @@ export default function RaceSetup() {
             : 'SELECT BOTH CARS TO RACE'
           }
         </span>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 16, flexShrink: 0 }}>
-          {error && (
-            <span style={{ fontFamily: MONO, fontSize: 10, color: '#dc2626', letterSpacing: '0.1em' }}>
-              {error}
-            </span>
-          )}
-          {ready ? (
-            <button
-              onClick={handleStart}
-              disabled={submitting}
-              style={{
-                fontFamily: MONO,
-                fontSize: 11,
-                fontWeight: 500,
-                letterSpacing: '0.2em',
-                textTransform: 'uppercase',
-                background: '#dc2626',
-                color: '#0a0a0a',
-                border: 'none',
-                borderRadius: 0,
-                padding: '10px 24px',
-                cursor: submitting ? 'not-allowed' : 'pointer',
-                transition: 'background 0.15s',
-                opacity: submitting ? 0.6 : 1,
-                whiteSpace: 'nowrap',
-              }}
-              onMouseEnter={e => { if (!submitting) e.currentTarget.style.background = '#ef4444' }}
-              onMouseLeave={e => { e.currentTarget.style.background = '#dc2626' }}
-            >
-              {submitting ? 'Starting…' : 'Start Race →'}
-            </button>
-          ) : (
-            <span style={{ fontFamily: MONO, fontSize: 11, color: '#383838', letterSpacing: '0.2em', textTransform: 'uppercase' }}>
-              {(carA ? 1 : 0) + (carB ? 1 : 0)} / 2 SELECTED
-            </span>
-          )}
-        </div>
+        <span style={{ fontFamily: MONO, fontSize: 11, color: '#383838', letterSpacing: '0.2em', textTransform: 'uppercase' }}>
+          {(carA ? 1 : 0) + (carB ? 1 : 0)} / 2 SELECTED
+        </span>
       </div>
 
     </div>
