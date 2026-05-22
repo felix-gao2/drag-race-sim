@@ -6,6 +6,44 @@ import { postRace } from '../api'
 const MONO = `'JetBrains Mono', monospace`
 const CAR_COUNT = 1017
 
+function CarSilhouette({ fillColor, strokeColor }) {
+  return (
+    <svg
+      viewBox="0 0 260 72"
+      xmlns="http://www.w3.org/2000/svg"
+      style={{ height: '7vh', width: 'auto', display: 'block', transform: 'scaleX(-1)' }}
+      aria-hidden="true"
+    >
+      {/* Front wing */}
+      <polygon
+        points="5,58 66,54 66,63 5,67"
+        fill={fillColor}
+        stroke={strokeColor}
+        strokeWidth="1.2"
+        strokeLinejoin="round"
+      />
+      {/* Main body */}
+      <path
+        d="M 22,60 L 30,46 L 40,36 L 68,30 L 88,26 L 104,22 L 120,19 L 138,22 L 162,26 L 198,30 L 224,34 L 238,42 L 240,60 Z"
+        fill={fillColor}
+        stroke={strokeColor}
+        strokeWidth="1.2"
+        strokeLinejoin="round"
+      />
+      {/* Rear wing pillar */}
+      <rect x="228" y="20" width="5" height="14" fill={fillColor} stroke={strokeColor} strokeWidth="1.2" />
+      {/* Rear wing blade */}
+      <rect x="214" y="16" width="34" height="6" rx="1" fill={fillColor} stroke={strokeColor} strokeWidth="1.2" />
+      {/* Front wheel */}
+      <circle cx="66" cy="62" r="10" fill={fillColor} stroke={strokeColor} strokeWidth="1.5" />
+      <circle cx="66" cy="62" r="3.5" fill="none" stroke={strokeColor} strokeWidth="1" />
+      {/* Rear wheel */}
+      <circle cx="210" cy="62" r="12" fill={fillColor} stroke={strokeColor} strokeWidth="1.5" />
+      <circle cx="210" cy="62" r="4.5" fill="none" stroke={strokeColor} strokeWidth="1" />
+    </svg>
+  )
+}
+
 function Chip({ label }) {
   return (
     <span style={{
@@ -119,129 +157,101 @@ export default function RaceSetup() {
         {/* ─────────────────────────────────────── */}
         {/* BAND 1: Dragstrip preview               */}
         {/* ─────────────────────────────────────── */}
-        <div style={{ position: 'relative', overflow: 'hidden', borderBottom: '1px solid #191919' }}>
+        <div style={{
+          position: 'relative',
+          overflow: 'hidden',
+          borderBottom: '1px solid #191919',
+          background: 'linear-gradient(180deg, #0a0a0a 0%, #1a1a1a 50%, #0a0a0a 100%)',
+        }}>
 
-          {/* Asphalt floor with perspective */}
+          {/* Lane divider at 60% */}
           <div style={{
             position: 'absolute',
-            bottom: 0, left: 0, right: 0,
-            height: '300%',
-            transform: 'perspective(540px) rotateX(70deg)',
-            transformOrigin: 'bottom center',
-            background: '#0d0d0d',
-          }} />
-
-          {/* Track grid lines on floor */}
-          <div style={{
-            position: 'absolute',
-            bottom: 0, left: 0, right: 0,
-            height: '300%',
-            transform: 'perspective(540px) rotateX(70deg)',
-            transformOrigin: 'bottom center',
-            backgroundImage: `
-              linear-gradient(to right, #1e1e1e 1px, transparent 1px),
-              linear-gradient(to bottom, #1a1a1a 1px, transparent 1px)
-            `,
-            backgroundSize: '80px 80px',
-            animation: 'gridScroll 3s linear infinite',
-            willChange: 'background-position',
-          }} />
-
-          {/* Lane A color wash — left half */}
-          <div style={{
-            position: 'absolute',
-            inset: 0,
-            background: 'linear-gradient(to right, rgba(220,38,38,0.07) 0%, rgba(220,38,38,0.07) 50%, transparent 50%)',
-            pointerEvents: 'none',
-          }} />
-
-          {/* Lane B color wash — right half */}
-          <div style={{
-            position: 'absolute',
-            inset: 0,
-            background: 'linear-gradient(to right, transparent 50%, rgba(51,153,255,0.07) 50%)',
-            pointerEvents: 'none',
-          }} />
-
-          {/* Center divider */}
-          <div style={{
-            position: 'absolute',
-            top: 0, bottom: 0,
-            left: '50%',
-            width: 1,
-            background: '#1c1c1c',
-            transform: 'translateX(-50%)',
-          }} />
-
-          {/* Starting line (bi-color) */}
-          <div style={{
-            position: 'absolute',
-            bottom: 0, left: 0, right: 0,
-            height: 3,
-            background: 'linear-gradient(to right, #dc2626 0 50%, #3399ff 50% 100%)',
-          }} />
-
-          {/* Top sky fade */}
-          <div style={{
-            position: 'absolute',
-            top: 0, left: 0, right: 0,
-            height: '55%',
-            background: 'linear-gradient(to bottom, #0a0a0a 0%, transparent 100%)',
-            pointerEvents: 'none',
-          }} />
-
-          {/* Horizon glow */}
-          <div style={{
-            position: 'absolute',
-            top: '40%', left: 0, right: 0,
+            top: '60%',
+            left: 0, right: 0,
             height: 1,
-            background: 'linear-gradient(to right, transparent, rgba(250,204,21,0.08), transparent)',
+            backgroundImage: 'repeating-linear-gradient(to right, #2a2a2a 0 40px, transparent 40px 80px)',
           }} />
 
-          {/* ¼ MILE label — top center */}
+          {/* Lane divider at 80% */}
           <div style={{
             position: 'absolute',
-            top: 20,
-            left: '50%',
+            top: '80%',
+            left: 0, right: 0,
+            height: 1,
+            backgroundImage: 'repeating-linear-gradient(to right, #2a2a2a 0 40px, transparent 40px 80px)',
+          }} />
+
+          {/* START line */}
+          <div style={{
+            position: 'absolute',
+            left: '8%',
+            top: 0, bottom: 0,
+            width: 1,
+            background: '#facc15',
+          }} />
+          <span style={{
+            position: 'absolute',
+            left: '8%',
+            top: 14,
             transform: 'translateX(-50%)',
             fontFamily: MONO,
-            fontSize: 10,
-            color: '#2e2e2e',
-            letterSpacing: '0.3em',
+            fontSize: 9,
+            color: '#facc15',
+            letterSpacing: '0.2em',
             textTransform: 'uppercase',
             whiteSpace: 'nowrap',
           }}>
-            1320 FT — QUARTER MILE
-          </div>
+            START
+          </span>
 
-          {/* Lane A label */}
+          {/* FINISH line */}
           <div style={{
             position: 'absolute',
-            bottom: 12,
-            left: '25%',
+            left: '92%',
+            top: 0, bottom: 0,
+            width: 1,
+            background: '#dc2626',
+          }} />
+          <span style={{
+            position: 'absolute',
+            left: '92%',
+            top: 14,
             transform: 'translateX(-50%)',
             fontFamily: MONO,
-            fontSize: 10,
-            letterSpacing: '0.25em',
+            fontSize: 9,
+            color: '#dc2626',
+            letterSpacing: '0.2em',
             textTransform: 'uppercase',
-            color: 'rgba(220,38,38,0.35)',
+            whiteSpace: 'nowrap',
           }}>
-            LANE A
-          </div>
+            FINISH
+          </span>
 
-          {/* Lane B label */}
+          {/* Car A — top lane, ~50% vertical */}
           <div style={{
             position: 'absolute',
-            bottom: 12,
-            left: '75%',
-            transform: 'translateX(-50%)',
-            fontFamily: MONO,
-            fontSize: 10,
-            letterSpacing: '0.25em',
-            textTransform: 'uppercase',
-            color: 'rgba(51,153,255,0.35)',
+            left: '9%',
+            top: '50%',
+            transform: 'translateY(-50%)',
           }}>
-            LANE B
+            <CarSilhouette
+              fillColor="rgba(220,38,38,0.2)"
+              strokeColor="rgba(220,38,38,1)"
+            />
+          </div>
+
+          {/* Car B — bottom lane, ~70% vertical */}
+          <div style={{
+            position: 'absolute',
+            left: '9%',
+            top: '70%',
+            transform: 'translateY(-50%)',
+          }}>
+            <CarSilhouette
+              fillColor="rgba(59,130,246,0.2)"
+              strokeColor="rgba(59,130,246,1)"
+            />
           </div>
         </div>
 
