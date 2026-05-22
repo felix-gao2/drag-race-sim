@@ -149,6 +149,7 @@ export default function Landing() {
         display: 'flex', justifyContent: 'space-between', alignItems: 'center',
         padding: '24px',
         borderBottom: '1px solid #1f1f1f',
+        animation: 'fadeIn 1.2s cubic-bezier(0.22,1,0.36,1) 0s both',
       }}>
         <span style={{ fontFamily: MONO, fontSize: 11, color: '#525252', letterSpacing: '0.25em', textTransform: 'uppercase' }}>
           v0.1.0 // {CAR_COUNT} CARS
@@ -194,6 +195,7 @@ export default function Landing() {
       <div style={{
         position: 'relative', zIndex: 10,
         display: 'flex', alignItems: 'center', justifyContent: 'center',
+        animation: 'fadeIn 1.2s cubic-bezier(0.22,1,0.36,1) 0.6s both',
       }}>
         <div style={{ pointerEvents: 'none' }}>
           <DotLottieReact
@@ -215,6 +217,7 @@ export default function Landing() {
           margin: 0,
           fontFamily: MONO, fontSize: 14, color: '#a3a3a3',
           letterSpacing: '0.25em', textTransform: 'uppercase',
+          animation: 'fadeIn 1.2s cubic-bezier(0.22,1,0.36,1) 1.0s both',
         }}>
           PICK TWO. RUN THE QUARTER. SEE WHO WINS.
         </p>
@@ -237,7 +240,7 @@ export default function Landing() {
             display: 'flex', alignItems: 'center', gap: 8,
             transition: 'background 0.15s, transform 0.15s',
             transform: ctaHover ? 'scale(1.02)' : 'scale(1)',
-            animation: ctaHover ? 'none' : 'ctaPulse 2.4s ease-in-out infinite',
+            animation: ctaHover ? 'none' : 'fadeIn 1.2s cubic-bezier(0.22,1,0.36,1) 1.2s both, ctaPulse 2.4s ease-in-out 2.5s infinite',
           }}
         >
           START RACING
@@ -267,6 +270,7 @@ export default function Landing() {
         position: 'relative', zIndex: 10,
         background: '#060606',
         borderTop: '1px solid #131313',
+        animation: 'fadeIn 1.2s cubic-bezier(0.22,1,0.36,1) 1.4s both',
         borderBottom: '1px solid #1f1f1f',
         padding: '0.45rem 1.75rem 24px',
         display: 'flex', alignItems: 'center', justifyContent: 'center',
