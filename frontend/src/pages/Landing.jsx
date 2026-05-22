@@ -50,13 +50,18 @@ export default function Landing() {
   const glowRef = useRef(null)
 
   useEffect(() => {
+    let rafId = null
     const move = e => {
-      if (glowRef.current) {
-        glowRef.current.style.transform = `translate3d(calc(${e.clientX}px - 50%), calc(${e.clientY}px - 50%), 0)`
-      }
+      if (rafId) return
+      rafId = requestAnimationFrame(() => {
+        if (glowRef.current) {
+          glowRef.current.style.transform = `translate3d(calc(${e.clientX}px - 50%), calc(${e.clientY}px - 50%), 0)`
+        }
+        rafId = null
+      })
     }
     window.addEventListener('mousemove', move)
-    return () => window.removeEventListener('mousemove', move)
+    return () => { window.removeEventListener('mousemove', move); if (rafId) cancelAnimationFrame(rafId) }
   }, [])
 
   return (
@@ -86,18 +91,12 @@ export default function Landing() {
       {/* ── particles ── */}
       <div style={{ position: 'absolute', inset: 0, zIndex: 0, pointerEvents: 'none' }}>
         {[
-          { left: '5%',  delay: '-1s'  },
-          { left: '12%', delay: '-3s'  },
-          { left: '23%', delay: '-5s'  },
-          { left: '31%', delay: '-7s'  },
-          { left: '44%', delay: '-9s'  },
-          { left: '52%', delay: '-11s' },
-          { left: '61%', delay: '-2s'  },
-          { left: '68%', delay: '-4s'  },
-          { left: '76%', delay: '-6s'  },
-          { left: '84%', delay: '-8s'  },
-          { left: '91%', delay: '-10s' },
-          { left: '97%', delay: '0s'   },
+          { left: '10%', delay: '-1s'  },
+          { left: '28%', delay: '-5s'  },
+          { left: '46%', delay: '-9s'  },
+          { left: '63%', delay: '-3s'  },
+          { left: '79%', delay: '-7s'  },
+          { left: '93%', delay: '0s'   },
         ].map(({ left, delay }, i) => (
           <span key={i} style={{
             position: 'absolute',
@@ -197,7 +196,7 @@ export default function Landing() {
         display: 'flex', alignItems: 'center', justifyContent: 'center',
         animation: 'fadeIn 1.2s cubic-bezier(0.22,1,0.36,1) 0.6s both',
       }}>
-        <div style={{ pointerEvents: 'none' }}>
+        <div style={{ pointerEvents: 'none', willChange: 'transform' }}>
           <DotLottieReact
             src="/car.lottie"
             loop

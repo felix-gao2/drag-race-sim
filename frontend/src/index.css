@@ -115,6 +115,7 @@ body::before {
   mask-image: linear-gradient(to bottom, transparent 0%, black 30%, black 70%, transparent 100%);
   -webkit-mask-image: linear-gradient(to bottom, transparent 0%, black 30%, black 70%, transparent 100%);
   animation: gridScroll 8s linear infinite;
+  will-change: background-position;
   pointer-events: none;
 }
 
