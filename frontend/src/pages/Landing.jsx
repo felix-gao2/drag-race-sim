@@ -80,7 +80,7 @@ export default function Landing() {
         padding: '0 24px',
         position: 'relative',
         zIndex: 10,
-        borderBottom: '1px solid rgba(220,38,38,0.4)',
+        borderBottom: '1px solid rgba(220,38,38,0.2)',
       }}>
         <span style={{ fontFamily: MONO, fontSize: 11, color: DIM, letterSpacing: '0.12em', textTransform: 'uppercase' }}>
           V0.1.0 // 1017 CARS
@@ -89,7 +89,6 @@ export default function Landing() {
           ¼ MILE · SIDE BY SIDE · DIG START
         </span>
         <span style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-          <span style={{ color: ACCENT, fontSize: 8, lineHeight: 1 }}>●</span>
           <span style={{ fontFamily: MONO, fontSize: 11, color: DIM, letterSpacing: '0.12em', textTransform: 'uppercase' }}>
             SYS — READY
           </span>
@@ -117,7 +116,7 @@ export default function Landing() {
         flexDirection: 'column',
         alignItems: 'center',
         justifyContent: 'center',
-        paddingBottom: '12vh',
+        paddingBottom: '15vh',
         position: 'relative',
         zIndex: 10,
       }}>
@@ -148,8 +147,8 @@ export default function Landing() {
           />
         </div>
 
-        {/* ── headline: overlaps image bottom by 50px ── */}
-        <div style={{ textAlign: 'center', marginTop: -50, position: 'relative', zIndex: 11 }}>
+        {/* ── headline: sits just below image ── */}
+        <div style={{ textAlign: 'center', marginTop: -16, position: 'relative', zIndex: 11 }}>
           <div style={{ position: 'relative', display: 'inline-block' }}>
             <h1 style={{
               margin: 0,
@@ -166,10 +165,10 @@ export default function Landing() {
             </h1>
             <span style={{
               position: 'absolute',
-              top: -10,
+              top: -8,
               right: -46,
               fontFamily: MONO,
-              fontSize: 14,
+              fontSize: 11,
               color: ACCENT,
               lineHeight: 1,
               letterSpacing: '0',
@@ -222,13 +221,12 @@ export default function Landing() {
       <div style={{
         height: 32,
         flexShrink: 0,
-        marginTop: 24,
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
         position: 'relative',
         zIndex: 10,
-        borderTop: '1px solid rgba(220,38,38,0.4)',
+        borderTop: '1px solid rgba(220,38,38,0.2)',
       }}>
         <span style={{
           position: 'absolute',
