@@ -295,15 +295,15 @@ export default function RaceSetup() {
   const milestones = useMemo(() => {
     if (!raceData || raceState === 'idle' || raceState === 'loading') return INIT_MILESTONES
     const m = {
-      a: { sixty: null, eighth: null, trap: null, et: null },
-      b: { sixty: null, eighth: null, trap: null, et: null },
+      a: { sixty: null, eighth: null, eighthSpeed: null, trap: null, et: null },
+      b: { sixty: null, eighth: null, eighthSpeed: null, trap: null, et: null },
     }
     for (let i = 0; i <= Math.min(frame, raceData.telemetry.length - 1); i++) {
       const t = raceData.telemetry[i]
       if (m.a.sixty  === null && t.dist_a_ft >= 60)   m.a.sixty  = t.time_s
       if (m.b.sixty  === null && t.dist_b_ft >= 60)   m.b.sixty  = t.time_s
-      if (m.a.eighth === null && t.dist_a_ft >= 660)  m.a.eighth = t.time_s
-      if (m.b.eighth === null && t.dist_b_ft >= 660)  m.b.eighth = t.time_s
+      if (m.a.eighth === null && t.dist_a_ft >= 660)  { m.a.eighth = t.time_s; m.a.eighthSpeed = Math.round(t.speed_a_mph) }
+      if (m.b.eighth === null && t.dist_b_ft >= 660)  { m.b.eighth = t.time_s; m.b.eighthSpeed = Math.round(t.speed_b_mph) }
       if (m.a.trap   === null && t.dist_a_ft >= 1320) { m.a.trap = t.speed_a_mph; m.a.et = t.time_s }
       if (m.b.trap   === null && t.dist_b_ft >= 1320) { m.b.trap = t.speed_b_mph; m.b.et = t.time_s }
     }
@@ -399,6 +399,18 @@ export default function RaceSetup() {
   }
 
   const hasRace = (raceState === 'racing' || raceState === 'done') && raceData
+
+  const currentTickFull = raceData ? raceData.telemetry[Math.min(frame, raceData.telemetry.length - 1)] : null
+  const prevTickFull    = raceData && frame > 0 ? raceData.telemetry[frame - 1] : null
+  function calcGForce(curr, prev, side) {
+    if (!curr || !prev) return 0
+    const delta = side === 'a' ? curr.speed_a_mph - prev.speed_a_mph : curr.speed_b_mph - prev.speed_b_mph
+    return Math.max(0, (delta * 1.467) / (0.05 * 32.174))
+  }
+  const gForceA = calcGForce(currentTickFull, prevTickFull, 'a')
+  const gForceB = calcGForce(currentTickFull, prevTickFull, 'b')
+  const winnerA = raceData?.winner_id != null && raceData.winner_id === raceData?.car_a?.id
+  const winnerB = raceData?.winner_id != null && raceData.winner_id === raceData?.car_b?.id
 
   return (
     <div style={{
@@ -611,9 +623,27 @@ export default function RaceSetup() {
         flex: 1, display: 'grid', gridTemplateColumns: '1fr 1fr',
         position: 'relative', zIndex: 5, minHeight: 0, overflow: 'hidden',
       }}>
-        <CarPanel side="a" onCarChange={handleCarAChange} racePhase={raceState} />
+        <CarPanel
+          side="a"
+          onCarChange={handleCarAChange}
+          racePhase={raceState}
+          tick={currentTickFull}
+          gForce={gForceA}
+          milestones={milestones.a}
+          isWinner={winnerA}
+          onReplay={handleRestart}
+        />
         <div style={{ position: 'absolute', top: 0, bottom: 0, left: '50%', width: 1, background: 'rgba(245,245,240,0.06)', zIndex: 1, pointerEvents: 'none' }} />
-        <CarPanel side="b" onCarChange={handleCarBChange} racePhase={raceState} />
+        <CarPanel
+          side="b"
+          onCarChange={handleCarBChange}
+          racePhase={raceState}
+          tick={currentTickFull}
+          gForce={gForceB}
+          milestones={milestones.b}
+          isWinner={winnerB}
+          onReplay={handleRestart}
+        />
       </div>
 
       {/* ── Bottom HUD ── */}
