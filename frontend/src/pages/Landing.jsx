@@ -21,6 +21,49 @@ export default function Landing() {
       flexDirection: 'column',
       overflow: 'hidden',
     }}>
+      {/* ── fixed background structure ── */}
+      <div style={{ position: 'fixed', inset: 0, zIndex: -1, pointerEvents: 'none', overflow: 'hidden' }}>
+
+        {/* 40×40 grid */}
+        <div style={{
+          position: 'absolute', inset: 0,
+          backgroundImage: [
+            'linear-gradient(rgba(245,245,240,0.04) 1px, transparent 1px)',
+            'linear-gradient(90deg, rgba(245,245,240,0.04) 1px, transparent 1px)',
+          ].join(', '),
+          backgroundSize: '40px 40px',
+        }} />
+
+        {/* center staging dashed line */}
+        <div style={{
+          position: 'absolute', top: '50%', left: 0, right: 0, height: 1,
+          backgroundImage: 'repeating-linear-gradient(90deg, rgba(245,245,240,0.05) 0, rgba(245,245,240,0.05) 4px, transparent 4px, transparent 12px)',
+        }} />
+
+        {/* left lane marker — vertical line */}
+        <div style={{ position: 'absolute', top: 0, bottom: 0, left: 80, width: 1, background: 'rgba(245,245,240,0.08)' }} />
+        {/* left lane marker — ticks every 120px */}
+        <div style={{
+          position: 'absolute', top: 0, bottom: 0, left: 74, width: 12,
+          backgroundImage: 'repeating-linear-gradient(to bottom, transparent 0px, transparent 119px, rgba(245,245,240,0.08) 119px, rgba(245,245,240,0.08) 120px)',
+        }} />
+
+        {/* right lane marker — vertical line */}
+        <div style={{ position: 'absolute', top: 0, bottom: 0, right: 80, width: 1, background: 'rgba(245,245,240,0.08)' }} />
+        {/* right lane marker — ticks every 120px */}
+        <div style={{
+          position: 'absolute', top: 0, bottom: 0, right: 74, width: 12,
+          backgroundImage: 'repeating-linear-gradient(to bottom, transparent 0px, transparent 119px, rgba(245,245,240,0.08) 119px, rgba(245,245,240,0.08) 120px)',
+        }} />
+
+        {/* corner brackets */}
+        <div style={{ position: 'absolute', top: 16, left: 16, width: 24, height: 24, borderTop: '1px solid rgba(220,38,38,0.6)', borderLeft: '1px solid rgba(220,38,38,0.6)' }} />
+        <div style={{ position: 'absolute', top: 16, right: 16, width: 24, height: 24, borderTop: '1px solid rgba(220,38,38,0.6)', borderRight: '1px solid rgba(220,38,38,0.6)' }} />
+        <div style={{ position: 'absolute', bottom: 16, left: 16, width: 24, height: 24, borderBottom: '1px solid rgba(220,38,38,0.6)', borderLeft: '1px solid rgba(220,38,38,0.6)' }} />
+        <div style={{ position: 'absolute', bottom: 16, right: 16, width: 24, height: 24, borderBottom: '1px solid rgba(220,38,38,0.6)', borderRight: '1px solid rgba(220,38,38,0.6)' }} />
+
+      </div>
+
       {/* subtle radial vignette, max 5% */}
       <div style={{
         position: 'absolute', inset: 0, pointerEvents: 'none', zIndex: 0,
@@ -96,7 +139,7 @@ export default function Landing() {
           color: TEXT,
           userSelect: 'none',
         }}>
-          QUARTER MILE
+          QUARTER MILE SIM
         </h1>
       </div>
 
