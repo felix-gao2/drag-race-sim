@@ -119,19 +119,30 @@ export default function Landing() {
         position: 'relative',
         zIndex: 10,
       }}>
-        <img
-          src="/hero.jpg"
-          alt=""
-          style={{
-            width: '70vw',
-            maxWidth: 1000,
-            maxHeight: '100%',
-            objectFit: 'contain',
-            display: 'block',
-            maskImage: 'radial-gradient(ellipse at center, black 45%, transparent 92%)',
-            WebkitMaskImage: 'radial-gradient(ellipse at center, black 45%, transparent 92%)',
-          }}
-        />
+        {/* wrapper constrains both halo and image to the same footprint */}
+        <div style={{ position: 'relative', width: '70vw', maxWidth: 1000, maxHeight: '100%' }}>
+          {/* red color bleed halo, 40px larger on each side */}
+          <div style={{
+            position: 'absolute',
+            top: -40, left: -40, right: -40, bottom: -40,
+            background: 'radial-gradient(ellipse at center, rgba(220,38,38,0.15), transparent 70%)',
+            pointerEvents: 'none',
+          }} />
+          <img
+            src="/hero.jpg"
+            alt=""
+            style={{
+              width: '100%',
+              maxHeight: '100%',
+              objectFit: 'contain',
+              display: 'block',
+              filter: 'saturate(0.85) contrast(0.95) brightness(0.92)',
+              maskImage: 'radial-gradient(ellipse 70% 65% at center, black 35%, transparent 88%)',
+              WebkitMaskImage: 'radial-gradient(ellipse 70% 65% at center, black 35%, transparent 88%)',
+              animation: 'heroZoom 24s ease-in-out infinite',
+            }}
+          />
+        </div>
       </div>
 
       {/* ── headline ── */}
@@ -202,6 +213,18 @@ export default function Landing() {
           <span style={{ fontFamily: MONO, fontSize: 10, color: 'rgba(245,245,240,0.3)', marginLeft: 10, letterSpacing: '0.06em' }}>[ENTER]</span>
         </span>
       </div>
+
+      {/* ── film grain overlay ── */}
+      <div style={{
+        position: 'fixed',
+        inset: 0,
+        zIndex: 50,
+        pointerEvents: 'none',
+        background: `url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.4'/%3E%3C/svg%3E")`,
+        backgroundSize: '200px 200px',
+        opacity: 0.08,
+        mixBlendMode: 'overlay',
+      }} />
 
       {/* ── bottom HUD bar ── */}
       <div style={{
