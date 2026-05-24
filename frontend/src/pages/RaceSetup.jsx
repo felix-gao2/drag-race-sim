@@ -45,25 +45,44 @@ const SURF_VALS  = ['DRY', 'WET']
 function CycleParam({ label, value, onClick }) {
   const [hov, setHov] = useState(false)
   return (
-    <span
+    <div
       onClick={onClick}
       onMouseEnter={() => setHov(true)}
       onMouseLeave={() => setHov(false)}
       style={{
-        fontFamily: MONO,
-        fontSize: 12,
-        color: hov ? ACCENT : DIM,
-        letterSpacing: '0.12em',
-        textTransform: 'uppercase',
-        cursor: 'pointer',
-        transition: 'color 0.1s',
-        userSelect: 'none',
-        whiteSpace: 'nowrap',
+        display: 'flex', flexDirection: 'column', gap: 4,
+        cursor: 'pointer', userSelect: 'none', whiteSpace: 'nowrap',
       }}
     >
-      {label}:{' '}
-      <span style={{ color: hov ? ACCENT : TEXT }}>{value}</span>
-    </span>
+      <span style={{
+        fontFamily: MONO, fontSize: 10,
+        color: hov ? ACCENT : DIM,
+        letterSpacing: '0.12em', textTransform: 'uppercase',
+        transition: 'color 0.1s', lineHeight: 1,
+      }}>
+        {label}
+      </span>
+      <span style={{
+        fontFamily: MONO, fontSize: 18,
+        color: TEXT, letterSpacing: '0.06em',
+        textTransform: 'uppercase', lineHeight: 1,
+      }}>
+        {value}
+      </span>
+    </div>
+  )
+}
+
+function StatParam({ label, value }) {
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 4, whiteSpace: 'nowrap', userSelect: 'none' }}>
+      <span style={{ fontFamily: MONO, fontSize: 10, color: DIM, letterSpacing: '0.12em', textTransform: 'uppercase', lineHeight: 1 }}>
+        {label}
+      </span>
+      <span style={{ fontFamily: MONO, fontSize: 18, color: TEXT, letterSpacing: '0.06em', textTransform: 'uppercase', lineHeight: 1 }}>
+        {value}
+      </span>
+    </div>
   )
 }
 
@@ -71,10 +90,11 @@ function Dot() {
   return (
     <span style={{
       fontFamily: MONO,
-      fontSize: 12,
+      fontSize: 14,
       color: 'rgba(245,245,240,0.15)',
-      margin: '0 10px',
+      margin: '0 14px',
       userSelect: 'none',
+      alignSelf: 'center',
     }}>·</span>
   )
 }
@@ -288,36 +308,14 @@ export default function RaceSetup() {
 
       </div>
 
-      {/* ── Lane panels ── */}
-      <div style={{
-        flex: 1,
-        display: 'grid',
-        gridTemplateColumns: '1fr 1fr',
-        position: 'relative',
-        zIndex: 5,
-        minHeight: 0,
-        overflow: 'hidden',
-      }}>
-        <CarPanel side="a" onCarChange={setCarA} />
-
-        {/* center divider */}
-        <div style={{
-          position: 'absolute', top: 0, bottom: 0, left: '50%',
-          width: 1, background: 'rgba(245,245,240,0.06)',
-          zIndex: 1, pointerEvents: 'none',
-        }} />
-
-        <CarPanel side="b" onCarChange={setCarB} />
-      </div>
-
       {/* ── Race params toolbar ── */}
       <div style={{
-        height: '5vh', minHeight: 44, flexShrink: 0,
+        height: '8vh', minHeight: 60, flexShrink: 0,
         display: 'flex', alignItems: 'center', justifyContent: 'space-between',
         padding: '0 24px',
         position: 'relative', zIndex: 10,
-        borderTop: '1px solid rgba(245,245,240,0.05)',
-        borderBottom: '1px solid rgba(220,38,38,0.2)',
+        borderTop: '1px solid rgba(220,38,38,0.4)',
+        borderBottom: '1px solid rgba(220,38,38,0.4)',
         background: 'rgba(0,0,0,0.4)',
       }}>
 
@@ -341,13 +339,9 @@ export default function RaceSetup() {
             onClick={() => setSurfIdx(i => (i + 1) % SURF_VALS.length)}
           />
           <Dot />
-          <span style={{ fontFamily: MONO, fontSize: 12, color: DIM, letterSpacing: '0.12em', textTransform: 'uppercase', whiteSpace: 'nowrap', userSelect: 'none' }}>
-            DA: <span style={{ color: TEXT }}>56 FT</span>
-          </span>
+          <StatParam label="DA" value="56 FT" />
           <Dot />
-          <span style={{ fontFamily: MONO, fontSize: 12, color: DIM, letterSpacing: '0.12em', textTransform: 'uppercase', whiteSpace: 'nowrap', userSelect: 'none' }}>
-            WIND: <span style={{ color: TEXT }}>0 MPH</span>
-          </span>
+          <StatParam label="WIND" value="0 MPH" />
         </div>
 
         {/* Right: START RACE */}
@@ -360,23 +354,45 @@ export default function RaceSetup() {
           <span
             onClick={ready && !submitting ? handleStart : undefined}
             style={{
-              fontFamily: MONO,
-              fontSize: 12,
-              letterSpacing: '0.22em',
+              fontFamily: DISPLAY,
+              fontSize: 22,
+              letterSpacing: '0.04em',
               textTransform: 'uppercase',
+              color: ACCENT,
               opacity: ready ? (submitting ? 0.6 : 1) : 0.2,
               cursor: ready && !submitting ? 'pointer' : 'default',
               display: 'flex',
               alignItems: 'center',
               userSelect: 'none',
-              color: TEXT,
             }}
           >
-            <span className="blink" style={{ color: ACCENT, marginRight: 5 }}>{'>'}</span>
+            <span className="blink" style={{ marginRight: 6 }}>{'>'}</span>
             {submitting ? 'STARTING' : 'START RACE'}
-            <span className="blink" style={{ color: ACCENT, animationDelay: '0.5s', marginLeft: 1 }}>_</span>
+            <span className="blink" style={{ animationDelay: '0.5s', marginLeft: 2 }}>_</span>
           </span>
         </div>
+      </div>
+
+      {/* ── Lane panels ── */}
+      <div style={{
+        flex: 1,
+        display: 'grid',
+        gridTemplateColumns: '1fr 1fr',
+        position: 'relative',
+        zIndex: 5,
+        minHeight: 0,
+        overflow: 'hidden',
+      }}>
+        <CarPanel side="a" onCarChange={setCarA} />
+
+        {/* center divider */}
+        <div style={{
+          position: 'absolute', top: 0, bottom: 0, left: '50%',
+          width: 1, background: 'rgba(245,245,240,0.06)',
+          zIndex: 1, pointerEvents: 'none',
+        }} />
+
+        <CarPanel side="b" onCarChange={setCarB} />
       </div>
 
       {/* ── Bottom HUD bar ── */}

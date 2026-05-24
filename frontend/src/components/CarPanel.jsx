@@ -93,7 +93,7 @@ export default function CarPanel({ side, onCarChange }) {
       <div style={{
         flex: 1, minHeight: 0,
         overflow: 'hidden auto',
-        padding: '28px 24px',
+        padding: '48px',
         boxSizing: 'border-box',
       }}>
 

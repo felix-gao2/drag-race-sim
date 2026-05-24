@@ -20,8 +20,9 @@ function TerminalSelect({ label, value, options, disabled, onChange, accentColor
   }, [open])
 
   const isRed      = accentColor === '#DC2626'
-  const dimBorder  = isRed ? 'rgba(220,38,38,0.3)' : 'rgba(245,245,240,0.3)'
-  const fullBorder = isRed ? 'rgba(220,38,38,0.9)' : 'rgba(245,245,240,0.8)'
+  const dimBorder  = isRed ? 'rgba(220,38,38,0.5)' : 'rgba(245,245,240,0.5)'
+  const fullBorder = isRed ? '#DC2626' : '#F5F5F0'
+  const hoverBg    = isRed ? 'rgba(220,38,38,0.15)' : 'rgba(245,245,240,0.08)'
   const active     = open || hov
 
   const displayValue = value != null ? (getLabel ? getLabel(value) : String(value)) : null
@@ -37,7 +38,7 @@ function TerminalSelect({ label, value, options, disabled, onChange, accentColor
       }}
     >
       <span style={{
-        fontFamily: MONO, fontSize: 10,
+        fontFamily: MONO, fontSize: 12,
         color: DIM, letterSpacing: '0.22em',
         textTransform: 'uppercase',
         display: 'block', marginBottom: 6,
@@ -54,15 +55,15 @@ function TerminalSelect({ label, value, options, disabled, onChange, accentColor
           display: 'flex',
           alignItems: 'center',
           padding: '8px 0',
-          borderBottom: `1px solid ${active ? fullBorder : dimBorder}`,
+          borderBottom: `1.5px solid ${active ? fullBorder : dimBorder}`,
           transition: 'border-color 0.12s',
           cursor: 'pointer',
           userSelect: 'none',
         }}
       >
         <span style={{
-          fontFamily: MONO, fontSize: 12,
-          color: displayValue ? TEXT : DIM,
+          fontFamily: MONO, fontSize: 18,
+          color: displayValue ? '#F5F5F0' : DIM,
           letterSpacing: '0.06em',
           flex: 1,
           textTransform: 'uppercase',
@@ -102,8 +103,8 @@ function TerminalSelect({ label, value, options, disabled, onChange, accentColor
                 key={i}
                 onClick={() => { onChange(opt); setOpen(false) }}
                 style={{
-                  padding: '9px 14px',
-                  fontFamily: MONO, fontSize: 11,
+                  padding: '12px 14px',
+                  fontFamily: MONO, fontSize: 14,
                   color: selected ? accentColor : TEXT,
                   cursor: 'pointer',
                   letterSpacing: '0.08em',
@@ -112,7 +113,7 @@ function TerminalSelect({ label, value, options, disabled, onChange, accentColor
                     ? '1px solid rgba(245,245,240,0.05)'
                     : 'none',
                 }}
-                onMouseEnter={e => e.currentTarget.style.background = 'rgba(245,245,240,0.06)'}
+                onMouseEnter={e => e.currentTarget.style.background = hoverBg}
                 onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
               >
                 {label}
@@ -166,7 +167,7 @@ export default function Cascade({ onSelect, accentColor }) {
   function handleTrim(v)  { setTrim(v) }
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 22 }}>
+    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px 32px' }}>
       <TerminalSelect
         label="MAKE"
         value={make}
