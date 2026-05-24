@@ -11,26 +11,29 @@ const ACCENT  = '#DC2626'
 const LANE_A  = '#DC2626'
 const LANE_B  = '#F5F5F0'
 
-function CarSilhouette({ fillColor, strokeColor }) {
+function CarCoupe({ strokeColor }) {
   return (
     <svg
-      viewBox="0 0 260 72"
+      viewBox="0 0 200 72"
       xmlns="http://www.w3.org/2000/svg"
-      style={{ height: '5vh', width: 'auto', display: 'block' }}
+      style={{ height: '42px', width: 'auto', display: 'block', flexShrink: 0 }}
       aria-hidden="true"
     >
-      <polygon points="5,58 66,54 66,63 5,67"
-        fill={fillColor} stroke={strokeColor} strokeWidth="1.2" strokeLinejoin="round" />
-      <path d="M 22,60 L 30,46 L 40,36 L 68,30 L 88,26 L 104,22 L 120,19 L 138,22 L 162,26 L 198,30 L 224,34 L 238,42 L 240,60 Z"
-        fill={fillColor} stroke={strokeColor} strokeWidth="1.2" strokeLinejoin="round" />
-      <rect x="228" y="20" width="5" height="14"
-        fill={fillColor} stroke={strokeColor} strokeWidth="1.2" />
-      <rect x="214" y="16" width="34" height="6" rx="1"
-        fill={fillColor} stroke={strokeColor} strokeWidth="1.2" />
-      <circle cx="66"  cy="62" r="10"  fill={fillColor} stroke={strokeColor} strokeWidth="1.5" />
-      <circle cx="66"  cy="62" r="3.5" fill="none"      stroke={strokeColor} strokeWidth="1" />
-      <circle cx="210" cy="62" r="12"  fill={fillColor} stroke={strokeColor} strokeWidth="1.5" />
-      <circle cx="210" cy="62" r="4.5" fill="none"      stroke={strokeColor} strokeWidth="1" />
+      {/* body outline with wheel arch cutouts */}
+      <path
+        d="M 15,64 L 11,56 L 22,48 L 50,42 L 72,17 L 138,15 L 164,29 L 178,44 L 186,57 L 190,64 L 182,64 A 15 15 0 0 0 152,64 L 72,64 A 15 15 0 0 0 42,64 Z"
+        fill="none" stroke={strokeColor}
+        strokeWidth="1.5" strokeLinejoin="round" strokeLinecap="round"
+      />
+      {/* beltline */}
+      <line x1="88" y1="40" x2="163" y2="33"
+        stroke={strokeColor} strokeWidth="0.8" opacity="0.4" />
+      {/* front wheel */}
+      <circle cx="57"  cy="64" r="14"  fill="none" stroke={strokeColor} strokeWidth="1.5" />
+      <circle cx="57"  cy="64" r="4.5" fill="none" stroke={strokeColor} strokeWidth="0.8" opacity="0.4" />
+      {/* rear wheel */}
+      <circle cx="167" cy="64" r="14"  fill="none" stroke={strokeColor} strokeWidth="1.5" />
+      <circle cx="167" cy="64" r="4.5" fill="none" stroke={strokeColor} strokeWidth="0.8" opacity="0.4" />
     </svg>
   )
 }
@@ -156,99 +159,105 @@ export default function RaceSetup() {
 
       {/* ── Drag strip viz ── */}
       <div style={{
-        height: '18vh', flexShrink: 0,
+        height: '22vh', flexShrink: 0,
         position: 'relative', zIndex: 5,
         borderBottom: '1px solid rgba(245,245,240,0.07)',
         overflow: 'hidden',
       }}>
 
-        {/* START line */}
+        {/* Grid floor — perspective-faded dashed horizontal lines */}
+        {[0.52, 0.62, 0.72, 0.82, 0.91].map((yPct, i) => (
+          <div key={i} style={{
+            position: 'absolute',
+            top: `${yPct * 100}%`,
+            left: 0, right: 0, height: 1,
+            backgroundImage: `repeating-linear-gradient(90deg, rgba(245,245,240,${(0.02 + i * 0.006).toFixed(3)}) 0, rgba(245,245,240,${(0.02 + i * 0.006).toFixed(3)}) 8px, transparent 8px, transparent 24px)`,
+          }} />
+        ))}
+
+        {/* Lane divider — center dashed line */}
         <div style={{
-          position: 'absolute', left: 170, top: 0, bottom: 0,
-          width: 1, background: 'rgba(220,38,38,0.25)',
+          position: 'absolute', top: '50%', left: 0, right: 0, height: 1,
+          backgroundImage: 'repeating-linear-gradient(90deg, rgba(245,245,240,0.07) 0, rgba(245,245,240,0.07) 4px, transparent 4px, transparent 16px)',
         }} />
+
+        {/* START line */}
+        <div style={{ position: 'absolute', left: 0, top: 0, bottom: 0, width: 1, background: '#DC2626' }} />
         <span style={{
-          position: 'absolute', left: 170, top: 8,
-          transform: 'translateX(-50%)',
-          fontFamily: MONO, fontSize: 8,
-          color: 'rgba(220,38,38,0.45)', letterSpacing: '0.2em', textTransform: 'uppercase',
-        }}>
-          START
-        </span>
+          position: 'absolute', left: 6, top: 7,
+          fontFamily: MONO, fontSize: 10,
+          color: '#DC2626', letterSpacing: '0.15em', textTransform: 'uppercase',
+        }}>START</span>
 
-        {/* Lane A — top half */}
-        <div style={{
-          position: 'absolute', top: 0, left: 0, right: 0, height: '50%',
-          borderBottom: '1px solid rgba(245,245,240,0.05)',
-          display: 'flex', alignItems: 'center',
-        }}>
-          {/* Lane label */}
-          <div style={{
-            position: 'absolute', left: 100,
-            display: 'flex', alignItems: 'center', gap: 7,
+        {/* FINISH line */}
+        <div style={{ position: 'absolute', right: 0, top: 0, bottom: 0, width: 1, background: 'rgba(245,245,240,0.6)' }} />
+        <span style={{
+          position: 'absolute', right: 6, top: 7,
+          fontFamily: MONO, fontSize: 10,
+          color: 'rgba(245,245,240,0.5)', letterSpacing: '0.15em', textTransform: 'uppercase',
+        }}>FINISH</span>
+
+        {/* Distance markers at 25 / 50 / 75% */}
+        {[
+          { pct: 25, label: '330 FT' },
+          { pct: 50, label: '660 FT' },
+          { pct: 75, label: '1000 FT' },
+        ].map(({ pct, label }) => (
+          <div key={pct} style={{
+            position: 'absolute', left: `${pct}%`, bottom: 0,
+            display: 'flex', flexDirection: 'column', alignItems: 'center',
+            transform: 'translateX(-50%)',
           }}>
-            <span style={{ width: 5, height: 5, borderRadius: '50%', background: LANE_A, display: 'inline-block', flexShrink: 0 }} />
-            <span style={{ fontFamily: MONO, fontSize: 9, color: LANE_A, letterSpacing: '0.28em', textTransform: 'uppercase', opacity: 0.75 }}>
-              LANE 01
+            <span style={{
+              fontFamily: MONO, fontSize: 8,
+              color: 'rgba(245,245,240,0.2)',
+              letterSpacing: '0.08em', textTransform: 'uppercase',
+              whiteSpace: 'nowrap', marginBottom: 3,
+            }}>
+              {label}
             </span>
+            <div style={{ width: 1, height: 8, background: 'rgba(245,245,240,0.14)' }} />
           </div>
+        ))}
 
-          {/* Car silhouette + name */}
-          <div style={{
-            position: 'absolute', left: 180,
-            display: 'flex', alignItems: 'center', gap: 14,
+        {/* ¼ MILE at finish edge */}
+        <span style={{
+          position: 'absolute', right: 6, bottom: 14,
+          fontFamily: MONO, fontSize: 8,
+          color: 'rgba(245,245,240,0.2)',
+          letterSpacing: '0.08em', textTransform: 'uppercase',
+        }}>¼ MILE</span>
+
+        {/* Lane A car — top lane, at start line */}
+        <div style={{
+          position: 'absolute', left: 4, top: '25%',
+          transform: 'translateY(-50%)',
+          display: 'flex', alignItems: 'center', gap: 14,
+        }}>
+          <CarCoupe strokeColor={carA ? '#DC2626' : 'rgba(220,38,38,0.22)'} />
+          <span style={{
+            fontFamily: MONO, fontSize: 10,
+            color: carA ? 'rgba(220,38,38,0.72)' : 'rgba(220,38,38,0.28)',
+            letterSpacing: '0.1em', textTransform: 'uppercase', whiteSpace: 'nowrap',
           }}>
-            <CarSilhouette
-              fillColor={carA ? 'rgba(220,38,38,0.18)' : 'rgba(220,38,38,0.06)'}
-              strokeColor={carA ? 'rgba(220,38,38,0.9)' : 'rgba(220,38,38,0.3)'}
-            />
-            {carA && (
-              <span style={{
-                fontFamily: MONO, fontSize: 10,
-                color: LANE_A, letterSpacing: '0.1em', textTransform: 'uppercase',
-                whiteSpace: 'nowrap', opacity: 0.9,
-              }}>
-                {carA.year} {carA.make} {carA.model}
-              </span>
-            )}
-          </div>
+            {`LANE 01 — ${carA ? `${carA.year} ${carA.make} ${carA.model}` : 'EMPTY'}`}
+          </span>
         </div>
 
-        {/* Lane B — bottom half */}
+        {/* Lane B car — bottom lane, at start line */}
         <div style={{
-          position: 'absolute', bottom: 0, left: 0, right: 0, height: '50%',
-          display: 'flex', alignItems: 'center',
+          position: 'absolute', left: 4, top: '75%',
+          transform: 'translateY(-50%)',
+          display: 'flex', alignItems: 'center', gap: 14,
         }}>
-          {/* Lane label */}
-          <div style={{
-            position: 'absolute', left: 100,
-            display: 'flex', alignItems: 'center', gap: 7,
+          <CarCoupe strokeColor={carB ? 'rgba(245,245,240,0.65)' : 'rgba(245,245,240,0.15)'} />
+          <span style={{
+            fontFamily: MONO, fontSize: 10,
+            color: carB ? 'rgba(245,245,240,0.42)' : 'rgba(245,245,240,0.18)',
+            letterSpacing: '0.1em', textTransform: 'uppercase', whiteSpace: 'nowrap',
           }}>
-            <span style={{ width: 5, height: 5, borderRadius: '50%', background: LANE_B, display: 'inline-block', flexShrink: 0, opacity: 0.4 }} />
-            <span style={{ fontFamily: MONO, fontSize: 9, color: DIM, letterSpacing: '0.28em', textTransform: 'uppercase' }}>
-              LANE 02
-            </span>
-          </div>
-
-          {/* Car silhouette + name */}
-          <div style={{
-            position: 'absolute', left: 180,
-            display: 'flex', alignItems: 'center', gap: 14,
-          }}>
-            <CarSilhouette
-              fillColor={carB ? 'rgba(245,245,240,0.12)' : 'rgba(245,245,240,0.03)'}
-              strokeColor={carB ? 'rgba(245,245,240,0.7)' : 'rgba(245,245,240,0.15)'}
-            />
-            {carB && (
-              <span style={{
-                fontFamily: MONO, fontSize: 10,
-                color: TEXT, letterSpacing: '0.1em', textTransform: 'uppercase',
-                whiteSpace: 'nowrap', opacity: 0.75,
-              }}>
-                {carB.year} {carB.make} {carB.model}
-              </span>
-            )}
-          </div>
+            {`LANE 02 — ${carB ? `${carB.year} ${carB.make} ${carB.model}` : 'EMPTY'}`}
+          </span>
         </div>
 
       </div>
