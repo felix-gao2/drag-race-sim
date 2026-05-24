@@ -85,32 +85,32 @@ export default function CarPanel({ side, onCarChange }) {
       overflow: 'hidden',
     }}>
 
-      {/* ── Panel header ── */}
-      <div style={{
-        height: 36,
-        flexShrink: 0,
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'space-between',
-        padding: '0 20px',
-        borderBottom: '1px solid rgba(245,245,240,0.06)',
-      }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-          <span style={{
-            width: 5, height: 5, borderRadius: '50%',
-            background: accent, display: 'inline-block', flexShrink: 0,
-            opacity: side === 'b' ? 0.6 : 1,
-          }} />
-          <span style={{
-            fontFamily: MONO, fontSize: 10,
-            color: accent, letterSpacing: '0.3em', textTransform: 'uppercase',
-            opacity: side === 'b' ? 0.7 : 1,
-          }}>
-            {label}
-          </span>
-        </div>
+      {/* ── Panel header — only when a car is selected ── */}
+      {!showCascade && (
+        <div style={{
+          height: 36,
+          flexShrink: 0,
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          padding: '0 20px',
+          borderBottom: '1px solid rgba(245,245,240,0.06)',
+        }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+            <span style={{
+              width: 5, height: 5, borderRadius: '50%',
+              background: accent, display: 'inline-block', flexShrink: 0,
+              opacity: side === 'b' ? 0.6 : 1,
+            }} />
+            <span style={{
+              fontFamily: MONO, fontSize: 10,
+              color: accent, letterSpacing: '0.3em', textTransform: 'uppercase',
+              opacity: side === 'b' ? 0.7 : 1,
+            }}>
+              {label}
+            </span>
+          </div>
 
-        {isSelected && (
           <button
             onClick={handleChange}
             style={{
@@ -127,20 +127,40 @@ export default function CarPanel({ side, onCarChange }) {
           >
             CHANGE
           </button>
-        )}
-      </div>
+        </div>
+      )}
 
       {/* ── Content area ── */}
       <div style={{
-        flex: 1, minHeight: 0, overflow: 'hidden',
-        padding: '24px 20px',
+        flex: 1, minHeight: 0, overflow: 'hidden auto',
+        padding: '28px 24px',
+        boxSizing: 'border-box',
       }}>
         {loading ? (
           <span style={{ fontFamily: MONO, fontSize: 11, color: DIM, letterSpacing: '0.1em' }}>
             Loading…
           </span>
         ) : showCascade ? (
-          <Cascade onSelect={setCarId} />
+          <>
+            {/* Lane label */}
+            <span style={{
+              fontFamily: MONO, fontSize: 18,
+              color: accent, letterSpacing: '0.3em',
+              textTransform: 'uppercase',
+              display: 'block', marginBottom: 8,
+            }}>
+              {label}
+            </span>
+            {/* Status */}
+            <span style={{
+              fontFamily: MONO, fontSize: 11,
+              color: DIM, letterSpacing: '0.12em',
+              display: 'block', marginBottom: 32,
+            }}>
+              {'> AWAITING SELECTION'}
+            </span>
+            <Cascade onSelect={setCarId} accentColor={accent} />
+          </>
         ) : isSelected && (
           <div style={{ display: 'flex', flexDirection: 'column' }}>
 

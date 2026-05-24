@@ -1,187 +1,163 @@
-import { useState, useEffect } from 'react'
-import { getMakes, getModels, getYears, getTrims } from '../api'
+import { useState, useEffect, useRef } from 'react'
 
 const MONO = `'JetBrains Mono', monospace`
+const TEXT = '#F5F5F0'
+const DIM  = 'rgba(245,245,240,0.35)'
 
-const BASE_BORDER  = '#2a2a2a'
-const FOCUS_BORDER = '#DC2626'
+const STUB = {
+  AUDI:      { models: ['A4', 'A6', 'Q5', 'TT RS'],            trims: ['BASE', 'PREMIUM', 'S LINE', 'COMPETITION'] },
+  BMW:       { models: ['M3', 'M4', '330I', '540I'],            trims: ['BASE', 'M SPORT', 'COMPETITION', 'XDRIVE'] },
+  FORD:      { models: ['MUSTANG', 'GT500', 'F-150', 'BRONCO'], trims: ['BASE', 'GT', 'SHELBY', 'PREMIUM'] },
+  CHEVROLET: { models: ['CORVETTE', 'CAMARO', 'SILVERADO', 'BLAZER'], trims: ['BASE', 'LT', 'SS', 'Z06'] },
+  DODGE:     { models: ['CHALLENGER', 'CHARGER', 'DURANGO', 'VIPER'], trims: ['BASE', 'SXT', 'R/T', 'HELLCAT'] },
+}
 
-function Dropdown({ label, value, options, disabled, onChange, renderOption }) {
-  function handleMouseEnter(e) {
-    if (!disabled) e.target.style.borderColor = FOCUS_BORDER
-  }
-  function handleMouseLeave(e) {
-    if (!disabled && document.activeElement !== e.target)
-      e.target.style.borderColor = BASE_BORDER
-  }
-  function handleFocus(e) {
-    if (!disabled) {
-      e.target.style.borderColor = FOCUS_BORDER
-      e.target.style.boxShadow = '0 0 0 1px rgba(220,38,38,0.2)'
+const MAKES = Object.keys(STUB)
+const YEARS = Array.from({ length: 8 }, (_, i) => String(2025 - i))
+
+function TerminalSelect({ label, value, options, disabled, onChange, accentColor }) {
+  const [open, setOpen] = useState(false)
+  const [hov,  setHov]  = useState(false)
+  const ref = useRef(null)
+
+  useEffect(() => {
+    if (!open) return
+    function handler(e) {
+      if (ref.current && !ref.current.contains(e.target)) setOpen(false)
     }
-  }
-  function handleBlur(e) {
-    e.target.style.borderColor = BASE_BORDER
-    e.target.style.boxShadow = 'none'
-  }
+    document.addEventListener('mousedown', handler)
+    return () => document.removeEventListener('mousedown', handler)
+  }, [open])
+
+  const isRed     = accentColor === '#DC2626'
+  const dimBorder = isRed ? 'rgba(220,38,38,0.3)' : 'rgba(245,245,240,0.3)'
+  const fullBorder= isRed ? 'rgba(220,38,38,0.9)' : 'rgba(245,245,240,0.8)'
+  const active    = open || hov
 
   return (
-    <div style={{ opacity: disabled ? 0.35 : 1, display: 'flex', flexDirection: 'column' }}>
+    <div
+      ref={ref}
+      style={{
+        position: 'relative',
+        opacity: disabled ? 0.28 : 1,
+        transition: 'opacity 0.15s',
+        pointerEvents: disabled ? 'none' : 'auto',
+      }}
+    >
       <span style={{
-        fontFamily: MONO,
-        fontSize: 9,
-        letterSpacing: '0.3em',
+        fontFamily: MONO, fontSize: 10,
+        color: DIM, letterSpacing: '0.22em',
         textTransform: 'uppercase',
-        color: 'rgba(245,245,240,0.4)',
-        marginBottom: 6,
-        display: 'block',
+        display: 'block', marginBottom: 6,
+        userSelect: 'none',
       }}>
         {label}
       </span>
 
-      <div style={{ position: 'relative' }}>
-        <select
-          value={value}
-          disabled={disabled}
-          onChange={e => onChange(e.target.value)}
-          onMouseEnter={handleMouseEnter}
-          onMouseLeave={handleMouseLeave}
-          onFocus={handleFocus}
-          onBlur={handleBlur}
+      <div
+        onClick={() => setOpen(o => !o)}
+        onMouseEnter={() => setHov(true)}
+        onMouseLeave={() => setHov(false)}
+        style={{
+          display: 'flex',
+          alignItems: 'center',
+          padding: '8px 0',
+          borderBottom: `1px solid ${active ? fullBorder : dimBorder}`,
+          transition: 'border-color 0.12s',
+          cursor: 'pointer',
+          userSelect: 'none',
+        }}
+      >
+        <span style={{
+          fontFamily: MONO, fontSize: 12,
+          color: value ? TEXT : DIM,
+          letterSpacing: '0.06em',
+          flex: 1,
+          textTransform: 'uppercase',
+        }}>
+          {value || '—'}
+        </span>
+        <span
+          className={open ? 'blink' : ''}
           style={{
-            width: '100%',
-            background: '#000000',
-            color: '#F5F5F0',
-            border: `1px solid ${BASE_BORDER}`,
-            borderRadius: 0,
-            padding: '10px 14px',
-            paddingRight: 32,
-            fontFamily: MONO,
-            fontSize: 12,
-            letterSpacing: '0.06em',
-            cursor: disabled ? 'not-allowed' : 'pointer',
-            appearance: 'none',
-            WebkitAppearance: 'none',
-            outline: 'none',
-            transition: 'border-color 120ms ease, box-shadow 120ms ease',
+            fontFamily: MONO, fontSize: 12,
+            color: accentColor,
+            opacity: open ? 0.9 : 0.4,
           }}
         >
-          <option value="">—</option>
-          {options.map((opt, i) => (
-            <option
-              key={i}
-              value={renderOption ? opt.value : opt}
-              style={{ background: '#000000', color: '#F5F5F0' }}
-            >
-              {renderOption ? opt.label : opt}
-            </option>
-          ))}
-        </select>
-
-        <span style={{
-          position: 'absolute',
-          right: 12,
-          top: '50%',
-          transform: 'translateY(-50%)',
-          pointerEvents: 'none',
-          color: 'rgba(245,245,240,0.4)',
-          fontSize: 7,
-          lineHeight: 1,
-        }}>
-          ▼
+          _
         </span>
       </div>
+
+      {open && options.length > 0 && (
+        <div style={{
+          position: 'absolute',
+          top: '100%',
+          left: 0, right: 0,
+          background: '#060606',
+          border: '0.5px solid rgba(245,245,240,0.18)',
+          zIndex: 200,
+          maxHeight: 180,
+          overflowY: 'auto',
+        }}>
+          {options.map((opt, i) => (
+            <div
+              key={i}
+              onClick={() => { onChange(opt); setOpen(false) }}
+              style={{
+                padding: '9px 14px',
+                fontFamily: MONO, fontSize: 11,
+                color: opt === value ? accentColor : TEXT,
+                cursor: 'pointer',
+                letterSpacing: '0.08em',
+                textTransform: 'uppercase',
+                borderBottom: i < options.length - 1
+                  ? '1px solid rgba(245,245,240,0.05)'
+                  : 'none',
+              }}
+              onMouseEnter={e => e.currentTarget.style.background = 'rgba(245,245,240,0.06)'}
+              onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
+            >
+              {opt}
+            </div>
+          ))}
+        </div>
+      )}
     </div>
   )
 }
 
-export default function Cascade({ onSelect }) {
-  const [makes, setMakes]   = useState([])
-  const [models, setModels] = useState([])
-  const [years, setYears]   = useState([])
-  const [trims, setTrims]   = useState([])
+export default function Cascade({ onSelect, accentColor }) {
+  const [make,  setMake]  = useState('')
+  const [model, setModel] = useState('')
+  const [year,  setYear]  = useState('')
+  const [trim,  setTrim]  = useState('')
 
-  const [make, setMake]     = useState('')
-  const [model, setModel]   = useState('')
-  const [year, setYear]     = useState('')
-  const [trimId, setTrimId] = useState('')
+  const models = make ? (STUB[make]?.models ?? []) : []
+  const trims  = year ? (STUB[make]?.trims  ?? []) : []
 
-  const [loading, setLoading] = useState({ makes: true, models: false, years: false, trims: false })
-
-  useEffect(() => {
-    getMakes()
-      .then(setMakes)
-      .finally(() => setLoading(l => ({ ...l, makes: false })))
-  }, [])
-
-  useEffect(() => {
-    setModel(''); setYear(''); setTrimId('')
-    setModels([]); setYears([]); setTrims([])
-    if (!make) return
-    setLoading(l => ({ ...l, models: true }))
-    getModels(make)
-      .then(setModels)
-      .finally(() => setLoading(l => ({ ...l, models: false })))
-  }, [make])
-
-  useEffect(() => {
-    setYear(''); setTrimId('')
-    setYears([]); setTrims([])
-    if (!make || !model) return
-    setLoading(l => ({ ...l, years: true }))
-    getYears(make, model)
-      .then(data => setYears(data.map(String)))
-      .finally(() => setLoading(l => ({ ...l, years: false })))
-  }, [model])
-
-  useEffect(() => {
-    setTrimId('')
-    setTrims([])
-    if (!make || !model || !year) return
-    setLoading(l => ({ ...l, trims: true }))
-    getTrims(make, model, year)
-      .then(setTrims)
-      .finally(() => setLoading(l => ({ ...l, trims: false })))
-  }, [year])
-
-  useEffect(() => {
-    if (trimId) onSelect(parseInt(trimId, 10))
-  }, [trimId])
+  function handleMake(v)  { setMake(v); setModel(''); setYear(''); setTrim('') }
+  function handleModel(v) { setModel(v); setYear(''); setTrim('') }
+  function handleYear(v)  { setYear(v); setTrim('') }
+  function handleTrim(v)  { setTrim(v) }
 
   return (
-    <div style={{
-      display: 'grid',
-      gridTemplateColumns: '1fr 1fr',
-      gap: '14px 20px',
-    }}>
-      <Dropdown
-        label="Make"
-        value={make}
-        options={makes}
-        disabled={loading.makes}
-        onChange={setMake}
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 22 }}>
+      <TerminalSelect
+        label="MAKE"  value={make}  options={MAKES}  disabled={false}
+        onChange={handleMake}  accentColor={accentColor}
       />
-      <Dropdown
-        label="Model"
-        value={model}
-        options={models}
-        disabled={!make || loading.models}
-        onChange={setModel}
+      <TerminalSelect
+        label="MODEL" value={model} options={models} disabled={!make}
+        onChange={handleModel} accentColor={accentColor}
       />
-      <Dropdown
-        label="Year"
-        value={year}
-        options={years}
-        disabled={!model || loading.years}
-        onChange={setYear}
+      <TerminalSelect
+        label="YEAR"  value={year}  options={YEARS}  disabled={!model}
+        onChange={handleYear}  accentColor={accentColor}
       />
-      <Dropdown
-        label="Trim"
-        value={trimId}
-        options={trims.map(t => ({ value: String(t.id), label: t.trim }))}
-        disabled={!year || loading.trims}
-        onChange={setTrimId}
-        renderOption
+      <TerminalSelect
+        label="TRIM"  value={trim}  options={trims}  disabled={!year}
+        onChange={handleTrim}  accentColor={accentColor}
       />
     </div>
   )
