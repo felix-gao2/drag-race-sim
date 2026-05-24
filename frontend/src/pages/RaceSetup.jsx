@@ -38,22 +38,44 @@ function CarCoupe({ strokeColor }) {
   )
 }
 
-function ParamChip({ label, value }) {
+const DIST_VALS  = ['¼ MILE', '⅛ MILE', '½ MILE']
+const START_VALS = ['DIG', 'ROLL']
+const SURF_VALS  = ['DRY', 'WET']
+
+function CycleParam({ label, value, onClick }) {
+  const [hov, setHov] = useState(false)
   return (
-    <div style={{
-      display: 'flex',
-      flexDirection: 'column',
-      gap: 3,
-      padding: '0 18px',
-      borderLeft: '1px solid rgba(245,245,240,0.07)',
-    }}>
-      <span style={{ fontFamily: MONO, fontSize: 9, color: DIM, letterSpacing: '0.22em', textTransform: 'uppercase' }}>
-        {label}
-      </span>
-      <span style={{ fontFamily: MONO, fontSize: 11, color: TEXT, letterSpacing: '0.1em', textTransform: 'uppercase' }}>
-        {value}
-      </span>
-    </div>
+    <span
+      onClick={onClick}
+      onMouseEnter={() => setHov(true)}
+      onMouseLeave={() => setHov(false)}
+      style={{
+        fontFamily: MONO,
+        fontSize: 12,
+        color: hov ? ACCENT : DIM,
+        letterSpacing: '0.12em',
+        textTransform: 'uppercase',
+        cursor: 'pointer',
+        transition: 'color 0.1s',
+        userSelect: 'none',
+        whiteSpace: 'nowrap',
+      }}
+    >
+      {label}:{' '}
+      <span style={{ color: hov ? ACCENT : TEXT }}>{value}</span>
+    </span>
+  )
+}
+
+function Dot() {
+  return (
+    <span style={{
+      fontFamily: MONO,
+      fontSize: 12,
+      color: 'rgba(245,245,240,0.15)',
+      margin: '0 10px',
+      userSelect: 'none',
+    }}>·</span>
   )
 }
 
@@ -63,6 +85,9 @@ export default function RaceSetup() {
   const [carB, setCarB] = useState(null)
   const [submitting, setSubmitting] = useState(false)
   const [error, setError] = useState(null)
+  const [distIdx, setDistIdx] = useState(0)
+  const [startIdx, setStartIdx] = useState(0)
+  const [surfIdx, setSurfIdx] = useState(0)
 
   const ready = carA !== null && carB !== null
 
@@ -89,6 +114,7 @@ export default function RaceSetup() {
       flexDirection: 'column',
       overflow: 'hidden',
     }}>
+      <style>{`@keyframes blink{0%,100%{opacity:1}50%{opacity:0}}.blink{animation:blink 1s step-end infinite}`}</style>
 
       {/* ── Background: exact match to Landing ── */}
       <div style={{ position: 'fixed', inset: 0, zIndex: 0, pointerEvents: 'none' }}>
@@ -284,79 +310,81 @@ export default function RaceSetup() {
         <CarPanel side="b" onCarChange={setCarB} />
       </div>
 
-      {/* ── Race params toolbar + START RACE ── */}
+      {/* ── Race params toolbar ── */}
       <div style={{
-        height: 56, flexShrink: 0,
+        height: '5vh', minHeight: 44, flexShrink: 0,
         display: 'flex', alignItems: 'center', justifyContent: 'space-between',
         padding: '0 24px',
         position: 'relative', zIndex: 10,
-        borderTop: '1px solid rgba(245,245,240,0.07)',
-        background: 'rgba(0,0,0,0.5)',
+        borderTop: '1px solid rgba(245,245,240,0.05)',
+        borderBottom: '1px solid rgba(220,38,38,0.2)',
+        background: 'rgba(0,0,0,0.4)',
       }}>
 
-        {/* Param chips */}
-        <div style={{ display: 'flex', alignItems: 'center', height: '100%' }}>
-          <div style={{ paddingRight: 18 }}>
-            <span style={{ fontFamily: MONO, fontSize: 9, color: DIM, letterSpacing: '0.22em', textTransform: 'uppercase', display: 'block', marginBottom: 3 }}>
-              DISTANCE
-            </span>
-            <span style={{ fontFamily: MONO, fontSize: 11, color: TEXT, letterSpacing: '0.1em', textTransform: 'uppercase' }}>
-              ¼ MILE
-            </span>
-          </div>
-          <ParamChip label="START"    value="DIG" />
-          <ParamChip label="SURFACE"  value="ASPHALT" />
-          <ParamChip label="ALTITUDE" value="SEA LEVEL" />
-          <ParamChip label="WIND"     value="CALM" />
+        {/* Left: cycling params */}
+        <div style={{ display: 'flex', alignItems: 'center' }}>
+          <CycleParam
+            label="DISTANCE"
+            value={DIST_VALS[distIdx]}
+            onClick={() => setDistIdx(i => (i + 1) % DIST_VALS.length)}
+          />
+          <Dot />
+          <CycleParam
+            label="START"
+            value={START_VALS[startIdx]}
+            onClick={() => setStartIdx(i => (i + 1) % START_VALS.length)}
+          />
+          <Dot />
+          <CycleParam
+            label="SURFACE"
+            value={SURF_VALS[surfIdx]}
+            onClick={() => setSurfIdx(i => (i + 1) % SURF_VALS.length)}
+          />
+          <Dot />
+          <span style={{ fontFamily: MONO, fontSize: 12, color: DIM, letterSpacing: '0.12em', textTransform: 'uppercase', whiteSpace: 'nowrap', userSelect: 'none' }}>
+            DA: <span style={{ color: TEXT }}>56 FT</span>
+          </span>
+          <Dot />
+          <span style={{ fontFamily: MONO, fontSize: 12, color: DIM, letterSpacing: '0.12em', textTransform: 'uppercase', whiteSpace: 'nowrap', userSelect: 'none' }}>
+            WIND: <span style={{ color: TEXT }}>0 MPH</span>
+          </span>
         </div>
 
-        {/* Right side: error + CTA */}
+        {/* Right: START RACE */}
         <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
           {error && (
             <span style={{ fontFamily: MONO, fontSize: 10, color: ACCENT, letterSpacing: '0.1em' }}>
               {error}
             </span>
           )}
-
-          {!ready && (
-            <span style={{ fontFamily: MONO, fontSize: 10, color: DIM, letterSpacing: '0.14em', textTransform: 'uppercase' }}>
-              SELECT BOTH CARS
-            </span>
-          )}
-
-          <button
-            onClick={handleStart}
-            disabled={!ready || submitting}
+          <span
+            onClick={ready && !submitting ? handleStart : undefined}
             style={{
               fontFamily: MONO,
-              fontSize: 11,
+              fontSize: 12,
               letterSpacing: '0.22em',
               textTransform: 'uppercase',
-              background: ready ? ACCENT : 'rgba(245,245,240,0.04)',
-              color: ready ? '#000000' : 'rgba(245,245,240,0.18)',
-              border: ready ? 'none' : '1px solid rgba(245,245,240,0.08)',
-              borderRadius: 0,
-              padding: '0 28px',
-              height: 36,
-              cursor: ready ? 'pointer' : 'not-allowed',
-              transition: 'background 0.12s',
-              opacity: submitting ? 0.6 : 1,
-              whiteSpace: 'nowrap',
+              opacity: ready ? (submitting ? 0.6 : 1) : 0.2,
+              cursor: ready && !submitting ? 'pointer' : 'default',
+              display: 'flex',
+              alignItems: 'center',
+              userSelect: 'none',
+              color: TEXT,
             }}
-            onMouseEnter={e => { if (ready) e.target.style.background = '#b91c1c' }}
-            onMouseLeave={e => { if (ready) e.target.style.background = ACCENT }}
           >
-            {submitting ? 'STARTING…' : 'START RACE'}
-          </button>
+            <span className="blink" style={{ color: ACCENT, marginRight: 5 }}>{'>'}</span>
+            {submitting ? 'STARTING' : 'START RACE'}
+            <span className="blink" style={{ color: ACCENT, animationDelay: '0.5s', marginLeft: 1 }}>_</span>
+          </span>
         </div>
       </div>
 
-      {/* ── Bottom HUD bar — identical to Landing ── */}
+      {/* ── Bottom HUD bar ── */}
       <div style={{
         height: 32, flexShrink: 0,
         display: 'flex', alignItems: 'center', justifyContent: 'center',
         position: 'relative', zIndex: 10,
-        borderTop: '1px solid rgba(220,38,38,0.2)',
+        borderTop: '1px solid rgba(245,245,240,0.05)',
       }}>
         <span style={{
           position: 'absolute', left: 24,
