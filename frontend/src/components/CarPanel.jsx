@@ -2,38 +2,41 @@ import { useState, useEffect } from 'react'
 import { getCar } from '../api'
 import Cascade from './Cascade'
 
-const ACCENT  = { a: '#dc2626', b: '#3b82f6' }
-const LABEL   = { a: 'CAR A',   b: 'CAR B'   }
+const ACCENT  = { a: '#DC2626', b: '#F5F5F0' }
+const LABEL   = { a: 'LANE 01', b: 'LANE 02' }
 const MONO    = `'JetBrains Mono', monospace`
 const DISPLAY = `'Anton', sans-serif`
+const TEXT    = '#F5F5F0'
+const DIM     = 'rgba(245,245,240,0.4)'
 
 function fmt(n, decimals = 0) {
   return Number(n).toLocaleString('en-US', { maximumFractionDigits: decimals })
 }
 
-function StatBox({ label, value }) {
+function StatRow({ label, value }) {
   return (
     <div style={{
-      border: '1px solid #1f1f1f',
-      padding: '10px 12px',
+      borderTop: '1px solid rgba(245,245,240,0.07)',
+      padding: '9px 0',
       display: 'flex',
       flexDirection: 'column',
-      gap: 4,
+      gap: 3,
     }}>
       <span style={{
         fontFamily: MONO,
         fontSize: 9,
-        letterSpacing: '0.15em',
+        letterSpacing: '0.22em',
         textTransform: 'uppercase',
-        color: '#525252',
+        color: DIM,
       }}>
         {label}
       </span>
       <span style={{
         fontFamily: MONO,
-        fontSize: 13,
-        color: '#a3a3a3',
-        lineHeight: 1.2,
+        fontSize: 15,
+        color: TEXT,
+        lineHeight: 1,
+        letterSpacing: '0.04em',
       }}>
         {value}
       </span>
@@ -41,162 +44,158 @@ function StatBox({ label, value }) {
   )
 }
 
-function EmptyIcon() {
-  return (
-    <svg
-      viewBox="0 0 260 72"
-      xmlns="http://www.w3.org/2000/svg"
-      style={{ width: '72%', height: 'auto', opacity: 0.06, transform: 'scaleX(-1)', display: 'block' }}
-      aria-hidden="true"
-    >
-      <polygon points="5,58 66,54 66,63 5,67" fill="#ffffff" />
-      <path d="M 22,60 L 30,46 L 40,36 L 68,30 L 88,26 L 104,22 L 120,19 L 138,22 L 162,26 L 198,30 L 224,34 L 238,42 L 240,60 Z" fill="#ffffff" />
-      <rect x="228" y="20" width="5" height="14" fill="#ffffff" />
-      <rect x="214" y="16" width="34" height="6"  fill="#ffffff" />
-      <circle cx="66"  cy="62" r="10" fill="#ffffff" />
-      <circle cx="210" cy="62" r="12" fill="#ffffff" />
-    </svg>
-  )
-}
-
 export default function CarPanel({ side, onCarChange }) {
   const accent = ACCENT[side]
-  const [carId, setCarId]   = useState(null)
-  const [car, setCar]       = useState(null)
-  const [loading, setLoading] = useState(false)
+  const label  = LABEL[side]
+
+  const [carId, setCarId]         = useState(null)
+  const [car, setCar]             = useState(null)
+  const [loading, setLoading]     = useState(false)
+  const [showCascade, setShowCascade] = useState(true)
 
   useEffect(() => {
     if (!carId) { setCar(null); onCarChange(null); return }
     setLoading(true)
     getCar(carId)
-      .then(data => { setCar(data); onCarChange(data) })
+      .then(data => { setCar(data); onCarChange(data); setShowCascade(false) })
       .catch(() => { setCar(null); onCarChange(null) })
       .finally(() => setLoading(false))
   }, [carId])
+
+  function handleChange() {
+    setCarId(null)
+    setCar(null)
+    onCarChange(null)
+    setShowCascade(true)
+  }
 
   const isSelected = !loading && car !== null
 
   return (
     <div style={{
       display: 'flex',
+      flexDirection: 'column',
       height: '100%',
-      borderLeft:   '1px solid #1f1f1f',
-      borderRight:  '1px solid #1f1f1f',
-      borderBottom: '1px solid #1f1f1f',
-      borderTop:    `2px solid ${accent}`,
-      background: 'rgba(255,255,255,0.015)',
-      padding: 32,
-      gap: 24,
+      borderTop: `2px solid ${accent}`,
+      background: side === 'a'
+        ? 'rgba(220,38,38,0.025)'
+        : 'rgba(245,245,240,0.012)',
       boxSizing: 'border-box',
       minHeight: 0,
       overflow: 'hidden',
     }}>
 
-      {/* ── Left 40% — empty state or car hero ── */}
+      {/* ── Panel header ── */}
       <div style={{
-        width: '40%',
+        height: 36,
         flexShrink: 0,
         display: 'flex',
-        flexDirection: 'column',
         alignItems: 'center',
-        justifyContent: 'center',
-        borderRight: '1px solid #1a1a1a',
-        paddingRight: 24,
-        minHeight: 0,
+        justifyContent: 'space-between',
+        padding: '0 20px',
+        borderBottom: '1px solid rgba(245,245,240,0.06)',
       }}>
-        {isSelected ? (
-          <div style={{ textAlign: 'center', width: '100%' }}>
-            <p style={{
-              fontFamily: DISPLAY,
-              fontSize: 'clamp(1.3rem, 2.2vw, 2.6rem)',
-              fontWeight: 400,
-              textTransform: 'uppercase',
-              color: accent,
-              lineHeight: 0.9,
-              margin: 0,
-            }}>
-              {car.make}
-            </p>
-            <p style={{
-              fontFamily: DISPLAY,
-              fontSize: 'clamp(0.9rem, 1.6vw, 1.9rem)',
-              fontWeight: 400,
-              textTransform: 'uppercase',
-              color: '#737373',
-              lineHeight: 0.9,
-              margin: '6px 0 0',
-            }}>
-              {car.year} {car.model}
-            </p>
-            <p style={{
-              fontFamily: MONO,
-              fontSize: 10,
-              color: '#404040',
-              letterSpacing: '0.08em',
-              margin: '10px 0 0',
-              lineHeight: 1.4,
-            }}>
-              {car.trim}
-            </p>
-          </div>
-        ) : (
-          <>
-            <EmptyIcon />
-            <span style={{
-              fontFamily: MONO,
-              fontSize: 10,
-              color: '#2e2e2e',
-              letterSpacing: '0.3em',
-              textTransform: 'uppercase',
-              marginTop: 14,
-            }}>
-              EMPTY SLOT
-            </span>
-          </>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+          <span style={{
+            width: 5, height: 5, borderRadius: '50%',
+            background: accent, display: 'inline-block', flexShrink: 0,
+            opacity: side === 'b' ? 0.6 : 1,
+          }} />
+          <span style={{
+            fontFamily: MONO, fontSize: 10,
+            color: accent, letterSpacing: '0.3em', textTransform: 'uppercase',
+            opacity: side === 'b' ? 0.7 : 1,
+          }}>
+            {label}
+          </span>
+        </div>
+
+        {isSelected && (
+          <button
+            onClick={handleChange}
+            style={{
+              fontFamily: MONO, fontSize: 9,
+              letterSpacing: '0.18em', textTransform: 'uppercase',
+              color: DIM, background: 'none',
+              border: '1px solid rgba(245,245,240,0.1)',
+              borderRadius: 0, padding: '3px 10px',
+              cursor: 'pointer',
+              transition: 'color 0.1s, border-color 0.1s',
+            }}
+            onMouseEnter={e => { e.target.style.color = TEXT; e.target.style.borderColor = 'rgba(245,245,240,0.3)' }}
+            onMouseLeave={e => { e.target.style.color = ''; e.target.style.borderColor = '' }}
+          >
+            CHANGE
+          </button>
         )}
       </div>
 
-      {/* ── Right 60% — label, dropdowns, stats ── */}
+      {/* ── Content area ── */}
       <div style={{
-        flex: 1,
-        display: 'flex',
-        flexDirection: 'column',
-        gap: 20,
-        minWidth: 0,
-        overflow: 'hidden',
+        flex: 1, minHeight: 0, overflow: 'hidden',
+        padding: '24px 20px',
       }}>
-
-        {/* Panel label */}
-        <span style={{
-          fontFamily: MONO,
-          fontSize: 12,
-          color: accent,
-          letterSpacing: '0.3em',
-          textTransform: 'uppercase',
-          flexShrink: 0,
-        }}>
-          {LABEL[side]}
-        </span>
-
-        {/* Dropdowns */}
         {loading ? (
-          <span style={{ fontFamily: MONO, fontSize: 11, color: '#525252' }}>Loading…</span>
-        ) : (
-          <Cascade onSelect={setCarId} accentColor={accent} />
-        )}
+          <span style={{ fontFamily: MONO, fontSize: 11, color: DIM, letterSpacing: '0.1em' }}>
+            Loading…
+          </span>
+        ) : showCascade ? (
+          <Cascade onSelect={setCarId} />
+        ) : isSelected && (
+          <div style={{ display: 'flex', flexDirection: 'column' }}>
 
-        {/* Stats — shown only after selection */}
-        {isSelected && (
-          <div style={{
-            display: 'grid',
-            gridTemplateColumns: '1fr 1fr',
-            gap: 8,
-            flexShrink: 0,
-          }}>
-            <StatBox label="Horsepower" value={`${fmt(car.horsepower)} hp`} />
-            <StatBox label="Torque"     value={`${fmt(car.torque)} lb·ft`} />
-            <StatBox label="Weight"     value={`${fmt(car.weight_lbs)} lb`} />
-            <StatBox label="Drivetrain" value={car.drivetrain} />
+            {/* Car identity */}
+            <div style={{ marginBottom: 22 }}>
+              <p style={{
+                fontFamily: DISPLAY,
+                fontSize: 'clamp(1.8rem, 3vw, 3.8rem)',
+                fontWeight: 400,
+                textTransform: 'uppercase',
+                color: accent,
+                lineHeight: 0.88,
+                margin: 0,
+                opacity: side === 'b' ? 0.85 : 1,
+              }}>
+                {car.make}
+              </p>
+              <p style={{
+                fontFamily: DISPLAY,
+                fontSize: 'clamp(1.1rem, 2vw, 2.4rem)',
+                fontWeight: 400,
+                textTransform: 'uppercase',
+                color: TEXT,
+                lineHeight: 0.9,
+                margin: '10px 0 0',
+              }}>
+                {car.year} {car.model}
+              </p>
+              <p style={{
+                fontFamily: MONO,
+                fontSize: 9,
+                color: DIM,
+                letterSpacing: '0.1em',
+                margin: '10px 0 0',
+                lineHeight: 1.5,
+                textTransform: 'uppercase',
+              }}>
+                {car.trim}
+              </p>
+            </div>
+
+            {/* Stats — 2-column grid */}
+            <div style={{
+              display: 'grid',
+              gridTemplateColumns: '1fr 1fr',
+              columnGap: 28,
+            }}>
+              <StatRow label="Horsepower" value={`${fmt(car.horsepower)} hp`} />
+              <StatRow label="Torque"     value={`${fmt(car.torque)} lb·ft`} />
+              <StatRow label="Weight"     value={`${fmt(car.weight_lbs)} lb`} />
+              <StatRow label="Drivetrain" value={car.drivetrain} />
+              <StatRow label="0 – 60 mph" value={car.zero_to_sixty != null ? `${car.zero_to_sixty}s` : '—'} />
+              <StatRow label="¼ Mile"     value={car.quarter_mile  != null ? `${car.quarter_mile}s`  : '—'} />
+            </div>
+
           </div>
         )}
       </div>

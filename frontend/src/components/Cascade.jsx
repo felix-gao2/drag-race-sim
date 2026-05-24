@@ -3,8 +3,8 @@ import { getMakes, getModels, getYears, getTrims } from '../api'
 
 const MONO = `'JetBrains Mono', monospace`
 
-const BASE_BORDER = '#2a2a2a'
-const FOCUS_BORDER = '#facc15'
+const BASE_BORDER  = '#2a2a2a'
+const FOCUS_BORDER = '#DC2626'
 
 function Dropdown({ label, value, options, disabled, onChange, renderOption }) {
   function handleMouseEnter(e) {
@@ -17,7 +17,7 @@ function Dropdown({ label, value, options, disabled, onChange, renderOption }) {
   function handleFocus(e) {
     if (!disabled) {
       e.target.style.borderColor = FOCUS_BORDER
-      e.target.style.boxShadow = '0 0 0 1px rgba(250,204,21,0.3)'
+      e.target.style.boxShadow = '0 0 0 1px rgba(220,38,38,0.2)'
     }
   }
   function handleBlur(e) {
@@ -26,14 +26,14 @@ function Dropdown({ label, value, options, disabled, onChange, renderOption }) {
   }
 
   return (
-    <div style={{ opacity: disabled ? 0.4 : 1, display: 'flex', flexDirection: 'column' }}>
+    <div style={{ opacity: disabled ? 0.35 : 1, display: 'flex', flexDirection: 'column' }}>
       <span style={{
         fontFamily: MONO,
-        fontSize: 10,
+        fontSize: 9,
         letterSpacing: '0.3em',
         textTransform: 'uppercase',
-        color: '#525252',
-        marginBottom: 8,
+        color: 'rgba(245,245,240,0.4)',
+        marginBottom: 6,
         display: 'block',
       }}>
         {label}
@@ -50,20 +50,20 @@ function Dropdown({ label, value, options, disabled, onChange, renderOption }) {
           onBlur={handleBlur}
           style={{
             width: '100%',
-            background: '#0a0a0a',
-            color: '#f5f5f4',
+            background: '#000000',
+            color: '#F5F5F0',
             border: `1px solid ${BASE_BORDER}`,
             borderRadius: 0,
-            padding: '12px 16px',
-            paddingRight: 36,
+            padding: '10px 14px',
+            paddingRight: 32,
             fontFamily: MONO,
-            fontSize: 13,
-            letterSpacing: '0.1em',
+            fontSize: 12,
+            letterSpacing: '0.06em',
             cursor: disabled ? 'not-allowed' : 'pointer',
             appearance: 'none',
             WebkitAppearance: 'none',
             outline: 'none',
-            transition: 'border-color 150ms ease, box-shadow 150ms ease',
+            transition: 'border-color 120ms ease, box-shadow 120ms ease',
           }}
         >
           <option value="">—</option>
@@ -71,22 +71,21 @@ function Dropdown({ label, value, options, disabled, onChange, renderOption }) {
             <option
               key={i}
               value={renderOption ? opt.value : opt}
-              style={{ background: '#0a0a0a', color: '#f5f5f4' }}
+              style={{ background: '#000000', color: '#F5F5F0' }}
             >
               {renderOption ? opt.label : opt}
             </option>
           ))}
         </select>
 
-        {/* Custom caret */}
         <span style={{
           position: 'absolute',
-          right: 14,
+          right: 12,
           top: '50%',
           transform: 'translateY(-50%)',
           pointerEvents: 'none',
-          color: '#525252',
-          fontSize: 8,
+          color: 'rgba(245,245,240,0.4)',
+          fontSize: 7,
           lineHeight: 1,
         }}>
           ▼
@@ -96,7 +95,7 @@ function Dropdown({ label, value, options, disabled, onChange, renderOption }) {
   )
 }
 
-export default function Cascade({ onSelect, accentColor }) {
+export default function Cascade({ onSelect }) {
   const [makes, setMakes]   = useState([])
   const [models, setModels] = useState([])
   const [years, setYears]   = useState([])
@@ -153,7 +152,7 @@ export default function Cascade({ onSelect, accentColor }) {
     <div style={{
       display: 'grid',
       gridTemplateColumns: '1fr 1fr',
-      gap: '12px 16px',
+      gap: '14px 20px',
     }}>
       <Dropdown
         label="Make"
