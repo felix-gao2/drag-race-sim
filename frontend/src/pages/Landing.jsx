@@ -109,18 +109,21 @@ export default function Landing() {
         })}
       </svg>
 
-      {/* ── hero image ── */}
+      {/* ── content group: image + headline + CTA, shifted up 6vh ── */}
       <div style={{
         flex: 1,
         minHeight: 0,
         display: 'flex',
+        flexDirection: 'column',
         alignItems: 'center',
         justifyContent: 'center',
+        paddingBottom: '12vh',
         position: 'relative',
         zIndex: 10,
       }}>
-        {/* wrapper constrains both halo and image to the same footprint */}
-        <div style={{ position: 'relative', width: '70vw', maxWidth: 1000, maxHeight: '100%' }}>
+
+        {/* ── hero image ── */}
+        <div style={{ position: 'relative', width: '70vw', maxWidth: 900, aspectRatio: '5/3', overflow: 'hidden' }}>
           {/* red color bleed halo, 40px larger on each side */}
           <div style={{
             position: 'absolute',
@@ -133,8 +136,9 @@ export default function Landing() {
             alt=""
             style={{
               width: '100%',
-              maxHeight: '100%',
-              objectFit: 'contain',
+              height: '100%',
+              objectFit: 'cover',
+              objectPosition: 'center 55%',
               display: 'block',
               filter: 'saturate(0.85) contrast(0.95) brightness(0.92)',
               maskImage: 'radial-gradient(ellipse 70% 65% at center, black 35%, transparent 88%)',
@@ -143,75 +147,63 @@ export default function Landing() {
             }}
           />
         </div>
-      </div>
 
-      {/* ── headline ── */}
-      <div style={{
-        flexShrink: 0,
-        textAlign: 'center',
-        paddingTop: 16,
-        position: 'relative',
-        zIndex: 10,
-      }}>
-        <div style={{ position: 'relative', display: 'inline-block' }}>
-          <h1 style={{
-            margin: 0,
-            fontFamily: DISPLAY,
-            fontWeight: 400,
-            fontSize: 'clamp(72px, 9vw, 120px)',
-            lineHeight: 1,
-            letterSpacing: '-0.02em',
-            textTransform: 'uppercase',
-            color: TEXT,
-            userSelect: 'none',
-          }}>
-            QUARTER MILE SIM
-          </h1>
-          <span style={{
-            position: 'absolute',
-            top: -6,
-            right: -38,
-            fontFamily: MONO,
-            fontSize: 14,
-            color: ACCENT,
-            lineHeight: 1,
-            letterSpacing: '0',
-          }}>_03</span>
+        {/* ── headline: overlaps image bottom by 50px ── */}
+        <div style={{ textAlign: 'center', marginTop: -50, position: 'relative', zIndex: 11 }}>
+          <div style={{ position: 'relative', display: 'inline-block' }}>
+            <h1 style={{
+              margin: 0,
+              fontFamily: DISPLAY,
+              fontWeight: 400,
+              fontSize: 'clamp(72px, 9vw, 120px)',
+              lineHeight: 1,
+              letterSpacing: '-0.02em',
+              textTransform: 'uppercase',
+              color: TEXT,
+              userSelect: 'none',
+            }}>
+              QUARTER MILE SIM
+            </h1>
+            <span style={{
+              position: 'absolute',
+              top: -10,
+              right: -46,
+              fontFamily: MONO,
+              fontSize: 14,
+              color: ACCENT,
+              lineHeight: 1,
+              letterSpacing: '0',
+            }}>_03</span>
+          </div>
         </div>
-      </div>
 
-      {/* ── CTA ── */}
-      <div style={{
-        flexShrink: 0,
-        textAlign: 'center',
-        paddingTop: 24,
-        position: 'relative',
-        zIndex: 10,
-      }}>
-        <span
-          role="button"
-          tabIndex={0}
-          onClick={() => navigate('/race')}
-          onKeyDown={e => e.key === 'Enter' && navigate('/race')}
-          onMouseEnter={() => setCtaHover(true)}
-          onMouseLeave={() => setCtaHover(false)}
-          style={{
-            fontFamily: MONO,
-            fontSize: 14,
-            letterSpacing: '0.12em',
-            textTransform: 'uppercase',
-            color: ctaHover ? ACCENT : TEXT,
-            cursor: 'pointer',
-            userSelect: 'none',
-            outline: 'none',
-            transition: 'color 0.1s',
-          }}
-        >
-          <span style={{ color: ACCENT }}>{'>'}</span>
-          {' SELECT CONTENDERS'}
-          <span className={ctaHover ? '' : 'blink-caret'} style={{ color: ACCENT }}>_</span>
-          <span style={{ fontFamily: MONO, fontSize: 10, color: 'rgba(245,245,240,0.3)', marginLeft: 10, letterSpacing: '0.06em' }}>[ENTER]</span>
-        </span>
+        {/* ── CTA ── */}
+        <div style={{ textAlign: 'center', paddingTop: 24, position: 'relative', zIndex: 10 }}>
+          <span
+            role="button"
+            tabIndex={0}
+            onClick={() => navigate('/race')}
+            onKeyDown={e => e.key === 'Enter' && navigate('/race')}
+            onMouseEnter={() => setCtaHover(true)}
+            onMouseLeave={() => setCtaHover(false)}
+            style={{
+              fontFamily: MONO,
+              fontSize: 14,
+              letterSpacing: '0.12em',
+              textTransform: 'uppercase',
+              color: ctaHover ? ACCENT : TEXT,
+              cursor: 'pointer',
+              userSelect: 'none',
+              outline: 'none',
+              transition: 'color 0.1s',
+            }}
+          >
+            <span style={{ color: ACCENT }}>{'>'}</span>
+            {' SELECT CONTENDERS'}
+            <span className={ctaHover ? '' : 'blink-caret'} style={{ color: ACCENT }}>_</span>
+          </span>
+        </div>
+
       </div>
 
       {/* ── film grain overlay ── */}
@@ -260,7 +252,7 @@ export default function Landing() {
           textTransform: 'uppercase',
           whiteSpace: 'pre',
         }}>
-          {'ET —   ·   60FT —   ·   1/8 —   ·   TRAP — MPH'}
+          {'ET 0.000s   ·   60FT 0.000   ·   1/8 0.000s   ·   TRAP 000 MPH'}
         </span>
       </div>
     </div>
