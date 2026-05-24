@@ -66,11 +66,13 @@ export default function Landing() {
           src="/hero.jpg"
           alt=""
           style={{
-            width: '55vw',
-            maxWidth: 800,
+            width: '70vw',
+            maxWidth: 1000,
             maxHeight: '100%',
             objectFit: 'contain',
             display: 'block',
+            maskImage: 'radial-gradient(ellipse at center, black 45%, transparent 92%)',
+            WebkitMaskImage: 'radial-gradient(ellipse at center, black 45%, transparent 92%)',
           }}
         />
       </div>
@@ -79,7 +81,7 @@ export default function Landing() {
       <div style={{
         flexShrink: 0,
         textAlign: 'center',
-        paddingTop: 32,
+        paddingTop: 16,
         position: 'relative',
         zIndex: 10,
       }}>
