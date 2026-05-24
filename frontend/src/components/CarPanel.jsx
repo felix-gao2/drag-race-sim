@@ -59,7 +59,7 @@ function ActionLink({ children, onClick }) {
   )
 }
 
-export default function CarPanel({ side, onCarChange }) {
+export default function CarPanel({ side, onCarChange, racePhase = 'idle' }) {
   const accent = ACCENT[side]
   const label  = LABEL[side]
 
@@ -154,10 +154,14 @@ export default function CarPanel({ side, onCarChange }) {
             </div>
 
             {/* Action links */}
-            <div style={{ display: 'flex', gap: 24 }}>
-              <ActionLink onClick={handleClear}>[ EDIT ]</ActionLink>
-              <ActionLink onClick={handleClear}>[ REMOVE ]</ActionLink>
-            </div>
+            {racePhase === 'idle' ? (
+              <div style={{ display: 'flex', gap: 24 }}>
+                <ActionLink onClick={handleClear}>[ EDIT ]</ActionLink>
+                <ActionLink onClick={handleClear}>[ REMOVE ]</ActionLink>
+              </div>
+            ) : racePhase === 'done' ? (
+              <ActionLink onClick={handleClear}>[ CHANGE CARS ]</ActionLink>
+            ) : null}
           </>
         )}
 

@@ -1,7 +1,6 @@
-import { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useState, useEffect } from 'react'
 import CarPanel from '../components/CarPanel'
-import { postRace } from '../api'
+import { postRace, getRace } from '../api'
 
 const MONO    = `'JetBrains Mono', monospace`
 const DISPLAY = `'Anton', sans-serif`
@@ -99,29 +98,102 @@ function Dot() {
   )
 }
 
+const INIT_MILESTONES = {
+  a: { sixty: null, eighth: null, trap: null, et: null },
+  b: { sixty: null, eighth: null, trap: null, et: null },
+}
+
 export default function RaceSetup() {
-  const navigate = useNavigate()
   const [carA, setCarA] = useState(null)
   const [carB, setCarB] = useState(null)
-  const [submitting, setSubmitting] = useState(false)
-  const [error, setError] = useState(null)
   const [distIdx, setDistIdx] = useState(0)
   const [startIdx, setStartIdx] = useState(0)
   const [surfIdx, setSurfIdx] = useState(0)
 
+  // race state machine: idle | loading | racing | done
+  const [raceState, setRaceState] = useState('idle')
+  const [raceData,  setRaceData]  = useState(null)
+  const [frame,     setFrame]     = useState(0)
+  const [milestones, setMilestones] = useState(INIT_MILESTONES)
+  const [error, setError] = useState(null)
+
   const ready = carA !== null && carB !== null
 
+  // animation loop — advance one telemetry frame every 50ms
+  useEffect(() => {
+    if (raceState !== 'racing' || !raceData) return
+    const id = setInterval(() => {
+      setFrame(f => {
+        const next = f + 1
+        if (next >= raceData.telemetry.length) {
+          clearInterval(id)
+          setRaceState('done')
+          return f
+        }
+        return next
+      })
+    }, 50)
+    return () => clearInterval(id)
+  }, [raceState, raceData])
+
+  // milestone tracking — runs every frame during race
+  useEffect(() => {
+    if (!raceData || raceState !== 'racing') return
+    const tick = raceData.telemetry[frame]
+    setMilestones(prev => {
+      const a = { ...prev.a }
+      const b = { ...prev.b }
+      if (a.sixty  === null && tick.dist_a_ft >= 60)   a.sixty  = tick.time_s
+      if (b.sixty  === null && tick.dist_b_ft >= 60)   b.sixty  = tick.time_s
+      if (a.eighth === null && tick.dist_a_ft >= 660)  a.eighth = tick.time_s
+      if (b.eighth === null && tick.dist_b_ft >= 660)  b.eighth = tick.time_s
+      if (a.trap   === null && tick.dist_a_ft >= 1320) { a.trap = tick.speed_a_mph; a.et = tick.time_s }
+      if (b.trap   === null && tick.dist_b_ft >= 1320) { b.trap = tick.speed_b_mph; b.et = tick.time_s }
+      return { a, b }
+    })
+  }, [frame, raceData, raceState])
+
+  function resetRace() {
+    setRaceState('idle')
+    setRaceData(null)
+    setFrame(0)
+    setMilestones(INIT_MILESTONES)
+    setError(null)
+  }
+
+  function handleCarAChange(car) {
+    setCarA(car)
+    if (!car) resetRace()
+  }
+
+  function handleCarBChange(car) {
+    setCarB(car)
+    if (!car) resetRace()
+  }
+
   async function handleStart() {
-    if (!ready || submitting) return
-    setSubmitting(true)
+    if (!ready || raceState !== 'idle') return
+    setRaceState('loading')
     setError(null)
     try {
       const { slug } = await postRace(carA.id, carB.id)
-      navigate(`/race/${slug}`)
+      const data = await getRace(slug)
+      setRaceData(data)
+      setFrame(0)
+      setMilestones(INIT_MILESTONES)
+      setRaceState('racing')
     } catch {
       setError('Failed to start race. Is the server running?')
-      setSubmitting(false)
+      setRaceState('idle')
     }
+  }
+
+  function handleRaceAgain() {
+    setRaceState('idle')
+    setRaceData(null)
+    setFrame(0)
+    setMilestones(INIT_MILESTONES)
+    setError(null)
   }
 
   return (
@@ -274,37 +346,61 @@ export default function RaceSetup() {
           letterSpacing: '0.08em', textTransform: 'uppercase',
         }}>¼ MILE</span>
 
-        {/* Lane A car — top lane, at start line */}
-        <div style={{
-          position: 'absolute', left: 4, top: '25%',
-          transform: 'translateY(-50%)',
-          display: 'flex', alignItems: 'center', gap: 14,
-        }}>
-          <CarCoupe strokeColor={carA ? '#DC2626' : 'rgba(220,38,38,0.22)'} />
-          <span style={{
-            fontFamily: MONO, fontSize: 10,
-            color: carA ? 'rgba(220,38,38,0.72)' : 'rgba(220,38,38,0.28)',
-            letterSpacing: '0.1em', textTransform: 'uppercase', whiteSpace: 'nowrap',
-          }}>
-            {`LANE 01 — ${carA ? `${carA.year} ${carA.make} ${carA.model}` : 'EMPTY'}`}
-          </span>
-        </div>
+        {/* Lane A car */}
+        {(() => {
+          const live = raceData && frame < raceData.telemetry.length
+          const tick = live ? raceData.telemetry[frame] : null
+          const pctA = tick ? Math.max(0.3, Math.min((tick.dist_a_ft / 1320) * 96, 94)) : 0.3
+          return (
+            <div style={{
+              position: 'absolute',
+              left: live ? `${pctA}%` : 4,
+              top: '25%',
+              transform: 'translateY(-50%)',
+              display: 'flex', alignItems: 'center', gap: 14,
+              transition: live ? 'left 0.05s linear' : 'none',
+            }}>
+              <CarCoupe strokeColor={carA ? '#DC2626' : 'rgba(220,38,38,0.22)'} />
+              {!live && (
+                <span style={{
+                  fontFamily: MONO, fontSize: 10,
+                  color: carA ? 'rgba(220,38,38,0.72)' : 'rgba(220,38,38,0.28)',
+                  letterSpacing: '0.1em', textTransform: 'uppercase', whiteSpace: 'nowrap',
+                }}>
+                  {`LANE 01 — ${carA ? `${carA.year} ${carA.make} ${carA.model}` : 'EMPTY'}`}
+                </span>
+              )}
+            </div>
+          )
+        })()}
 
-        {/* Lane B car — bottom lane, at start line */}
-        <div style={{
-          position: 'absolute', left: 4, top: '75%',
-          transform: 'translateY(-50%)',
-          display: 'flex', alignItems: 'center', gap: 14,
-        }}>
-          <CarCoupe strokeColor={carB ? 'rgba(245,245,240,0.65)' : 'rgba(245,245,240,0.15)'} />
-          <span style={{
-            fontFamily: MONO, fontSize: 10,
-            color: carB ? 'rgba(245,245,240,0.42)' : 'rgba(245,245,240,0.18)',
-            letterSpacing: '0.1em', textTransform: 'uppercase', whiteSpace: 'nowrap',
-          }}>
-            {`LANE 02 — ${carB ? `${carB.year} ${carB.make} ${carB.model}` : 'EMPTY'}`}
-          </span>
-        </div>
+        {/* Lane B car */}
+        {(() => {
+          const live = raceData && frame < raceData.telemetry.length
+          const tick = live ? raceData.telemetry[frame] : null
+          const pctB = tick ? Math.max(0.3, Math.min((tick.dist_b_ft / 1320) * 96, 94)) : 0.3
+          return (
+            <div style={{
+              position: 'absolute',
+              left: live ? `${pctB}%` : 4,
+              top: '75%',
+              transform: 'translateY(-50%)',
+              display: 'flex', alignItems: 'center', gap: 14,
+              transition: live ? 'left 0.05s linear' : 'none',
+            }}>
+              <CarCoupe strokeColor={carB ? 'rgba(245,245,240,0.65)' : 'rgba(245,245,240,0.15)'} />
+              {!live && (
+                <span style={{
+                  fontFamily: MONO, fontSize: 10,
+                  color: carB ? 'rgba(245,245,240,0.42)' : 'rgba(245,245,240,0.18)',
+                  letterSpacing: '0.1em', textTransform: 'uppercase', whiteSpace: 'nowrap',
+                }}>
+                  {`LANE 02 — ${carB ? `${carB.year} ${carB.make} ${carB.model}` : 'EMPTY'}`}
+                </span>
+              )}
+            </div>
+          )
+        })()}
 
       </div>
 
@@ -319,8 +415,8 @@ export default function RaceSetup() {
         background: 'rgba(0,0,0,0.4)',
       }}>
 
-        {/* Left: cycling params */}
-        <div style={{ display: 'flex', alignItems: 'center' }}>
+        {/* Left: cycling params — locked during/after race */}
+        <div style={{ display: 'flex', alignItems: 'center', opacity: raceState !== 'idle' ? 0.3 : 1, transition: 'opacity 0.2s', pointerEvents: raceState !== 'idle' ? 'none' : 'auto' }}>
           <CycleParam
             label="DISTANCE"
             value={DIST_VALS[distIdx]}
@@ -344,32 +440,54 @@ export default function RaceSetup() {
           <StatParam label="WIND" value="0 MPH" />
         </div>
 
-        {/* Right: START RACE */}
+        {/* Right: CTA — changes based on race state */}
         <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
           {error && (
             <span style={{ fontFamily: MONO, fontSize: 10, color: ACCENT, letterSpacing: '0.1em' }}>
               {error}
             </span>
           )}
-          <span
-            onClick={ready && !submitting ? handleStart : undefined}
-            style={{
-              fontFamily: DISPLAY,
-              fontSize: 22,
-              letterSpacing: '0.04em',
-              textTransform: 'uppercase',
-              color: ACCENT,
-              opacity: ready ? (submitting ? 0.6 : 1) : 0.2,
-              cursor: ready && !submitting ? 'pointer' : 'default',
-              display: 'flex',
-              alignItems: 'center',
-              userSelect: 'none',
-            }}
-          >
-            <span className="blink" style={{ marginRight: 6 }}>{'>'}</span>
-            {submitting ? 'STARTING' : 'START RACE'}
-            <span className="blink" style={{ animationDelay: '0.5s', marginLeft: 2 }}>_</span>
-          </span>
+          {raceState === 'racing' || raceState === 'loading' ? (
+            <span style={{
+              fontFamily: DISPLAY, fontSize: 22,
+              letterSpacing: '0.04em', textTransform: 'uppercase',
+              color: DIM, opacity: 0.5,
+              display: 'flex', alignItems: 'center', userSelect: 'none',
+            }}>
+              {'>'} {raceState === 'loading' ? 'LOADING...' : 'RACING...'}
+            </span>
+          ) : raceState === 'done' ? (
+            <span
+              onClick={handleRaceAgain}
+              style={{
+                fontFamily: DISPLAY, fontSize: 22,
+                letterSpacing: '0.04em', textTransform: 'uppercase',
+                color: ACCENT, opacity: 1,
+                cursor: 'pointer',
+                display: 'flex', alignItems: 'center', userSelect: 'none',
+              }}
+            >
+              <span className="blink" style={{ marginRight: 6 }}>{'>'}</span>
+              RACE AGAIN
+              <span className="blink" style={{ animationDelay: '0.5s', marginLeft: 2 }}>_</span>
+            </span>
+          ) : (
+            <span
+              onClick={ready ? handleStart : undefined}
+              style={{
+                fontFamily: DISPLAY, fontSize: 22,
+                letterSpacing: '0.04em', textTransform: 'uppercase',
+                color: ACCENT,
+                opacity: ready ? 1 : 0.2,
+                cursor: ready ? 'pointer' : 'default',
+                display: 'flex', alignItems: 'center', userSelect: 'none',
+              }}
+            >
+              <span className="blink" style={{ marginRight: 6 }}>{'>'}</span>
+              START RACE
+              <span className="blink" style={{ animationDelay: '0.5s', marginLeft: 2 }}>_</span>
+            </span>
+          )}
         </div>
       </div>
 
@@ -383,7 +501,7 @@ export default function RaceSetup() {
         minHeight: 0,
         overflow: 'hidden',
       }}>
-        <CarPanel side="a" onCarChange={setCarA} />
+        <CarPanel side="a" onCarChange={handleCarAChange} racePhase={raceState} />
 
         {/* center divider */}
         <div style={{
@@ -392,32 +510,68 @@ export default function RaceSetup() {
           zIndex: 1, pointerEvents: 'none',
         }} />
 
-        <CarPanel side="b" onCarChange={setCarB} />
+        <CarPanel side="b" onCarChange={handleCarBChange} racePhase={raceState} />
       </div>
 
       {/* ── Bottom HUD bar ── */}
-      <div style={{
-        height: 32, flexShrink: 0,
-        display: 'flex', alignItems: 'center', justifyContent: 'center',
-        position: 'relative', zIndex: 10,
-        borderTop: '1px solid rgba(245,245,240,0.05)',
-      }}>
-        <span style={{
-          position: 'absolute', left: 24,
-          fontFamily: MONO, fontSize: 11, color: DIM,
-          letterSpacing: '0.12em', textTransform: 'uppercase', whiteSpace: 'nowrap',
-        }}>
-          LANE <span style={{ color: 'rgba(220,38,38,0.7)' }}>01</span>
-          {' · '}
-          LANE <span style={{ color: 'rgba(245,245,240,0.35)' }}>02</span>
-        </span>
-        <span style={{
-          fontFamily: MONO, fontSize: 11, color: DIM,
-          letterSpacing: '0.12em', textTransform: 'uppercase', whiteSpace: 'pre',
-        }}>
-          {'ET 0.000s   ·   60FT 0.000   ·   1/8 0.000s   ·   TRAP 000 MPH'}
-        </span>
-      </div>
+      {(() => {
+        const live = raceState === 'racing' || raceState === 'done'
+        const tick = raceData && frame < raceData.telemetry.length ? raceData.telemetry[frame] : null
+        const fmt3 = v => v != null ? v.toFixed(3) : '—'
+        const fmtMph = v => v != null ? Math.round(v).toString().padStart(3, '0') : '—'
+        const etA = live ? (milestones.a.et != null ? milestones.a.et.toFixed(3) : (tick ? tick.time_s.toFixed(3) : '0.000')) : '0.000'
+        const etB = live ? (milestones.b.et != null ? milestones.b.et.toFixed(3) : (tick ? tick.time_s.toFixed(3) : '0.000')) : '0.000'
+        const sixtyA = live ? fmt3(milestones.a.sixty) : '0.000'
+        const sixtyB = live ? fmt3(milestones.b.sixty) : '0.000'
+        const eighthA = live ? fmt3(milestones.a.eighth) : '0.000'
+        const eighthB = live ? fmt3(milestones.b.eighth) : '0.000'
+        const trapA = live ? fmtMph(milestones.a.trap) : '000'
+        const trapB = live ? fmtMph(milestones.b.trap) : '000'
+        return (
+          <div style={{
+            height: 32, flexShrink: 0,
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            position: 'relative', zIndex: 10,
+            borderTop: '1px solid rgba(245,245,240,0.05)',
+          }}>
+            <span style={{
+              position: 'absolute', left: 24,
+              fontFamily: MONO, fontSize: 11, color: DIM,
+              letterSpacing: '0.12em', textTransform: 'uppercase', whiteSpace: 'nowrap',
+            }}>
+              LANE <span style={{ color: 'rgba(220,38,38,0.7)' }}>01</span>
+              {' · '}
+              LANE <span style={{ color: 'rgba(245,245,240,0.35)' }}>02</span>
+            </span>
+            <span style={{
+              fontFamily: MONO, fontSize: 11,
+              letterSpacing: '0.10em', textTransform: 'uppercase', whiteSpace: 'nowrap',
+              display: 'flex', alignItems: 'center', gap: 0,
+            }}>
+              <span style={{ color: DIM }}>ET </span>
+              <span style={{ color: live ? 'rgba(220,38,38,0.85)' : DIM }}>{etA}</span>
+              <span style={{ color: 'rgba(245,245,240,0.12)', margin: '0 4px' }}>/</span>
+              <span style={{ color: live ? 'rgba(245,245,240,0.6)' : DIM }}>{etB}</span>
+              <span style={{ color: 'rgba(245,245,240,0.12)', margin: '0 14px' }}>·</span>
+              <span style={{ color: DIM }}>60FT </span>
+              <span style={{ color: milestones.a.sixty != null ? 'rgba(220,38,38,0.85)' : DIM }}>{sixtyA}</span>
+              <span style={{ color: 'rgba(245,245,240,0.12)', margin: '0 4px' }}>/</span>
+              <span style={{ color: milestones.b.sixty != null ? 'rgba(245,245,240,0.6)' : DIM }}>{sixtyB}</span>
+              <span style={{ color: 'rgba(245,245,240,0.12)', margin: '0 14px' }}>·</span>
+              <span style={{ color: DIM }}>1/8 </span>
+              <span style={{ color: milestones.a.eighth != null ? 'rgba(220,38,38,0.85)' : DIM }}>{eighthA}</span>
+              <span style={{ color: 'rgba(245,245,240,0.12)', margin: '0 4px' }}>/</span>
+              <span style={{ color: milestones.b.eighth != null ? 'rgba(245,245,240,0.6)' : DIM }}>{eighthB}</span>
+              <span style={{ color: 'rgba(245,245,240,0.12)', margin: '0 14px' }}>·</span>
+              <span style={{ color: DIM }}>TRAP </span>
+              <span style={{ color: milestones.a.trap != null ? 'rgba(220,38,38,0.85)' : DIM }}>{trapA}</span>
+              <span style={{ color: 'rgba(245,245,240,0.12)', margin: '0 4px' }}>/</span>
+              <span style={{ color: milestones.b.trap != null ? 'rgba(245,245,240,0.6)' : DIM }}>{trapB}</span>
+              <span style={{ color: DIM, marginLeft: 4 }}>MPH</span>
+            </span>
+          </div>
+        )
+      })()}
 
     </div>
   )
