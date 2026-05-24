@@ -1,5 +1,4 @@
-import { useState, useEffect } from 'react'
-import { getCar } from '../api'
+import { useState } from 'react'
 import Cascade from './Cascade'
 
 const ACCENT  = { a: '#DC2626', b: '#F5F5F0' }
@@ -7,36 +6,30 @@ const LABEL   = { a: 'LANE 01', b: 'LANE 02' }
 const MONO    = `'JetBrains Mono', monospace`
 const DISPLAY = `'Anton', sans-serif`
 const TEXT    = '#F5F5F0'
-const DIM     = 'rgba(245,245,240,0.4)'
+const DIM     = 'rgba(245,245,240,0.38)'
 
-function fmt(n, decimals = 0) {
-  return Number(n).toLocaleString('en-US', { maximumFractionDigits: decimals })
+const DRIVE_LABEL = {
+  AWD:  'ALL-WHEEL',
+  RWD:  'REAR-WHEEL',
+  FWD:  'FRONT-WHEEL',
+  '4WD':'FOUR-WHEEL',
 }
 
-function StatRow({ label, value }) {
+function StatBlock({ label, value }) {
   return (
-    <div style={{
-      borderTop: '1px solid rgba(245,245,240,0.07)',
-      padding: '9px 0',
-      display: 'flex',
-      flexDirection: 'column',
-      gap: 3,
-    }}>
+    <div>
       <span style={{
-        fontFamily: MONO,
-        fontSize: 9,
-        letterSpacing: '0.22em',
+        fontFamily: MONO, fontSize: 10,
+        color: DIM, letterSpacing: '0.22em',
         textTransform: 'uppercase',
-        color: DIM,
+        display: 'block', marginBottom: 8,
       }}>
         {label}
       </span>
       <span style={{
-        fontFamily: MONO,
-        fontSize: 15,
-        color: TEXT,
-        lineHeight: 1,
-        letterSpacing: '0.04em',
+        fontFamily: DISPLAY, fontSize: 28,
+        color: TEXT, lineHeight: 1,
+        display: 'block',
       }}>
         {value}
       </span>
@@ -44,32 +37,46 @@ function StatRow({ label, value }) {
   )
 }
 
+function ActionLink({ children, onClick }) {
+  const [hov, setHov] = useState(false)
+  return (
+    <span
+      onClick={onClick}
+      onMouseEnter={() => setHov(true)}
+      onMouseLeave={() => setHov(false)}
+      style={{
+        fontFamily: MONO, fontSize: 11,
+        color: hov ? '#DC2626' : DIM,
+        letterSpacing: '0.14em',
+        textTransform: 'uppercase',
+        cursor: 'pointer',
+        transition: 'color 0.1s',
+        userSelect: 'none',
+      }}
+    >
+      {children}
+    </span>
+  )
+}
+
 export default function CarPanel({ side, onCarChange }) {
   const accent = ACCENT[side]
   const label  = LABEL[side]
 
-  const [carId, setCarId]         = useState(null)
-  const [car, setCar]             = useState(null)
-  const [loading, setLoading]     = useState(false)
-  const [showCascade, setShowCascade] = useState(true)
+  const [selectedCar, setSelectedCar] = useState(null)
 
-  useEffect(() => {
-    if (!carId) { setCar(null); onCarChange(null); return }
-    setLoading(true)
-    getCar(carId)
-      .then(data => { setCar(data); onCarChange(data); setShowCascade(false) })
-      .catch(() => { setCar(null); onCarChange(null) })
-      .finally(() => setLoading(false))
-  }, [carId])
-
-  function handleChange() {
-    setCarId(null)
-    setCar(null)
-    onCarChange(null)
-    setShowCascade(true)
+  function handleSelect(car) {
+    setSelectedCar(car)
+    onCarChange(car)
   }
 
-  const isSelected = !loading && car !== null
+  function handleClear() {
+    setSelectedCar(null)
+    onCarChange(null)
+  }
+
+  const pwRatio    = selectedCar ? (selectedCar.weight / selectedCar.hp).toFixed(1) : null
+  const driveLabel = selectedCar ? (DRIVE_LABEL[selectedCar.drivetrain] ?? selectedCar.drivetrain) : null
 
   return (
     <div style={{
@@ -82,67 +89,17 @@ export default function CarPanel({ side, onCarChange }) {
         : 'rgba(245,245,240,0.012)',
       boxSizing: 'border-box',
       minHeight: 0,
-      overflow: 'hidden',
     }}>
-
-      {/* ── Panel header — only when a car is selected ── */}
-      {!showCascade && (
-        <div style={{
-          height: 36,
-          flexShrink: 0,
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          padding: '0 20px',
-          borderBottom: '1px solid rgba(245,245,240,0.06)',
-        }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-            <span style={{
-              width: 5, height: 5, borderRadius: '50%',
-              background: accent, display: 'inline-block', flexShrink: 0,
-              opacity: side === 'b' ? 0.6 : 1,
-            }} />
-            <span style={{
-              fontFamily: MONO, fontSize: 10,
-              color: accent, letterSpacing: '0.3em', textTransform: 'uppercase',
-              opacity: side === 'b' ? 0.7 : 1,
-            }}>
-              {label}
-            </span>
-          </div>
-
-          <button
-            onClick={handleChange}
-            style={{
-              fontFamily: MONO, fontSize: 9,
-              letterSpacing: '0.18em', textTransform: 'uppercase',
-              color: DIM, background: 'none',
-              border: '1px solid rgba(245,245,240,0.1)',
-              borderRadius: 0, padding: '3px 10px',
-              cursor: 'pointer',
-              transition: 'color 0.1s, border-color 0.1s',
-            }}
-            onMouseEnter={e => { e.target.style.color = TEXT; e.target.style.borderColor = 'rgba(245,245,240,0.3)' }}
-            onMouseLeave={e => { e.target.style.color = ''; e.target.style.borderColor = '' }}
-          >
-            CHANGE
-          </button>
-        </div>
-      )}
-
-      {/* ── Content area ── */}
       <div style={{
-        flex: 1, minHeight: 0, overflow: 'hidden auto',
+        flex: 1, minHeight: 0,
+        overflow: 'hidden auto',
         padding: '28px 24px',
         boxSizing: 'border-box',
       }}>
-        {loading ? (
-          <span style={{ fontFamily: MONO, fontSize: 11, color: DIM, letterSpacing: '0.1em' }}>
-            Loading…
-          </span>
-        ) : showCascade ? (
+
+        {!selectedCar ? (
+          /* ── STATE A: empty ── */
           <>
-            {/* Lane label */}
             <span style={{
               fontFamily: MONO, fontSize: 18,
               color: accent, letterSpacing: '0.3em',
@@ -151,7 +108,6 @@ export default function CarPanel({ side, onCarChange }) {
             }}>
               {label}
             </span>
-            {/* Status */}
             <span style={{
               fontFamily: MONO, fontSize: 11,
               color: DIM, letterSpacing: '0.12em',
@@ -159,65 +115,52 @@ export default function CarPanel({ side, onCarChange }) {
             }}>
               {'> AWAITING SELECTION'}
             </span>
-            <Cascade onSelect={setCarId} accentColor={accent} />
+            <Cascade onSelect={handleSelect} accentColor={accent} />
           </>
-        ) : isSelected && (
-          <div style={{ display: 'flex', flexDirection: 'column' }}>
+        ) : (
+          /* ── STATE B: populated ── */
+          <>
+            {/* Car name */}
+            <p style={{
+              fontFamily: DISPLAY, fontSize: 32,
+              color: accent, lineHeight: 1,
+              textTransform: 'uppercase',
+              margin: '0 0 8px',
+            }}>
+              {selectedCar.year} {selectedCar.make} {selectedCar.model}
+            </p>
 
-            {/* Car identity */}
-            <div style={{ marginBottom: 22 }}>
-              <p style={{
-                fontFamily: DISPLAY,
-                fontSize: 'clamp(1.8rem, 3vw, 3.8rem)',
-                fontWeight: 400,
-                textTransform: 'uppercase',
-                color: accent,
-                lineHeight: 0.88,
-                margin: 0,
-                opacity: side === 'b' ? 0.85 : 1,
-              }}>
-                {car.make}
-              </p>
-              <p style={{
-                fontFamily: DISPLAY,
-                fontSize: 'clamp(1.1rem, 2vw, 2.4rem)',
-                fontWeight: 400,
-                textTransform: 'uppercase',
-                color: TEXT,
-                lineHeight: 0.9,
-                margin: '10px 0 0',
-              }}>
-                {car.year} {car.model}
-              </p>
-              <p style={{
-                fontFamily: MONO,
-                fontSize: 9,
-                color: DIM,
-                letterSpacing: '0.1em',
-                margin: '10px 0 0',
-                lineHeight: 1.5,
-                textTransform: 'uppercase',
-              }}>
-                {car.trim}
-              </p>
-            </div>
+            {/* Trim + drivetrain */}
+            <p style={{
+              fontFamily: MONO, fontSize: 11,
+              color: DIM, letterSpacing: '0.12em',
+              textTransform: 'uppercase',
+              margin: '0 0 32px',
+            }}>
+              {selectedCar.trim} · {driveLabel}
+            </p>
 
-            {/* Stats — 2-column grid */}
+            {/* 2×2 stat grid */}
             <div style={{
               display: 'grid',
               gridTemplateColumns: '1fr 1fr',
-              columnGap: 28,
+              gap: '24px 28px',
+              marginBottom: 36,
             }}>
-              <StatRow label="Horsepower" value={`${fmt(car.horsepower)} hp`} />
-              <StatRow label="Torque"     value={`${fmt(car.torque)} lb·ft`} />
-              <StatRow label="Weight"     value={`${fmt(car.weight_lbs)} lb`} />
-              <StatRow label="Drivetrain" value={car.drivetrain} />
-              <StatRow label="0 – 60 mph" value={car.zero_to_sixty != null ? `${car.zero_to_sixty}s` : '—'} />
-              <StatRow label="¼ Mile"     value={car.quarter_mile  != null ? `${car.quarter_mile}s`  : '—'} />
+              <StatBlock label="HORSEPOWER"    value={`${selectedCar.hp} HP`} />
+              <StatBlock label="TORQUE"        value={`${selectedCar.torque} LB-FT`} />
+              <StatBlock label="WEIGHT"        value={`${selectedCar.weight} LBS`} />
+              <StatBlock label="POWER / WEIGHT" value={`${pwRatio} LB/HP`} />
             </div>
 
-          </div>
+            {/* Action links */}
+            <div style={{ display: 'flex', gap: 24 }}>
+              <ActionLink onClick={handleClear}>[ EDIT ]</ActionLink>
+              <ActionLink onClick={handleClear}>[ REMOVE ]</ActionLink>
+            </div>
+          </>
         )}
+
       </div>
     </div>
   )

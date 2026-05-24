@@ -5,11 +5,36 @@ const TEXT = '#F5F5F0'
 const DIM  = 'rgba(245,245,240,0.35)'
 
 const STUB = {
-  AUDI:      { models: ['A4', 'A6', 'Q5', 'TT RS'],            trims: ['BASE', 'PREMIUM', 'S LINE', 'COMPETITION'] },
-  BMW:       { models: ['M3', 'M4', '330I', '540I'],            trims: ['BASE', 'M SPORT', 'COMPETITION', 'XDRIVE'] },
-  FORD:      { models: ['MUSTANG', 'GT500', 'F-150', 'BRONCO'], trims: ['BASE', 'GT', 'SHELBY', 'PREMIUM'] },
-  CHEVROLET: { models: ['CORVETTE', 'CAMARO', 'SILVERADO', 'BLAZER'], trims: ['BASE', 'LT', 'SS', 'Z06'] },
-  DODGE:     { models: ['CHALLENGER', 'CHARGER', 'DURANGO', 'VIPER'], trims: ['BASE', 'SXT', 'R/T', 'HELLCAT'] },
+  AUDI: {
+    'A4':    { hp: 201, torque: 236, weight: 3637, drivetrain: 'AWD', trims: ['BASE', 'PREMIUM', 'S LINE', 'COMPETITION'] },
+    'A6':    { hp: 335, torque: 369, weight: 4266, drivetrain: 'AWD', trims: ['BASE', 'PREMIUM', 'S LINE', 'COMPETITION'] },
+    'Q5':    { hp: 261, torque: 273, weight: 4045, drivetrain: 'AWD', trims: ['BASE', 'PREMIUM', 'S LINE', 'COMPETITION'] },
+    'TT RS': { hp: 394, torque: 354, weight: 3571, drivetrain: 'AWD', trims: ['BASE', 'PREMIUM', 'COMPETITION'] },
+  },
+  BMW: {
+    'M3':   { hp: 503, torque: 479, weight: 3795, drivetrain: 'RWD', trims: ['BASE', 'COMPETITION', 'M SPORT', 'XDRIVE'] },
+    'M4':   { hp: 503, torque: 479, weight: 3748, drivetrain: 'RWD', trims: ['BASE', 'COMPETITION', 'M SPORT', 'XDRIVE'] },
+    '330I': { hp: 255, torque: 295, weight: 3582, drivetrain: 'RWD', trims: ['BASE', 'M SPORT', 'XDRIVE'] },
+    '540I': { hp: 335, torque: 332, weight: 3924, drivetrain: 'RWD', trims: ['BASE', 'M SPORT', 'XDRIVE'] },
+  },
+  FORD: {
+    'MUSTANG': { hp: 450, torque: 410, weight: 3837, drivetrain: 'RWD', trims: ['BASE', 'GT', 'PREMIUM', 'MACH 1'] },
+    'GT500':   { hp: 760, torque: 625, weight: 4225, drivetrain: 'RWD', trims: ['BASE', 'CARBON', 'SHELBY'] },
+    'F-150':   { hp: 400, torque: 500, weight: 5150, drivetrain: '4WD', trims: ['BASE', 'XLT', 'PLATINUM', 'RAPTOR'] },
+    'BRONCO':  { hp: 300, torque: 325, weight: 4688, drivetrain: '4WD', trims: ['BASE', 'BIG BEND', 'BADLANDS', 'WILDTRAK'] },
+  },
+  CHEVROLET: {
+    'CORVETTE':  { hp: 495, torque: 470, weight: 3366, drivetrain: 'RWD', trims: ['BASE', '1LT', '2LT', '3LT'] },
+    'CAMARO':    { hp: 455, torque: 455, weight: 3950, drivetrain: 'RWD', trims: ['BASE', 'LT', 'SS', 'ZL1'] },
+    'SILVERADO': { hp: 420, torque: 460, weight: 4770, drivetrain: '4WD', trims: ['BASE', 'LT', 'LTZ', 'HIGH COUNTRY'] },
+    'BLAZER':    { hp: 314, torque: 269, weight: 4353, drivetrain: 'AWD', trims: ['BASE', 'LT', 'RS', 'SS'] },
+  },
+  DODGE: {
+    'CHALLENGER': { hp: 717, torque: 656, weight: 4448, drivetrain: 'RWD', trims: ['SXT', 'R/T', 'SCAT PACK', 'HELLCAT'] },
+    'CHARGER':    { hp: 717, torque: 656, weight: 4586, drivetrain: 'RWD', trims: ['SXT', 'R/T', 'SCAT PACK', 'HELLCAT'] },
+    'DURANGO':    { hp: 710, torque: 645, weight: 5360, drivetrain: 'AWD', trims: ['SXT', 'GT', 'R/T', 'HELLCAT'] },
+    'VIPER':      { hp: 645, torque: 600, weight: 3374, drivetrain: 'RWD', trims: ['BASE', 'GTS', 'ACR', 'TA 2.0'] },
+  },
 }
 
 const MAKES = Object.keys(STUB)
@@ -133,32 +158,27 @@ export default function Cascade({ onSelect, accentColor }) {
   const [year,  setYear]  = useState('')
   const [trim,  setTrim]  = useState('')
 
-  const models = make ? (STUB[make]?.models ?? []) : []
-  const trims  = year ? (STUB[make]?.trims  ?? []) : []
+  const models = make        ? Object.keys(STUB[make] ?? {})     : []
+  const trims  = make&&model ? (STUB[make]?.[model]?.trims ?? []) : []
 
   function handleMake(v)  { setMake(v); setModel(''); setYear(''); setTrim('') }
   function handleModel(v) { setModel(v); setYear(''); setTrim('') }
   function handleYear(v)  { setYear(v); setTrim('') }
   function handleTrim(v)  { setTrim(v) }
 
+  useEffect(() => {
+    if (!make || !model || !year || !trim) return
+    const spec = STUB[make]?.[model]
+    if (!spec) return
+    onSelect({ make, model, year, trim, hp: spec.hp, torque: spec.torque, weight: spec.weight, drivetrain: spec.drivetrain })
+  }, [make, model, year, trim])
+
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 22 }}>
-      <TerminalSelect
-        label="MAKE"  value={make}  options={MAKES}  disabled={false}
-        onChange={handleMake}  accentColor={accentColor}
-      />
-      <TerminalSelect
-        label="MODEL" value={model} options={models} disabled={!make}
-        onChange={handleModel} accentColor={accentColor}
-      />
-      <TerminalSelect
-        label="YEAR"  value={year}  options={YEARS}  disabled={!model}
-        onChange={handleYear}  accentColor={accentColor}
-      />
-      <TerminalSelect
-        label="TRIM"  value={trim}  options={trims}  disabled={!year}
-        onChange={handleTrim}  accentColor={accentColor}
-      />
+      <TerminalSelect label="MAKE"  value={make}  options={MAKES}  disabled={false}  onChange={handleMake}  accentColor={accentColor} />
+      <TerminalSelect label="MODEL" value={model} options={models} disabled={!make}  onChange={handleModel} accentColor={accentColor} />
+      <TerminalSelect label="YEAR"  value={year}  options={YEARS}  disabled={!model} onChange={handleYear}  accentColor={accentColor} />
+      <TerminalSelect label="TRIM"  value={trim}  options={trims}  disabled={!year}  onChange={handleTrim}  accentColor={accentColor} />
     </div>
   )
 }
