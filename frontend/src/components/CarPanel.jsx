@@ -75,7 +75,7 @@ export default function CarPanel({ side, onCarChange }) {
     onCarChange(null)
   }
 
-  const pwRatio    = selectedCar ? (selectedCar.weight / selectedCar.hp).toFixed(1) : null
+  const pwRatio    = selectedCar ? (selectedCar.weight_lbs / selectedCar.horsepower).toFixed(1) : null
   const driveLabel = selectedCar ? (DRIVE_LABEL[selectedCar.drivetrain] ?? selectedCar.drivetrain) : null
 
   return (
@@ -147,9 +147,9 @@ export default function CarPanel({ side, onCarChange }) {
               gap: '24px 28px',
               marginBottom: 36,
             }}>
-              <StatBlock label="HORSEPOWER"    value={`${selectedCar.hp} HP`} />
+              <StatBlock label="HORSEPOWER"    value={`${selectedCar.horsepower} HP`} />
               <StatBlock label="TORQUE"        value={`${selectedCar.torque} LB-FT`} />
-              <StatBlock label="WEIGHT"        value={`${selectedCar.weight} LBS`} />
+              <StatBlock label="WEIGHT"        value={`${selectedCar.weight_lbs} LBS`} />
               <StatBlock label="POWER / WEIGHT" value={`${pwRatio} LB/HP`} />
             </div>
 
