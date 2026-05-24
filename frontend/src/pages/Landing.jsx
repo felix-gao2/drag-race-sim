@@ -80,6 +80,7 @@ export default function Landing() {
         padding: '0 24px',
         position: 'relative',
         zIndex: 10,
+        borderBottom: '1px solid rgba(220,38,38,0.4)',
       }}>
         <span style={{ fontFamily: MONO, fontSize: 11, color: DIM, letterSpacing: '0.12em', textTransform: 'uppercase' }}>
           V0.1.0 // 1017 CARS
@@ -92,8 +93,21 @@ export default function Landing() {
           <span style={{ fontFamily: MONO, fontSize: 11, color: DIM, letterSpacing: '0.12em', textTransform: 'uppercase' }}>
             SYS — READY
           </span>
+          <span style={{ fontFamily: MONO, fontSize: 11, color: DIM, letterSpacing: '0.12em' }}>·</span>
+          <span className="rec-pulse" style={{ color: ACCENT, fontSize: 8, lineHeight: 1 }}>●</span>
+          <span style={{ fontFamily: MONO, fontSize: 11, color: ACCENT, letterSpacing: '0.12em', textTransform: 'uppercase' }}>REC</span>
         </span>
       </div>
+
+      {/* ── checkered micro-detail ── */}
+      <svg style={{ position: 'absolute', top: 38, right: 24, zIndex: 10, pointerEvents: 'none' }} width="24" height="8">
+        {Array.from({ length: 12 }, (_, i) => {
+          const col = i % 6, row = Math.floor(i / 6)
+          return (col + row) % 2 === 0
+            ? <rect key={i} x={col * 4} y={row * 4} width="4" height="4" fill="rgba(245,245,240,0.2)" />
+            : null
+        })}
+      </svg>
 
       {/* ── hero image ── */}
       <div style={{
@@ -128,19 +142,31 @@ export default function Landing() {
         position: 'relative',
         zIndex: 10,
       }}>
-        <h1 style={{
-          margin: 0,
-          fontFamily: DISPLAY,
-          fontWeight: 400,
-          fontSize: 'clamp(72px, 9vw, 120px)',
-          lineHeight: 1,
-          letterSpacing: '-0.02em',
-          textTransform: 'uppercase',
-          color: TEXT,
-          userSelect: 'none',
-        }}>
-          QUARTER MILE SIM
-        </h1>
+        <div style={{ position: 'relative', display: 'inline-block' }}>
+          <h1 style={{
+            margin: 0,
+            fontFamily: DISPLAY,
+            fontWeight: 400,
+            fontSize: 'clamp(72px, 9vw, 120px)',
+            lineHeight: 1,
+            letterSpacing: '-0.02em',
+            textTransform: 'uppercase',
+            color: TEXT,
+            userSelect: 'none',
+          }}>
+            QUARTER MILE SIM
+          </h1>
+          <span style={{
+            position: 'absolute',
+            top: -6,
+            right: -38,
+            fontFamily: MONO,
+            fontSize: 14,
+            color: ACCENT,
+            lineHeight: 1,
+            letterSpacing: '0',
+          }}>_03</span>
+        </div>
       </div>
 
       {/* ── CTA ── */}
@@ -170,8 +196,10 @@ export default function Landing() {
             transition: 'color 0.1s',
           }}
         >
-          {'> SELECT CONTENDERS'}
-          <span className="blink-caret" style={{ color: ACCENT }}>_</span>
+          <span style={{ color: ACCENT }}>{'>'}</span>
+          {' SELECT CONTENDERS'}
+          <span className={ctaHover ? '' : 'blink-caret'} style={{ color: ACCENT }}>_</span>
+          <span style={{ fontFamily: MONO, fontSize: 10, color: 'rgba(245,245,240,0.3)', marginLeft: 10, letterSpacing: '0.06em' }}>[ENTER]</span>
         </span>
       </div>
 
@@ -185,7 +213,22 @@ export default function Landing() {
         justifyContent: 'center',
         position: 'relative',
         zIndex: 10,
+        borderTop: '1px solid rgba(220,38,38,0.4)',
       }}>
+        <span style={{
+          position: 'absolute',
+          left: 24,
+          fontFamily: MONO,
+          fontSize: 11,
+          color: DIM,
+          letterSpacing: '0.12em',
+          textTransform: 'uppercase',
+          whiteSpace: 'nowrap',
+        }}>
+          LANE <span style={{ color: 'rgba(220,38,38,0.7)' }}>01</span>
+          {' · '}
+          LANE <span style={{ color: 'rgba(220,38,38,0.7)' }}>02</span>
+        </span>
         <span style={{
           fontFamily: MONO,
           fontSize: 11,
