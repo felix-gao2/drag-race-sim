@@ -340,8 +340,8 @@ function TimelineScrubber({ telemetry, frame, onScrub }) {
 }
 
 const INIT_MILESTONES = {
-  a: { sixty: null, eighth: null, trap: null, et: null },
-  b: { sixty: null, eighth: null, trap: null, et: null },
+  a: { sixty: null, eighth: null, eighthSpeed: null, trap: null, et: null, half: null, halfSpeed: null },
+  b: { sixty: null, eighth: null, eighthSpeed: null, trap: null, et: null, half: null, halfSpeed: null },
 }
 
 export default function RaceSetup() {
@@ -363,17 +363,19 @@ export default function RaceSetup() {
   const milestones = useMemo(() => {
     if (!raceData || raceState === 'idle' || raceState === 'loading') return INIT_MILESTONES
     const m = {
-      a: { sixty: null, eighth: null, eighthSpeed: null, trap: null, et: null },
-      b: { sixty: null, eighth: null, eighthSpeed: null, trap: null, et: null },
+      a: { sixty: null, eighth: null, eighthSpeed: null, trap: null, et: null, half: null, halfSpeed: null },
+      b: { sixty: null, eighth: null, eighthSpeed: null, trap: null, et: null, half: null, halfSpeed: null },
     }
     for (let i = 0; i <= Math.min(frame, raceData.telemetry.length - 1); i++) {
       const t = raceData.telemetry[i]
-      if (m.a.sixty  === null && t.dist_a_ft >= 60)   m.a.sixty  = t.time_s
-      if (m.b.sixty  === null && t.dist_b_ft >= 60)   m.b.sixty  = t.time_s
-      if (m.a.eighth === null && t.dist_a_ft >= 660)  { m.a.eighth = t.time_s; m.a.eighthSpeed = Math.round(t.speed_a_mph) }
-      if (m.b.eighth === null && t.dist_b_ft >= 660)  { m.b.eighth = t.time_s; m.b.eighthSpeed = Math.round(t.speed_b_mph) }
-      if (m.a.trap   === null && t.dist_a_ft >= 1320) { m.a.trap = t.speed_a_mph; m.a.et = t.time_s }
-      if (m.b.trap   === null && t.dist_b_ft >= 1320) { m.b.trap = t.speed_b_mph; m.b.et = t.time_s }
+      if (m.a.sixty  === null && t.speed_a_mph >= 60)  m.a.sixty  = t.time_s
+      if (m.b.sixty  === null && t.speed_b_mph >= 60)  m.b.sixty  = t.time_s
+      if (m.a.eighth === null && t.dist_a_ft >= 660)   { m.a.eighth = t.time_s; m.a.eighthSpeed = Math.round(t.speed_a_mph) }
+      if (m.b.eighth === null && t.dist_b_ft >= 660)   { m.b.eighth = t.time_s; m.b.eighthSpeed = Math.round(t.speed_b_mph) }
+      if (m.a.trap   === null && t.dist_a_ft >= 1320)  { m.a.trap = t.speed_a_mph; m.a.et = t.time_s }
+      if (m.b.trap   === null && t.dist_b_ft >= 1320)  { m.b.trap = t.speed_b_mph; m.b.et = t.time_s }
+      if (m.a.half   === null && t.dist_a_ft >= 2640)  { m.a.half = t.time_s; m.a.halfSpeed = Math.round(t.speed_a_mph) }
+      if (m.b.half   === null && t.dist_b_ft >= 2640)  { m.b.half = t.time_s; m.b.halfSpeed = Math.round(t.speed_b_mph) }
     }
     return m
   }, [raceData, raceState, frame])
@@ -487,7 +489,7 @@ export default function RaceSetup() {
       display: 'flex', flexDirection: 'column',
       overflow: 'hidden',
     }}>
-      <style>{`@keyframes blink{0%,100%{opacity:1}50%{opacity:0}}.blink{animation:blink 1s step-end infinite}`}</style>
+      <style>{`@keyframes blink{0%,100%{opacity:1}50%{opacity:0}}.blink{animation:blink 1s step-end infinite}@keyframes flashLock{0%{background-color:rgba(220,38,38,0.3)}100%{background-color:transparent}}`}</style>
 
       {/* ── Background ── */}
       <div style={{ position: 'fixed', inset: 0, zIndex: 0, pointerEvents: 'none' }}>
@@ -698,6 +700,7 @@ export default function RaceSetup() {
           milestones={milestones.a}
           isWinner={winnerA}
           onReplay={handleRestart}
+          distIdx={distIdx}
         />
         <div style={{ position: 'absolute', top: 0, bottom: 0, left: '50%', width: 1, background: 'rgba(245,245,240,0.06)', zIndex: 1, pointerEvents: 'none' }} />
         <CarPanel
@@ -709,6 +712,7 @@ export default function RaceSetup() {
           milestones={milestones.b}
           isWinner={winnerB}
           onReplay={handleRestart}
+          distIdx={distIdx}
         />
       </div>
 
@@ -737,7 +741,7 @@ export default function RaceSetup() {
               <span style={{ color: 'rgba(245,245,240,0.12)', margin: '0 4px' }}>/</span>
               <span style={{ color: live ? 'rgba(245,245,240,0.6)' : DIM }}>{etB}</span>
               <span style={{ color: 'rgba(245,245,240,0.12)', margin: '0 14px' }}>·</span>
-              <span style={{ color: DIM }}>60FT </span>
+              <span style={{ color: DIM }}>0-60 </span>
               <span style={{ color: milestones.a.sixty != null ? 'rgba(220,38,38,0.85)' : DIM }}>{sixtyA}</span>
               <span style={{ color: 'rgba(245,245,240,0.12)', margin: '0 4px' }}>/</span>
               <span style={{ color: milestones.b.sixty != null ? 'rgba(245,245,240,0.6)' : DIM }}>{sixtyB}</span>

@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import Cascade from './Cascade'
 
 const ACCENT  = { a: '#DC2626', b: '#F5F5F0' }
@@ -273,6 +273,160 @@ function GridDivider({ vertical }) {
   )
 }
 
+// ── Results section (terminal log) ───────────────────────────────────────────
+
+function ResultsSection({ milestones, accent, distIdx, racePhase, isDone, isWinner }) {
+  const [flashing, setFlashing] = useState({})
+  const prevRef = useRef({ sixty: null, eighth: null, et: null, half: null, trap: null })
+
+  useEffect(() => {
+    const keys = ['sixty', 'eighth', 'et', 'half', 'trap']
+    const newly = {}
+    for (const k of keys) {
+      if (prevRef.current[k] == null && milestones[k] != null) newly[k] = true
+    }
+    prevRef.current = {
+      sixty: milestones.sixty, eighth: milestones.eighth,
+      et: milestones.et, half: milestones.half, trap: milestones.trap,
+    }
+    if (!Object.keys(newly).length) return
+    setFlashing(f => ({ ...f, ...newly }))
+    const tid = setTimeout(() => {
+      setFlashing(f => {
+        const next = { ...f }
+        for (const k of Object.keys(newly)) delete next[k]
+        return next
+      })
+    }, 350)
+    return () => clearTimeout(tid)
+  }, [milestones.sixty, milestones.eighth, milestones.et, milestones.half, milestones.trap])
+
+  const accentRgb = accent === '#DC2626' ? '220,38,38' : '245,245,240'
+  const dotLeader = {
+    flex: 1, height: 1, margin: '0 8px',
+    backgroundImage: 'radial-gradient(circle, rgba(245,245,240,0.15) 1px, transparent 1px)',
+    backgroundSize: '5px 1px', backgroundRepeat: 'repeat-x', backgroundPosition: 'center',
+  }
+
+  const rows = []
+  rows.push({
+    key: 'sixty', flashKey: 'sixty', label: '0-60 MPH',
+    mainVal: milestones.sixty != null ? `${milestones.sixty.toFixed(2)} S` : null,
+    suffix: null,
+  })
+  rows.push({
+    key: 'eighth', flashKey: 'eighth', label: '1/8 MILE',
+    mainVal: milestones.eighth != null ? `${milestones.eighth.toFixed(3)} S` : null,
+    suffix: milestones.eighth != null && milestones.eighthSpeed != null
+      ? `@ ${milestones.eighthSpeed} MPH` : null,
+  })
+  if (distIdx === 0 || distIdx === 2) {
+    rows.push({
+      key: 'et', flashKey: 'et', label: '1/4 MILE',
+      mainVal: milestones.et != null ? `${milestones.et.toFixed(3)} S` : null,
+      suffix: milestones.et != null && milestones.trap != null
+        ? `@ ${Math.round(milestones.trap)} MPH` : null,
+    })
+  }
+  if (distIdx === 2) {
+    rows.push({
+      key: 'half', flashKey: 'half', label: '1/2 MILE',
+      mainVal: milestones.half != null ? `${milestones.half.toFixed(3)} S` : null,
+      suffix: milestones.half != null && milestones.halfSpeed != null
+        ? `@ ${milestones.halfSpeed} MPH` : null,
+    })
+  }
+  rows.push({
+    key: 'trap', flashKey: distIdx === 1 ? 'eighth' : 'trap', label: 'TRAP SPEED',
+    mainVal: distIdx === 1
+      ? (milestones.eighthSpeed != null ? `${milestones.eighthSpeed} MPH` : null)
+      : (milestones.trap != null ? `${milestones.trap.toFixed(1)} MPH` : null),
+    suffix: null,
+  })
+
+  const isActive = racePhase === 'racing'
+  const allLocked = rows.every(r => r.mainVal !== null)
+  const showBlink = isActive && !allLocked
+
+  return (
+    <div style={{ marginTop: 16 }}>
+      <div style={{
+        height: 1, margin: '0 0 16px',
+        background: `rgba(${accentRgb},0.2)`,
+      }} />
+
+      <div style={{ display: 'flex', alignItems: 'center', marginBottom: 10 }}>
+        <span style={{
+          fontFamily: DISPLAY, fontSize: 14, color: accent,
+          letterSpacing: '0.06em', textTransform: 'uppercase',
+        }}>
+          {'> RESULTS'}
+        </span>
+        {showBlink && (
+          <span className="blink" style={{
+            marginLeft: 3, color: '#DC2626',
+            fontFamily: MONO, fontSize: 13, lineHeight: 1,
+          }}>|</span>
+        )}
+        {isDone && isWinner && (
+          <span style={{
+            marginLeft: 14, fontFamily: DISPLAY, fontSize: 12,
+            color: '#DC2626', letterSpacing: '0.08em', textTransform: 'uppercase',
+            display: 'flex', alignItems: 'center', gap: 4,
+          }}>
+            <span className="blink">·</span>WINNER
+          </span>
+        )}
+      </div>
+
+      <div style={{ display: 'flex', flexDirection: 'column' }}>
+        {rows.map(row => {
+          const locked = row.mainVal !== null
+          const isFlashing = !!flashing[row.flashKey]
+          return (
+            <div key={row.key} style={{
+              display: 'flex', alignItems: 'center',
+              padding: '3px 0', minHeight: 26,
+            }}>
+              <span style={{
+                fontFamily: MONO, fontSize: 12,
+                color: 'rgba(245,245,240,0.5)',
+                letterSpacing: '0.08em', textTransform: 'uppercase',
+                flexShrink: 0, lineHeight: 1,
+              }}>
+                {row.label}
+              </span>
+              <div style={dotLeader} />
+              <div style={{
+                display: 'flex', alignItems: 'baseline', gap: 4,
+                flexShrink: 0, padding: '1px 4px',
+                animation: isFlashing ? 'flashLock 0.25s ease-out forwards' : 'none',
+              }}>
+                <span style={{
+                  fontFamily: DISPLAY, fontSize: 16,
+                  color: locked ? accent : `rgba(${accentRgb},0.25)`,
+                  letterSpacing: '0.02em', lineHeight: 1,
+                }}>
+                  {locked ? row.mainVal : '───'}
+                </span>
+                {locked && row.suffix && (
+                  <span style={{
+                    fontFamily: MONO, fontSize: 11,
+                    color: `rgba(${accentRgb},0.6)`,
+                    letterSpacing: '0.06em', lineHeight: 1,
+                  }}>
+                    {row.suffix}
+                  </span>
+                )}
+              </div>
+            </div>
+          )
+        })}
+      </div>
+    </div>
+  )
+}
+
 // ── CarPanel ──────────────────────────────────────────────────────────────────
 
 export default function CarPanel({
@@ -281,9 +435,10 @@ export default function CarPanel({
   racePhase = 'idle',
   tick       = null,
   gForce     = 0,
-  milestones = { sixty: null, eighth: null, eighthSpeed: null, trap: null, et: null },
+  milestones = { sixty: null, eighth: null, eighthSpeed: null, trap: null, et: null, half: null, halfSpeed: null },
   isWinner   = false,
   onReplay,
+  distIdx    = 0,
 }) {
   const accent = ACCENT[side]
   const label  = LABEL[side]
@@ -369,109 +524,57 @@ export default function CarPanel({
               </div>
             )}
 
-            {/* ── LIVE: 2×2 telemetry grid ── */}
-            {showLive && (
+            {/* ── LIVE/DONE: telemetry 2×2 + results section ── */}
+            {(showLive || showDone) && (
               <div style={{ flex: 1 }}>
+                {/* Telemetry grid — dims to 50% when race ends */}
                 <div style={{
-                  display: 'grid', gridTemplateColumns: '1fr 1px 1fr',
-                  gap: 0,
+                  opacity: isDone ? 0.5 : 1,
+                  transition: 'opacity 0.4s ease',
                 }}>
-                  {/* Row 1 */}
-                  <LiveCell
-                    label="RPM"
-                    value={rpmVal.toLocaleString('en-US')}
-                    unit={null}
-                    viz={<ArcGauge value={rpmVal} max={maxRpm} color={accent} showRedline />}
-                  />
-                  <GridDivider vertical />
-                  <div style={{ paddingLeft: 20 }}>
+                  <div style={{
+                    display: 'grid', gridTemplateColumns: '1fr 1px 1fr',
+                    gap: 0,
+                  }}>
                     <LiveCell
-                      label="SPEED"
-                      value={speedVal}
-                      unit="MPH"
-                      viz={<ArcGauge value={speedVal} max={200} color={accent} />}
+                      label="RPM"
+                      value={rpmVal.toLocaleString('en-US')}
+                      unit={null}
+                      viz={<ArcGauge value={rpmVal} max={maxRpm} color={accent} showRedline />}
                     />
-                  </div>
+                    <GridDivider vertical />
+                    <div style={{ paddingLeft: 20 }}>
+                      <LiveCell
+                        label="SPEED"
+                        value={speedVal}
+                        unit="MPH"
+                        viz={<ArcGauge value={speedVal} max={200} color={accent} />}
+                      />
+                    </div>
 
-                  {/* Row divider */}
-                  <GridDivider />
+                    <GridDivider />
 
-                  {/* Row 2 */}
-                  <LiveCell
-                    label="G-FORCE"
-                    value={gForce.toFixed(1)}
-                    unit="G"
-                    viz={<GForcePlot gx={0} gy={gForce} color={accent} />}
-                  />
-                  <GridDivider vertical />
-                  <div style={{ paddingLeft: 20 }}>
                     <LiveCell
-                      label="ET"
-                      value={etVal}
-                      unit="S"
+                      label="G-FORCE"
+                      value={gForce.toFixed(1)}
+                      unit="G"
+                      viz={<GForcePlot gx={0} gy={gForce} color={accent} />}
                     />
+                    <GridDivider vertical />
+                    <div style={{ paddingLeft: 20 }}>
+                      <LiveCell label="ET" value={etVal} unit="S" />
+                    </div>
                   </div>
                 </div>
-              </div>
-            )}
 
-            {/* ── DONE: results grid ── */}
-            {showDone && (
-              <div style={{ flex: 1 }}>
-                {isWinner && (
-                  <div style={{ marginBottom: 12 }}>
-                    <span style={{
-                      fontFamily: DISPLAY, fontSize: 14,
-                      color: '#DC2626', letterSpacing: '0.06em',
-                      textTransform: 'uppercase',
-                      display: 'flex', alignItems: 'center', gap: 4,
-                    }}>
-                      <span className="blink">{'>'}</span>
-                      WINNER
-                      <span className="blink" style={{ animationDelay: '0.5s' }}>_</span>
-                    </span>
-                  </div>
-                )}
-
-                <div style={{
-                  display: 'grid', gridTemplateColumns: '1fr 1px 1fr',
-                  gap: 0,
-                }}>
-                  {/* Row 1 */}
-                  <ResultCell
-                    label="0–60"
-                    time={selectedCar.zero_to_sixty}
-                    suffix="S"
-                  />
-                  <GridDivider vertical />
-                  <div style={{ paddingLeft: 20 }}>
-                    <ResultCell
-                      label="1/8 MI"
-                      time={milestones.eighth != null ? milestones.eighth.toFixed(3) : '—'}
-                      timeFontSize={28}
-                      sub={milestones.eighthSpeed != null ? `@ ${milestones.eighthSpeed} MPH` : null}
-                    />
-                  </div>
-
-                  {/* Row divider */}
-                  <GridDivider />
-
-                  {/* Row 2 */}
-                  <ResultCell
-                    label="1/4 MI"
-                    time={milestones.et != null ? milestones.et.toFixed(3) : '—'}
-                    timeFontSize={28}
-                    sub={milestones.trap != null ? `@ ${Math.round(milestones.trap)} MPH` : null}
-                  />
-                  <GridDivider vertical />
-                  <div style={{ paddingLeft: 20 }}>
-                    <ResultCell
-                      label="PEAK SPEED"
-                      time={milestones.trap != null ? Math.round(milestones.trap) : '—'}
-                      suffix="MPH"
-                    />
-                  </div>
-                </div>
+                <ResultsSection
+                  milestones={milestones}
+                  accent={accent}
+                  distIdx={distIdx}
+                  racePhase={racePhase}
+                  isDone={isDone}
+                  isWinner={isWinner}
+                />
               </div>
             )}
 
