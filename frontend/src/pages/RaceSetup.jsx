@@ -34,41 +34,78 @@ function CarCoupe({ strokeColor }) {
   )
 }
 
-const DIST_VALS  = ['¼ MILE', '⅛ MILE', '½ MILE']
+const DIST_VALS  = ['1/4 MILE', '1/8 MILE', '1/2 MILE']
 const START_VALS = ['DIG', 'ROLL']
 const SURF_VALS  = ['DRY', 'WET']
 
-function CycleParam({ label, value, onClick }) {
+function SegOption({ label, isActive, locked, onClick }) {
   const [hov, setHov] = useState(false)
+  let opacity
+  if (locked) {
+    opacity = isActive ? 0.5 : 0.15
+  } else if (isActive) {
+    opacity = 1
+  } else {
+    opacity = hov ? 0.6 : 0.3
+  }
+  const underlineColor = locked ? 'rgba(220,38,38,0.4)' : '#DC2626'
   return (
-    <div
+    <span
       onClick={onClick}
-      onMouseEnter={() => setHov(true)}
+      onMouseEnter={() => { if (!locked && !isActive) setHov(true) }}
       onMouseLeave={() => setHov(false)}
-      style={{ display: 'flex', flexDirection: 'column', gap: 4, cursor: 'pointer', userSelect: 'none', whiteSpace: 'nowrap' }}
+      style={{
+        fontFamily: MONO, fontSize: 16,
+        color: `rgba(245,245,240,${opacity})`,
+        letterSpacing: '0.06em', textTransform: 'uppercase',
+        cursor: locked || isActive ? 'default' : 'pointer',
+        transition: 'color 0.1s', lineHeight: 1,
+        display: 'inline-block',
+        paddingBottom: 4,
+        borderBottom: isActive ? `1.5px solid ${underlineColor}` : '1.5px solid transparent',
+        userSelect: 'none', whiteSpace: 'nowrap',
+      }}
     >
-      <span style={{ fontFamily: MONO, fontSize: 10, color: hov ? ACCENT : DIM, letterSpacing: '0.12em', textTransform: 'uppercase', transition: 'color 0.1s', lineHeight: 1 }}>
+      {label}
+    </span>
+  )
+}
+
+function SegmentedParam({ label, options, activeIdx, onSelect, locked }) {
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 6, userSelect: 'none', whiteSpace: 'nowrap' }}>
+      <span style={{ fontFamily: MONO, fontSize: 10, color: DIM, letterSpacing: '0.12em', textTransform: 'uppercase', lineHeight: 1 }}>
         {label}
       </span>
-      <span style={{ fontFamily: MONO, fontSize: 18, color: TEXT, letterSpacing: '0.06em', textTransform: 'uppercase', lineHeight: 1 }}>
-        {value}
-      </span>
+      <div style={{ display: 'flex', alignItems: 'center' }}>
+        {options.map((opt, i) => (
+          <span key={i} style={{ display: 'flex', alignItems: 'center' }}>
+            {i > 0 && (
+              <span style={{
+                fontFamily: MONO, fontSize: 12,
+                color: `rgba(245,245,240,${locked ? 0.1 : 0.2})`,
+                margin: '0 8px', lineHeight: 1, userSelect: 'none',
+              }}>·</span>
+            )}
+            <SegOption
+              label={opt}
+              isActive={i === activeIdx}
+              locked={locked}
+              onClick={() => !locked && onSelect(i)}
+            />
+          </span>
+        ))}
+      </div>
     </div>
   )
 }
 
 function StatParam({ label, value }) {
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 4, whiteSpace: 'nowrap', userSelect: 'none' }}>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 6, whiteSpace: 'nowrap', userSelect: 'none' }}>
       <span style={{ fontFamily: MONO, fontSize: 10, color: DIM, letterSpacing: '0.12em', textTransform: 'uppercase', lineHeight: 1 }}>{label}</span>
-      <span style={{ fontFamily: MONO, fontSize: 18, color: TEXT, letterSpacing: '0.06em', textTransform: 'uppercase', lineHeight: 1 }}>{value}</span>
+      <span style={{ fontFamily: MONO, fontSize: 16, color: TEXT, letterSpacing: '0.06em', textTransform: 'uppercase', lineHeight: 1 }}>{value}</span>
     </div>
-  )
-}
-
-function Dot() {
-  return (
-    <span style={{ fontFamily: MONO, fontSize: 14, color: 'rgba(245,245,240,0.15)', margin: '0 14px', userSelect: 'none', alignSelf: 'center' }}>·</span>
   )
 }
 
@@ -463,7 +500,7 @@ export default function RaceSetup() {
           V0.1.0 // 1017 CARS
         </span>
         <span style={{ fontFamily: MONO, fontSize: 11, color: DIM, letterSpacing: '0.12em', textTransform: 'uppercase' }}>
-          ¼ MILE · SIDE BY SIDE · DIG START
+          1/4 MILE · SIDE BY SIDE · DIG START
         </span>
         <span style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
           <span style={{ fontFamily: MONO, fontSize: 11, color: DIM, letterSpacing: '0.12em', textTransform: 'uppercase' }}>SYS — READY</span>
@@ -514,7 +551,7 @@ export default function RaceSetup() {
             <div style={{ width: 1, height: 8, background: 'rgba(245,245,240,0.14)' }} />
           </div>
         ))}
-        <span style={{ position: 'absolute', right: 6, bottom: 14, fontFamily: MONO, fontSize: 8, color: 'rgba(245,245,240,0.2)', letterSpacing: '0.08em', textTransform: 'uppercase' }}>¼ MILE</span>
+        <span style={{ position: 'absolute', right: 6, bottom: 14, fontFamily: MONO, fontSize: 8, color: 'rgba(245,245,240,0.2)', letterSpacing: '0.08em', textTransform: 'uppercase' }}>1/4 MILE</span>
 
         {/* Lane A car */}
         {(() => {
@@ -575,26 +612,24 @@ export default function RaceSetup() {
       {/* ── Race params toolbar ── */}
       <div style={{
         height: '8vh', minHeight: 60, flexShrink: 0,
-        display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+        display: 'flex', alignItems: 'center', justifyContent: 'center',
         padding: '0 24px',
         position: 'relative', zIndex: 10,
         borderTop: '1px solid rgba(220,38,38,0.4)',
         borderBottom: '1px solid rgba(220,38,38,0.4)',
         background: 'rgba(0,0,0,0.4)',
       }}>
-        <div style={{ display: 'flex', alignItems: 'center', opacity: raceState !== 'idle' ? 0.3 : 1, transition: 'opacity 0.2s', pointerEvents: raceState !== 'idle' ? 'none' : 'auto' }}>
-          <CycleParam label="DISTANCE" value={DIST_VALS[distIdx]}  onClick={() => setDistIdx(i => (i + 1) % DIST_VALS.length)} />
-          <Dot />
-          <CycleParam label="START"    value={START_VALS[startIdx]} onClick={() => setStartIdx(i => (i + 1) % START_VALS.length)} />
-          <Dot />
-          <CycleParam label="SURFACE"  value={SURF_VALS[surfIdx]}   onClick={() => setSurfIdx(i => (i + 1) % SURF_VALS.length)} />
-          <Dot />
+        {/* Centered params */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: 48 }}>
+          <SegmentedParam label="DISTANCE" options={DIST_VALS}  activeIdx={distIdx}  onSelect={setDistIdx}  locked={raceState !== 'idle'} />
+          <SegmentedParam label="START"    options={START_VALS} activeIdx={startIdx} onSelect={setStartIdx} locked={raceState !== 'idle'} />
+          <SegmentedParam label="SURFACE"  options={SURF_VALS}  activeIdx={surfIdx}  onSelect={setSurfIdx}  locked={raceState !== 'idle'} />
           <StatParam label="DA"   value="56 FT" />
-          <Dot />
           <StatParam label="WIND" value="0 MPH" />
         </div>
 
-        <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
+        {/* Right-aligned CTA */}
+        <div style={{ position: 'absolute', right: 24, display: 'flex', alignItems: 'center', gap: 16 }}>
           {error && (
             <span style={{ fontFamily: MONO, fontSize: 10, color: ACCENT, letterSpacing: '0.1em' }}>{error}</span>
           )}

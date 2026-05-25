@@ -478,15 +478,12 @@ export default function CarPanel({
             {/* ── Action links ── */}
             <div style={{ marginTop: 20, display: 'flex', gap: 20 }}>
               {racePhase === 'idle' || racePhase === 'loading' ? (
-                <>
-                  <ActionLink onClick={handleClear}>[ EDIT ]</ActionLink>
-                  <ActionLink onClick={handleClear}>[ REMOVE ]</ActionLink>
-                </>
+                <ActionLink onClick={handleClear}>[ REMOVE ]</ActionLink>
               ) : racePhase === 'racing' ? (
-                <ActionLink onClick={handleClear}>[ CHANGE CARS ]</ActionLink>
+                <ActionLink onClick={handleClear}>[ CHANGE CAR ]</ActionLink>
               ) : (
                 <>
-                  <ActionLink onClick={handleClear}>[ CHANGE CARS ]</ActionLink>
+                  <ActionLink onClick={handleClear}>[ CHANGE CAR ]</ActionLink>
                   {onReplay && <ActionLink onClick={onReplay}>[ REPLAY ]</ActionLink>}
                 </>
               )}
