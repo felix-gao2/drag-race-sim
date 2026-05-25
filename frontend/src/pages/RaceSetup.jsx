@@ -109,98 +109,129 @@ function StatParam({ label, value }) {
   )
 }
 
-function NavLink({ label, onClick }) {
+function PlaybackBtn({ label, onClick }) {
   const [hov, setHov] = useState(false)
   return (
-    <span
+    <button
       onClick={onClick}
       onMouseEnter={() => setHov(true)}
       onMouseLeave={() => setHov(false)}
       style={{
-        fontFamily: MONO, fontSize: 12,
-        color: hov ? ACCENT : DIM,
-        letterSpacing: '0.1em',
-        cursor: 'pointer', userSelect: 'none',
-        transition: 'color 0.1s',
+        fontFamily: MONO, fontSize: 13,
+        letterSpacing: '0.05em', textTransform: 'uppercase',
+        color: hov ? TEXT : 'rgba(245,245,240,0.7)',
+        background: 'none',
+        border: `1px solid ${hov ? TEXT : 'rgba(245,245,240,0.3)'}`,
+        padding: '10px 18px',
+        cursor: 'pointer',
+        transition: 'color 0.12s, border-color 0.12s',
+        userSelect: 'none', lineHeight: 1, borderRadius: 0,
       }}
     >
-      [{label}]
-    </span>
+      {label}
+    </button>
   )
 }
+
+function PlayPauseBtn({ paused, onClick }) {
+  return (
+    <button
+      onClick={onClick}
+      style={{
+        fontFamily: MONO, fontSize: 15,
+        letterSpacing: '0.05em', textTransform: 'uppercase',
+        color: ACCENT, background: 'none',
+        border: `1px solid ${ACCENT}`,
+        padding: '12px 24px', minWidth: 140,
+        cursor: 'pointer', userSelect: 'none',
+        lineHeight: 1, borderRadius: 0,
+      }}
+    >
+      {paused ? (
+        <><span className="blink">▷</span>{' PLAY_'}</>
+      ) : (
+        '❚❚ PAUSE_'
+      )}
+    </button>
+  )
+}
+
+function SpeedParam({ label, value, onClick }) {
+  const [hov, setHov] = useState(false)
+  return (
+    <div
+      onClick={onClick}
+      onMouseEnter={() => setHov(true)}
+      onMouseLeave={() => setHov(false)}
+      style={{ display: 'flex', flexDirection: 'column', gap: 6, cursor: 'pointer', userSelect: 'none' }}
+    >
+      <span style={{ fontFamily: MONO, fontSize: 10, color: DIM, letterSpacing: '0.12em', textTransform: 'uppercase', lineHeight: 1 }}>
+        {label}
+      </span>
+      <span style={{
+        fontFamily: MONO, fontSize: 16,
+        color: hov ? ACCENT : TEXT,
+        letterSpacing: '0.06em', lineHeight: 1,
+        transition: 'color 0.1s',
+      }}>
+        {value}
+      </span>
+    </div>
+  )
+}
+
+const DIVIDER = (
+  <div style={{ display: 'flex', alignItems: 'center' }}>
+    <div style={{ width: 32 }} />
+    <div style={{ width: 1, height: 40, background: 'rgba(245,245,240,0.2)', flexShrink: 0 }} />
+    <div style={{ width: 32 }} />
+  </div>
+)
 
 function PlaybackHeader({ tick, paused, onPlayPause, onRestart, onPrev, onNext, speedIdx, onCycleSpeed }) {
   const timeStr = tick ? tick.time_s.toFixed(2) : '0.00'
   return (
     <div style={{
-      height: '10vh', minHeight: 72, flexShrink: 0,
-      display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+      height: '12vh', minHeight: 86, flexShrink: 0,
+      display: 'flex', alignItems: 'center', justifyContent: 'center',
       padding: '0 24px',
       position: 'relative', zIndex: 10,
       borderTop: '1px solid rgba(220,38,38,0.4)',
       borderBottom: '1px solid rgba(220,38,38,0.4)',
     }}>
-      {/* Left: play/pause + nav */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: 20 }}>
-        <span
-          onClick={onPlayPause}
-          style={{
-            fontFamily: DISPLAY, fontSize: 22,
-            letterSpacing: '0.04em', textTransform: 'uppercase',
-            color: ACCENT, cursor: 'pointer',
-            display: 'flex', alignItems: 'center', userSelect: 'none',
-          }}
-        >
-          {paused ? (
-            <>
-              <span className="blink" style={{ marginRight: 6 }}>{'>'}</span>
-              PLAY
-              <span className="blink" style={{ animationDelay: '0.5s', marginLeft: 2 }}>_</span>
-            </>
-          ) : (
-            <>
-              <span style={{ marginRight: 6 }}>{'>'}</span>
-              PAUSE
-              <span style={{ marginLeft: 2 }}>_</span>
-            </>
-          )}
-        </span>
-        <div style={{ display: 'flex', gap: 14, alignItems: 'center' }}>
-          <NavLink label="RESTART" onClick={onRestart} />
-          <NavLink label="PREV" onClick={onPrev} />
-          <NavLink label="NEXT" onClick={onNext} />
+      <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+        {/* Nav + play buttons */}
+        <PlaybackBtn label="RESTART" onClick={onRestart} />
+        <PlaybackBtn label="PREV"    onClick={onPrev} />
+        <PlayPauseBtn paused={paused} onClick={onPlayPause} />
+        <PlaybackBtn label="NEXT"    onClick={onNext} />
+
+        {DIVIDER}
+
+        {/* Time readout */}
+        <div style={{ display: 'flex', alignItems: 'baseline' }}>
+          <span style={{
+            fontFamily: MONO, fontSize: 48,
+            color: TEXT, lineHeight: 1,
+            letterSpacing: '0.02em',
+            fontVariantNumeric: 'tabular-nums',
+          }}>
+            {timeStr}
+          </span>
+          <span style={{
+            fontFamily: MONO, fontSize: 16,
+            color: DIM, marginLeft: 6,
+            letterSpacing: '0.08em', lineHeight: 1,
+          }}>
+            S
+          </span>
         </div>
-      </div>
 
-      {/* Center: hero time */}
-      <div style={{
-        position: 'absolute', left: '50%', transform: 'translateX(-50%)',
-        display: 'flex', alignItems: 'baseline',
-        pointerEvents: 'none',
-      }}>
-        <span style={{
-          fontFamily: MONO, fontWeight: 500, fontSize: 64,
-          color: TEXT, lineHeight: 1,
-          letterSpacing: '0.02em',
-          fontVariantNumeric: 'tabular-nums',
-        }}>
-          {timeStr}
-        </span>
-        <span style={{
-          fontFamily: DISPLAY, fontSize: 24,
-          color: DIM, marginLeft: 8,
-          letterSpacing: '0.06em', lineHeight: 1,
-        }}>
-          S
-        </span>
-      </div>
+        {DIVIDER}
 
-      {/* Right: speed cycle */}
-      <CycleParam
-        label="SPEED"
-        value={SPEED_VALS[speedIdx]}
-        onClick={onCycleSpeed}
-      />
+        {/* Speed */}
+        <SpeedParam label="SPEED" value={SPEED_VALS[speedIdx]} onClick={onCycleSpeed} />
+      </div>
     </div>
   )
 }
