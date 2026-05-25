@@ -340,8 +340,8 @@ function TimelineScrubber({ telemetry, frame, onScrub }) {
 }
 
 const INIT_MILESTONES = {
-  a: { sixty: null, eighth: null, eighthSpeed: null, trap: null, et: null, half: null, halfSpeed: null },
-  b: { sixty: null, eighth: null, eighthSpeed: null, trap: null, et: null, half: null, halfSpeed: null },
+  a: { sixty: null, hundred: null, sixtyFt: null, threethirtyFt: null, eighth: null, eighthSpeed: null, trap: null, et: null, half: null, halfSpeed: null },
+  b: { sixty: null, hundred: null, sixtyFt: null, threethirtyFt: null, eighth: null, eighthSpeed: null, trap: null, et: null, half: null, halfSpeed: null },
 }
 
 export default function RaceSetup() {
@@ -363,13 +363,19 @@ export default function RaceSetup() {
   const milestones = useMemo(() => {
     if (!raceData || raceState === 'idle' || raceState === 'loading') return INIT_MILESTONES
     const m = {
-      a: { sixty: null, eighth: null, eighthSpeed: null, trap: null, et: null, half: null, halfSpeed: null },
-      b: { sixty: null, eighth: null, eighthSpeed: null, trap: null, et: null, half: null, halfSpeed: null },
+      a: { sixty: null, hundred: null, sixtyFt: null, threethirtyFt: null, eighth: null, eighthSpeed: null, trap: null, et: null, half: null, halfSpeed: null },
+      b: { sixty: null, hundred: null, sixtyFt: null, threethirtyFt: null, eighth: null, eighthSpeed: null, trap: null, et: null, half: null, halfSpeed: null },
     }
     for (let i = 0; i <= Math.min(frame, raceData.telemetry.length - 1); i++) {
       const t = raceData.telemetry[i]
-      if (m.a.sixty  === null && t.speed_a_mph >= 60)  m.a.sixty  = t.time_s
-      if (m.b.sixty  === null && t.speed_b_mph >= 60)  m.b.sixty  = t.time_s
+      if (m.a.sixtyFt       === null && t.dist_a_ft >= 60)    m.a.sixtyFt       = t.time_s
+      if (m.b.sixtyFt       === null && t.dist_b_ft >= 60)    m.b.sixtyFt       = t.time_s
+      if (m.a.sixty         === null && t.speed_a_mph >= 60)  m.a.sixty         = t.time_s
+      if (m.b.sixty         === null && t.speed_b_mph >= 60)  m.b.sixty         = t.time_s
+      if (m.a.threethirtyFt === null && t.dist_a_ft >= 330)   m.a.threethirtyFt = t.time_s
+      if (m.b.threethirtyFt === null && t.dist_b_ft >= 330)   m.b.threethirtyFt = t.time_s
+      if (m.a.hundred       === null && t.speed_a_mph >= 100) m.a.hundred       = t.time_s
+      if (m.b.hundred       === null && t.speed_b_mph >= 100) m.b.hundred       = t.time_s
       if (m.a.eighth === null && t.dist_a_ft >= 660)   { m.a.eighth = t.time_s; m.a.eighthSpeed = Math.round(t.speed_a_mph) }
       if (m.b.eighth === null && t.dist_b_ft >= 660)   { m.b.eighth = t.time_s; m.b.eighthSpeed = Math.round(t.speed_b_mph) }
       if (m.a.trap   === null && t.dist_a_ft >= 1320)  { m.a.trap = t.speed_a_mph; m.a.et = t.time_s }

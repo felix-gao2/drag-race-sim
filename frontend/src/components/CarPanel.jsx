@@ -273,21 +273,64 @@ function GridDivider({ vertical }) {
   )
 }
 
-// ── Results section (terminal log) ───────────────────────────────────────────
+// ── Results section (4×2 grid) ───────────────────────────────────────────────
 
-function ResultsSection({ milestones, accent, distIdx, racePhase, isDone, isWinner }) {
+function GridResultCell({ label, mainVal, suffix, flashKey, isEmpty, flashing, accent, accentRgb }) {
+  if (isEmpty) return <div />
+  const locked = mainVal !== null
+  const isFlashing = !!flashing[flashKey]
+  return (
+    <div style={{ padding: '8px 12px', display: 'flex', flexDirection: 'column', gap: 6 }}>
+      <span style={{
+        fontFamily: MONO, fontSize: 10,
+        color: 'rgba(245,245,240,0.4)',
+        letterSpacing: '0.1em', textTransform: 'uppercase', lineHeight: 1,
+      }}>
+        {label}
+      </span>
+      <div style={{
+        display: 'flex', alignItems: 'baseline', gap: 4,
+        animation: isFlashing ? 'flashLock 0.25s ease-out forwards' : 'none',
+      }}>
+        <span style={{
+          fontFamily: DISPLAY, fontSize: 18,
+          color: locked ? accent : `rgba(${accentRgb},0.25)`,
+          letterSpacing: '0.02em', lineHeight: 1,
+        }}>
+          {locked ? mainVal : '───'}
+        </span>
+        {locked && suffix && (
+          <span style={{
+            fontFamily: MONO, fontSize: 11,
+            color: `rgba(${accentRgb},0.6)`,
+            letterSpacing: '0.06em', lineHeight: 1,
+          }}>
+            {suffix}
+          </span>
+        )}
+      </div>
+    </div>
+  )
+}
+
+function ResultsSection({ milestones, accent, distIdx, racePhase, isDone, isWinner, horsepower }) {
   const [flashing, setFlashing] = useState({})
-  const prevRef = useRef({ sixty: null, eighth: null, et: null, half: null, trap: null })
+  const prevRef = useRef({
+    sixty: null, hundred: null, sixtyFt: null, threethirtyFt: null,
+    eighth: null, et: null, half: null, trap: null,
+  })
 
   useEffect(() => {
-    const keys = ['sixty', 'eighth', 'et', 'half', 'trap']
+    const keys = ['sixty', 'hundred', 'sixtyFt', 'threethirtyFt', 'eighth', 'et', 'half', 'trap']
     const newly = {}
     for (const k of keys) {
       if (prevRef.current[k] == null && milestones[k] != null) newly[k] = true
     }
     prevRef.current = {
-      sixty: milestones.sixty, eighth: milestones.eighth,
-      et: milestones.et, half: milestones.half, trap: milestones.trap,
+      sixty: milestones.sixty, hundred: milestones.hundred,
+      sixtyFt: milestones.sixtyFt, threethirtyFt: milestones.threethirtyFt,
+      eighth: milestones.eighth, et: milestones.et,
+      half: milestones.half, trap: milestones.trap,
     }
     if (!Object.keys(newly).length) return
     setFlashing(f => ({ ...f, ...newly }))
@@ -299,63 +342,31 @@ function ResultsSection({ milestones, accent, distIdx, racePhase, isDone, isWinn
       })
     }, 350)
     return () => clearTimeout(tid)
-  }, [milestones.sixty, milestones.eighth, milestones.et, milestones.half, milestones.trap])
+  }, [
+    milestones.sixty, milestones.hundred, milestones.sixtyFt, milestones.threethirtyFt,
+    milestones.eighth, milestones.et, milestones.half, milestones.trap,
+  ])
 
   const accentRgb = accent === '#DC2626' ? '220,38,38' : '245,245,240'
-  const dotLeader = {
-    flex: 1, height: 1, margin: '0 8px',
-    backgroundImage: 'radial-gradient(circle, rgba(245,245,240,0.15) 1px, transparent 1px)',
-    backgroundSize: '5px 1px', backgroundRepeat: 'repeat-x', backgroundPosition: 'center',
-  }
-
-  const rows = []
-  rows.push({
-    key: 'sixty', flashKey: 'sixty', label: '0-60 MPH',
-    mainVal: milestones.sixty != null ? `${milestones.sixty.toFixed(2)} S` : null,
-    suffix: null,
-  })
-  rows.push({
-    key: 'eighth', flashKey: 'eighth', label: '1/8 MILE',
-    mainVal: milestones.eighth != null ? `${milestones.eighth.toFixed(3)} S` : null,
-    suffix: milestones.eighth != null && milestones.eighthSpeed != null
-      ? `@ ${milestones.eighthSpeed} MPH` : null,
-  })
-  if (distIdx === 0 || distIdx === 2) {
-    rows.push({
-      key: 'et', flashKey: 'et', label: '1/4 MILE',
-      mainVal: milestones.et != null ? `${milestones.et.toFixed(3)} S` : null,
-      suffix: milestones.et != null && milestones.trap != null
-        ? `@ ${Math.round(milestones.trap)} MPH` : null,
-    })
-  }
-  if (distIdx === 2) {
-    rows.push({
-      key: 'half', flashKey: 'half', label: '1/2 MILE',
-      mainVal: milestones.half != null ? `${milestones.half.toFixed(3)} S` : null,
-      suffix: milestones.half != null && milestones.halfSpeed != null
-        ? `@ ${milestones.halfSpeed} MPH` : null,
-    })
-  }
-  rows.push({
-    key: 'trap', flashKey: distIdx === 1 ? 'eighth' : 'trap', label: 'TRAP SPEED',
-    mainVal: distIdx === 1
-      ? (milestones.eighthSpeed != null ? `${milestones.eighthSpeed} MPH` : null)
-      : (milestones.trap != null ? `${milestones.trap.toFixed(1)} MPH` : null),
-    suffix: null,
-  })
+  const fuelGal = (horsepower && milestones.et != null)
+    ? horsepower * milestones.et * 0.000035
+    : null
 
   const isActive = racePhase === 'racing'
-  const allLocked = rows.every(r => r.mainVal !== null)
+  const allLocked = [
+    milestones.sixty, milestones.hundred, milestones.sixtyFt, milestones.threethirtyFt,
+    milestones.eighth, milestones.trap, fuelGal,
+    distIdx !== 1 ? milestones.et : 'ok',
+  ].every(v => v !== null)
   const showBlink = isActive && !allLocked
+
+  const c = { flashing, accent, accentRgb }
 
   return (
     <div style={{ marginTop: 16 }}>
-      <div style={{
-        height: 1, margin: '0 0 16px',
-        background: `rgba(${accentRgb},0.2)`,
-      }} />
+      <div style={{ height: 1, margin: '0 0 14px', background: `rgba(${accentRgb},0.2)` }} />
 
-      <div style={{ display: 'flex', alignItems: 'center', marginBottom: 10 }}>
+      <div style={{ display: 'flex', alignItems: 'center', marginBottom: 12 }}>
         <span style={{
           fontFamily: DISPLAY, fontSize: 14, color: accent,
           letterSpacing: '0.06em', textTransform: 'uppercase',
@@ -364,8 +375,7 @@ function ResultsSection({ milestones, accent, distIdx, racePhase, isDone, isWinn
         </span>
         {showBlink && (
           <span className="blink" style={{
-            marginLeft: 3, color: '#DC2626',
-            fontFamily: MONO, fontSize: 13, lineHeight: 1,
+            marginLeft: 3, color: '#DC2626', fontFamily: MONO, fontSize: 13, lineHeight: 1,
           }}>|</span>
         )}
         {isDone && isWinner && (
@@ -379,49 +389,36 @@ function ResultsSection({ milestones, accent, distIdx, racePhase, isDone, isWinn
         )}
       </div>
 
-      <div style={{ display: 'flex', flexDirection: 'column' }}>
-        {rows.map(row => {
-          const locked = row.mainVal !== null
-          const isFlashing = !!flashing[row.flashKey]
-          return (
-            <div key={row.key} style={{
-              display: 'flex', alignItems: 'center',
-              padding: '3px 0', minHeight: 26,
-            }}>
-              <span style={{
-                fontFamily: MONO, fontSize: 12,
-                color: 'rgba(245,245,240,0.5)',
-                letterSpacing: '0.08em', textTransform: 'uppercase',
-                flexShrink: 0, lineHeight: 1,
-              }}>
-                {row.label}
-              </span>
-              <div style={dotLeader} />
-              <div style={{
-                display: 'flex', alignItems: 'baseline', gap: 4,
-                flexShrink: 0, padding: '1px 4px',
-                animation: isFlashing ? 'flashLock 0.25s ease-out forwards' : 'none',
-              }}>
-                <span style={{
-                  fontFamily: DISPLAY, fontSize: 16,
-                  color: locked ? accent : `rgba(${accentRgb},0.25)`,
-                  letterSpacing: '0.02em', lineHeight: 1,
-                }}>
-                  {locked ? row.mainVal : '───'}
-                </span>
-                {locked && row.suffix && (
-                  <span style={{
-                    fontFamily: MONO, fontSize: 11,
-                    color: `rgba(${accentRgb},0.6)`,
-                    letterSpacing: '0.06em', lineHeight: 1,
-                  }}>
-                    {row.suffix}
-                  </span>
-                )}
-              </div>
-            </div>
-          )
-        })}
+      <div style={{
+        display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)',
+        columnGap: 16, rowGap: 12,
+      }}>
+        {/* Row 1 */}
+        <GridResultCell label="0-60 MPH"  flashKey="sixty"
+          mainVal={milestones.sixty  != null ? `${milestones.sixty.toFixed(2)} S`  : null} suffix={null} {...c} />
+        <GridResultCell label="0-100 MPH" flashKey="hundred"
+          mainVal={milestones.hundred != null ? `${milestones.hundred.toFixed(2)} S` : null} suffix={null} {...c} />
+        <GridResultCell label="60 FT"     flashKey="sixtyFt"
+          mainVal={milestones.sixtyFt != null ? `${milestones.sixtyFt.toFixed(3)} S` : null} suffix={null} {...c} />
+        <GridResultCell label="330 FT"    flashKey="threethirtyFt"
+          mainVal={milestones.threethirtyFt != null ? `${milestones.threethirtyFt.toFixed(3)} S` : null} suffix={null} {...c} />
+
+        {/* Row 2 */}
+        <GridResultCell label="1/8 MILE" flashKey="eighth"
+          mainVal={milestones.eighth != null ? `${milestones.eighth.toFixed(3)} S` : null}
+          suffix={milestones.eighth != null && milestones.eighthSpeed != null ? `@ ${milestones.eighthSpeed} MPH` : null}
+          {...c} />
+        {distIdx === 1
+          ? <div />
+          : <GridResultCell label="1/4 MILE" flashKey="et"
+              mainVal={milestones.et != null ? `${milestones.et.toFixed(3)} S` : null}
+              suffix={milestones.et != null && milestones.trap != null ? `@ ${Math.round(milestones.trap)} MPH` : null}
+              {...c} />
+        }
+        <GridResultCell label="TRAP SPEED" flashKey="trap"
+          mainVal={milestones.trap != null ? `${milestones.trap.toFixed(1)} MPH` : null} suffix={null} {...c} />
+        <GridResultCell label="FUEL USED" flashKey="et"
+          mainVal={fuelGal != null ? `${fuelGal.toFixed(3)} GAL` : null} suffix={null} {...c} />
       </div>
     </div>
   )
@@ -574,6 +571,7 @@ export default function CarPanel({
                   racePhase={racePhase}
                   isDone={isDone}
                   isWinner={isWinner}
+                  horsepower={selectedCar?.horsepower}
                 />
               </div>
             )}
@@ -585,10 +583,7 @@ export default function CarPanel({
               ) : racePhase === 'racing' ? (
                 <ActionLink onClick={handleClear}>[ CHANGE CAR ]</ActionLink>
               ) : (
-                <>
-                  <ActionLink onClick={handleClear}>[ CHANGE CAR ]</ActionLink>
-                  {onReplay && <ActionLink onClick={onReplay}>[ REPLAY ]</ActionLink>}
-                </>
+                <ActionLink onClick={handleClear}>[ CHANGE CAR ]</ActionLink>
               )}
             </div>
           </>
