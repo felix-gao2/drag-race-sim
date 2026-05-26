@@ -182,6 +182,51 @@ function SpeedParam({ label, value, onClick }) {
 
 // ── Race Complete Modal ───────────────────────────────────────────────────────
 
+function ModalBtn({ label, onClick, copied }) {
+  const [hov, setHov] = useState(false)
+  return (
+    <button
+      onClick={onClick}
+      onMouseEnter={() => setHov(true)}
+      onMouseLeave={() => setHov(false)}
+      style={{
+        fontFamily: MONO, fontSize: 13,
+        letterSpacing: '0.05em', textTransform: 'uppercase',
+        color: copied ? ACCENT : `rgba(245,245,240,${hov ? 1 : 0.7})`,
+        background: 'none',
+        border: `1px solid ${copied ? ACCENT : `rgba(245,245,240,${hov ? 1 : 0.7})`}`,
+        padding: '10px 18px', cursor: 'pointer',
+        transition: 'color 0.1s, border-color 0.1s',
+        userSelect: 'none', lineHeight: 1, borderRadius: 0,
+      }}
+    >
+      {label}
+    </button>
+  )
+}
+
+function NewRaceBtn({ onClick }) {
+  const [hov, setHov] = useState(false)
+  return (
+    <button
+      onClick={onClick}
+      onMouseEnter={() => setHov(true)}
+      onMouseLeave={() => setHov(false)}
+      style={{
+        fontFamily: MONO, fontSize: 15,
+        letterSpacing: '0.05em', textTransform: 'uppercase',
+        color: ACCENT, background: hov ? 'rgba(220,38,38,0.1)' : 'none',
+        border: '1px solid #DC2626',
+        padding: '12px 24px', cursor: 'pointer',
+        transition: 'background 0.1s',
+        userSelect: 'none', lineHeight: 1, borderRadius: 0,
+      }}
+    >
+      ◇ NEW RACE
+    </button>
+  )
+}
+
 function renderCell(val, suf, isWin, laneRgb) {
   if (val == null) return (
     <span style={{ fontFamily: MONO, fontSize: 14, color: 'rgba(245,245,240,0.25)', letterSpacing: '0.04em' }}>—</span>
@@ -203,8 +248,9 @@ function renderCell(val, suf, isWin, laneRgb) {
   )
 }
 
-function RaceCompleteModal({ open, onClose, raceData, milestones, distIdx, startIdx, surfIdx }) {
+function RaceCompleteModal({ open, onClose, onNewRace, raceData, milestones, distIdx, startIdx, surfIdx, shareId }) {
   const [closeHov, setCloseHov] = useState(false)
+  const [copied,   setCopied]   = useState(false)
 
   useEffect(() => {
     if (!open) return
@@ -361,17 +407,66 @@ function RaceCompleteModal({ open, onClose, raceData, milestones, distIdx, start
         </div>
 
         {/* Config strip */}
-        <div style={{ textAlign: 'center', padding: '12px 0', borderTop: '1px solid rgba(245,245,240,0.08)', marginBottom: 16 }}>
+        <div style={{ textAlign: 'center', padding: '12px 0', borderTop: '1px solid rgba(245,245,240,0.08)', marginBottom: 32 }}>
           <span style={{ fontFamily: MONO, fontSize: 11, color: DIM, letterSpacing: '0.1em', textTransform: 'uppercase' }}>
             {configText}
           </span>
         </div>
 
-        {/* Actions placeholder */}
-        <div style={{ height: 60, display: 'flex', alignItems: 'center', justifyContent: 'center', border: '1px solid rgba(245,245,240,0.08)' }}>
-          <span style={{ fontFamily: MONO, fontSize: 11, color: DIM, letterSpacing: '0.1em', textTransform: 'uppercase' }}>
-            [ ACTIONS ]
-          </span>
+        {/* Share section */}
+        {(() => {
+          const shareUrl = shareId ? `${window.location.origin}/race/${shareId}` : ''
+          const loserCar = winSide === 'a' ? carB : carA
+          const winName  = winCar  ? `${winCar.year} ${winCar.make} ${winCar.model}`  : ''
+          const losName  = loserCar ? `${loserCar.year} ${loserCar.make} ${loserCar.model}` : ''
+          const distLabel = DIST_VALS[distIdx].toLowerCase()
+          const marginText = deadHeat
+            ? 'a dead heat'
+            : margin < 0.5
+              ? `${margin.toFixed(2)} seconds`
+              : (() => {
+                  const avgTrap = ((milestones?.a?.trap ?? 0) + (milestones?.b?.trap ?? 0)) / 2
+                  const lengths = avgTrap > 0 ? (margin * avgTrap * 1.467) / 15 : 0
+                  return `${lengths.toFixed(1)} car lengths`
+                })()
+          const tweetText = deadHeat
+            ? `${winName} vs ${losName} — ${distLabel} drag race ended in a dead heat — ${shareUrl}`
+            : `watched a ${winName} beat a ${losName} by ${marginText} on the ${distLabel} — ${shareUrl}`
+          const redditTitle = deadHeat
+            ? `${winName} vs ${losName} — ${distLabel} drag race`
+            : `${winName} vs ${losName} — ${distLabel} drag race`
+
+          function handleCopy() {
+            navigator.clipboard.writeText(shareUrl).then(() => {
+              setCopied(true)
+              setTimeout(() => setCopied(false), 2000)
+            })
+          }
+          function handleTwitter() {
+            window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent(tweetText)}`, '_blank')
+          }
+          function handleReddit() {
+            window.open(`https://reddit.com/submit?url=${encodeURIComponent(shareUrl)}&title=${encodeURIComponent(redditTitle)}`, '_blank')
+          }
+
+          return (
+            <div style={{ marginBottom: 32 }}>
+              <span style={{ fontFamily: DISPLAY, fontSize: 14, color: ACCENT, letterSpacing: '0.04em', textTransform: 'uppercase', display: 'flex', alignItems: 'center', marginBottom: 12 }}>
+                {'> SHARE'}
+                <span className="blink" style={{ marginLeft: 2 }}>_</span>
+              </span>
+              <div style={{ display: 'flex', gap: 12 }}>
+                <ModalBtn label={copied ? '✓ COPIED' : 'COPY LINK_'} onClick={handleCopy} copied={copied} />
+                <ModalBtn label="TWITTER" onClick={handleTwitter} />
+                <ModalBtn label="REDDIT"  onClick={handleReddit} />
+              </div>
+            </div>
+          )
+        })()}
+
+        {/* Footer */}
+        <div style={{ display: 'flex', justifyContent: 'center' }}>
+          <NewRaceBtn onClick={onNewRace} />
         </div>
       </div>
     </div>
@@ -556,11 +651,13 @@ export default function RaceSetup() {
   const [speedIdx,  setSpeedIdx]  = useState(3)
   const [error,     setError]     = useState(null)
   const [modalOpen, setModalOpen] = useState(false)
+  const [shareId,   setShareId]   = useState(null)
 
   const ready = carA !== null && carB !== null
 
   useEffect(() => {
     if (raceState !== 'done') return
+    setShareId(Math.random().toString(36).slice(2, 10))
     const tid = setTimeout(() => setModalOpen(true), 800)
     return () => clearTimeout(tid)
   }, [raceState])
@@ -616,6 +713,13 @@ export default function RaceSetup() {
     setError(null)
     setPaused(false)
     setModalOpen(false)
+    setShareId(null)
+  }
+
+  function handleNewRace() {
+    setCarA(null)
+    setCarB(null)
+    resetRace()
   }
 
   function handleCarAChange(car) { setCarA(car); if (!car) resetRace() }
@@ -933,11 +1037,13 @@ export default function RaceSetup() {
         <RaceCompleteModal
           open={modalOpen}
           onClose={() => setModalOpen(false)}
+          onNewRace={handleNewRace}
           raceData={raceData}
           milestones={milestones}
           distIdx={distIdx}
           startIdx={startIdx}
           surfIdx={surfIdx}
+          shareId={shareId}
         />
       )}
 
