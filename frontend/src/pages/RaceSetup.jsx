@@ -1,4 +1,5 @@
 import { useState, useEffect, useMemo, useRef } from 'react'
+import { useParams } from 'react-router-dom'
 import CarPanel from '../components/CarPanel'
 import { postRace, getRace } from '../api'
 
@@ -638,6 +639,8 @@ const INIT_MILESTONES = {
 }
 
 export default function RaceSetup() {
+  const { slug } = useParams()
+
   const [carA, setCarA] = useState(null)
   const [carB, setCarB] = useState(null)
   const [distIdx,  setDistIdx]  = useState(0)
@@ -652,6 +655,17 @@ export default function RaceSetup() {
   const [error,     setError]     = useState(null)
   const [modalOpen, setModalOpen] = useState(false)
   const [shareId,   setShareId]   = useState(null)
+
+  // Load shared race from URL slug on mount
+  useEffect(() => {
+    if (!slug) return
+    getRace(slug).then(data => {
+      setRaceData(data)
+      setShareId(slug)
+      setFrame(data.telemetry.length - 1)
+      setRaceState('done')
+    }).catch(() => {})
+  }, [slug])
 
   const ready    = carA !== null && carB !== null
   const sameCar  = ready && carA.id === carB.id

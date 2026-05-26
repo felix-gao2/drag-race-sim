@@ -2,7 +2,6 @@ import { BrowserRouter, Routes, Route, Navigate, useLocation } from 'react-route
 import { AnimatePresence, motion } from 'framer-motion'
 import Landing from './pages/Landing'
 import RaceSetup from './pages/RaceSetup'
-import RaceView from './pages/RaceView'
 
 const pageVariants = {
   initial: { opacity: 0, y: 8 },
@@ -18,7 +17,7 @@ function AnimatedRoutes() {
         <Routes location={location}>
           <Route path="/" element={<Landing />} />
           <Route path="/race" element={<RaceSetup />} />
-          <Route path="/race/:slug" element={<RaceView />} />
+          <Route path="/race/:slug" element={<RaceSetup />} />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </motion.div>
