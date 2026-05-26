@@ -653,7 +653,9 @@ export default function RaceSetup() {
   const [modalOpen, setModalOpen] = useState(false)
   const [shareId,   setShareId]   = useState(null)
 
-  const ready = carA !== null && carB !== null
+  const ready    = carA !== null && carB !== null
+  const sameCar  = ready && carA.id === carB.id
+  const canStart = ready && !sameCar
 
   useEffect(() => {
     if (raceState !== 'done') return
@@ -726,7 +728,7 @@ export default function RaceSetup() {
   function handleCarBChange(car) { setCarB(car); if (!car) resetRace() }
 
   async function handleStart() {
-    if (!ready || raceState !== 'idle') return
+    if (!canStart || raceState !== 'idle') return
     setRaceState('loading')
     setError(null)
     try {
@@ -979,8 +981,10 @@ export default function RaceSetup() {
 
         {/* Right-aligned CTA */}
         <div style={{ position: 'absolute', right: 24, display: 'flex', alignItems: 'center', gap: 16 }}>
-          {error && (
-            <span style={{ fontFamily: MONO, fontSize: 10, color: ACCENT, letterSpacing: '0.1em' }}>{error}</span>
+          {(sameCar || error) && (
+            <span style={{ fontFamily: MONO, fontSize: 10, color: ACCENT, letterSpacing: '0.1em' }}>
+              {sameCar ? 'SAME CAR' : error}
+            </span>
           )}
           {raceState === 'racing' || raceState === 'loading' ? (
             <span style={{ fontFamily: DISPLAY, fontSize: 22, letterSpacing: '0.04em', textTransform: 'uppercase', color: DIM, opacity: 0.5, display: 'flex', alignItems: 'center', userSelect: 'none' }}>
@@ -993,7 +997,7 @@ export default function RaceSetup() {
               <span className="blink" style={{ animationDelay: '0.5s', marginLeft: 2 }}>_</span>
             </span>
           ) : (
-            <span onClick={ready ? handleStart : undefined} style={{ fontFamily: DISPLAY, fontSize: 22, letterSpacing: '0.04em', textTransform: 'uppercase', color: ACCENT, opacity: ready ? 1 : 0.2, cursor: ready ? 'pointer' : 'default', display: 'flex', alignItems: 'center', userSelect: 'none' }}>
+            <span onClick={canStart ? handleStart : undefined} style={{ fontFamily: DISPLAY, fontSize: 22, letterSpacing: '0.04em', textTransform: 'uppercase', color: ACCENT, opacity: canStart ? 1 : 0.2, cursor: canStart ? 'pointer' : 'default', display: 'flex', alignItems: 'center', userSelect: 'none' }}>
               <span className="blink" style={{ marginRight: 6 }}>{'>'}</span>
               START RACE
               <span className="blink" style={{ animationDelay: '0.5s', marginLeft: 2 }}>_</span>
