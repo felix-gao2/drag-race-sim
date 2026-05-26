@@ -659,6 +659,7 @@ export default function RaceSetup() {
 
   useEffect(() => {
     if (raceState !== 'done') return
+    if (shareId) window.history.replaceState(null, '', `/race/${shareId}`)
     const tid = setTimeout(() => setModalOpen(true), 800)
     return () => clearTimeout(tid)
   }, [raceState])
@@ -715,6 +716,7 @@ export default function RaceSetup() {
     setPaused(false)
     setModalOpen(false)
     setShareId(null)
+    window.history.replaceState(null, '', '/race')
   }
 
   function handleNewRace() {
