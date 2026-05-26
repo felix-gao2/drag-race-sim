@@ -659,7 +659,6 @@ export default function RaceSetup() {
 
   useEffect(() => {
     if (raceState !== 'done') return
-    setShareId(Math.random().toString(36).slice(2, 10))
     const tid = setTimeout(() => setModalOpen(true), 800)
     return () => clearTimeout(tid)
   }, [raceState])
@@ -734,6 +733,7 @@ export default function RaceSetup() {
     try {
       const { slug } = await postRace(carA.id, carB.id)
       const data = await getRace(slug)
+      setShareId(slug)
       setRaceData(data)
       setFrame(0)
       setRaceState('racing')
