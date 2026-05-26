@@ -762,7 +762,7 @@ export default function RaceSetup() {
 
   function handleRestart() {
     setFrame(0)
-    setPaused(false)
+    setPaused(true)
     if (raceState === 'done') setRaceState('racing')
   }
 
