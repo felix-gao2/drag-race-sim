@@ -182,7 +182,28 @@ function SpeedParam({ label, value, onClick }) {
 
 // ── Race Complete Modal ───────────────────────────────────────────────────────
 
-function RaceCompleteModal({ open, onClose }) {
+function renderCell(val, suf, isWin, laneRgb) {
+  if (val == null) return (
+    <span style={{ fontFamily: MONO, fontSize: 14, color: 'rgba(245,245,240,0.25)', letterSpacing: '0.04em' }}>—</span>
+  )
+  return (
+    <div style={{ display: 'flex', alignItems: 'baseline', gap: 4 }}>
+      <span style={{
+        fontFamily: isWin ? DISPLAY : MONO, fontSize: isWin ? 18 : 14,
+        color: isWin ? `rgb(${laneRgb})` : 'rgba(245,245,240,0.5)',
+        letterSpacing: isWin ? '0.02em' : '0.04em', lineHeight: 1,
+      }}>{val}</span>
+      {suf && (
+        <span style={{
+          fontFamily: MONO, fontSize: 11, lineHeight: 1, letterSpacing: '0.06em',
+          color: isWin ? `rgba(${laneRgb},0.6)` : 'rgba(245,245,240,0.25)',
+        }}>{suf}</span>
+      )}
+    </div>
+  )
+}
+
+function RaceCompleteModal({ open, onClose, raceData, milestones, distIdx, startIdx, surfIdx }) {
   const [closeHov, setCloseHov] = useState(false)
 
   useEffect(() => {
@@ -191,6 +212,66 @@ function RaceCompleteModal({ open, onClose }) {
     window.addEventListener('keydown', onKey)
     return () => window.removeEventListener('keydown', onKey)
   }, [open, onClose])
+
+  const carA   = raceData?.car_a
+  const carB   = raceData?.car_b
+  const margin = raceData?.margin_sec ?? 0
+  const wId    = raceData?.winner_id
+
+  const winSide  = wId === carA?.id ? 'a' : wId === carB?.id ? 'b' : null
+  const deadHeat = !winSide || margin < 0.05
+  const winCar   = winSide === 'a' ? carA : winSide === 'b' ? carB : null
+  const winColor = winSide === 'a' ? '#DC2626' : '#F5F5F0'
+
+  let marginLine = null
+  if (!deadHeat) {
+    if (margin < 0.5) {
+      marginLine = `+${margin.toFixed(2)} S MARGIN`
+    } else {
+      const avgTrap = ((milestones?.a?.trap ?? 0) + (milestones?.b?.trap ?? 0)) / 2
+      const lengths = avgTrap > 0 ? (margin * avgTrap * 1.467) / 15 : 0
+      marginLine = `+${lengths.toFixed(1)} CAR LENGTHS`
+    }
+  }
+
+  const fuelA = (carA?.horsepower && milestones?.a?.et != null)
+    ? carA.horsepower * milestones.a.et * 0.000035 : null
+  const fuelB = (carB?.horsepower && milestones?.b?.et != null)
+    ? carB.horsepower * milestones.b.et * 0.000035 : null
+
+  const finA = distIdx === 1 ? milestones?.a?.eighth : milestones?.a?.et
+  const finB = distIdx === 1 ? milestones?.b?.eighth : milestones?.b?.et
+
+  function mWin(va, vb, mode = 'lower') {
+    if (va == null || vb == null) return null
+    if (Math.abs(va - vb) < (mode === 'lower' ? 0.001 : 0.1)) return 'tie'
+    return mode === 'lower' ? (va < vb ? 'a' : 'b') : (va > vb ? 'a' : 'b')
+  }
+
+  const rows = [
+    { label: '0-60 MPH',    va: milestones?.a?.sixty,         vb: milestones?.b?.sixty,         mode: 'lower',  fmt: v => `${v.toFixed(2)} S` },
+    { label: '0-100 MPH',   va: milestones?.a?.hundred,       vb: milestones?.b?.hundred,       mode: 'lower',  fmt: v => `${v.toFixed(2)} S` },
+    { label: '60 FT',       va: milestones?.a?.sixtyFt,       vb: milestones?.b?.sixtyFt,       mode: 'lower',  fmt: v => `${v.toFixed(3)} S` },
+    { label: '330 FT',      va: milestones?.a?.threethirtyFt, vb: milestones?.b?.threethirtyFt, mode: 'lower',  fmt: v => `${v.toFixed(3)} S` },
+    {
+      label: '1/8 MILE',
+      va: milestones?.a?.eighth, vb: milestones?.b?.eighth, mode: 'lower', fmt: v => `${v.toFixed(3)} S`,
+      suffA: milestones?.a?.eighthSpeed != null ? `@ ${milestones.a.eighthSpeed} MPH` : null,
+      suffB: milestones?.b?.eighthSpeed != null ? `@ ${milestones.b.eighthSpeed} MPH` : null,
+    },
+    ...(distIdx !== 1 ? [{
+      label: '1/4 MILE',
+      va: milestones?.a?.et, vb: milestones?.b?.et, mode: 'lower', fmt: v => `${v.toFixed(3)} S`,
+      suffA: milestones?.a?.trap != null ? `@ ${Math.round(milestones.a.trap)} MPH` : null,
+      suffB: milestones?.b?.trap != null ? `@ ${Math.round(milestones.b.trap)} MPH` : null,
+    }] : []),
+    { label: 'TRAP SPEED',  va: milestones?.a?.trap,  vb: milestones?.b?.trap,  mode: 'higher', fmt: v => `${v.toFixed(1)} MPH` },
+    { label: 'FUEL USED',   va: fuelA,                vb: fuelB,                mode: 'lower',  fmt: v => `${v.toFixed(3)} GAL` },
+    { label: 'FINISH TIME', va: finA,                 vb: finB,                 mode: 'lower',  fmt: v => `${v.toFixed(3)} S` },
+  ]
+
+  const configText = `${DIST_VALS[distIdx]} · ${START_VALS[startIdx]} START · ${SURF_VALS[surfIdx]} · DA 56FT · WIND 0 MPH`
+  const rowBorder = { borderBottom: '1px solid rgba(245,245,240,0.08)', minHeight: 36, display: 'flex', alignItems: 'center' }
 
   return (
     <div
@@ -231,33 +312,63 @@ function RaceCompleteModal({ open, onClose }) {
             onMouseEnter={() => setCloseHov(true)}
             onMouseLeave={() => setCloseHov(false)}
             onClick={onClose}
-            style={{
-              fontFamily: MONO, fontSize: 11,
-              color: closeHov ? ACCENT : DIM,
-              letterSpacing: '0.14em', textTransform: 'uppercase',
-              cursor: 'pointer', transition: 'color 0.1s', userSelect: 'none',
-            }}
+            style={{ fontFamily: MONO, fontSize: 11, color: closeHov ? ACCENT : DIM, letterSpacing: '0.14em', textTransform: 'uppercase', cursor: 'pointer', transition: 'color 0.1s', userSelect: 'none' }}
           >
             [X CLOSE]
           </span>
         </div>
 
-        {/* Content placeholder */}
-        <div style={{
-          height: 200, display: 'flex', alignItems: 'center', justifyContent: 'center',
-          border: '1px solid rgba(245,245,240,0.08)',
-          marginBottom: 16,
-        }}>
+        {/* Winner block */}
+        <div style={{ marginBottom: 32 }}>
+          <span style={{ fontFamily: MONO, fontSize: 11, color: DIM, letterSpacing: '0.1em', textTransform: 'uppercase', display: 'block', marginBottom: 8 }}>
+            WINNER
+          </span>
+          <span style={{ fontFamily: DISPLAY, fontSize: 36, color: deadHeat ? TEXT : winColor, textTransform: 'uppercase', display: 'block', lineHeight: 1, marginBottom: deadHeat ? 0 : 8 }}>
+            {deadHeat ? 'DEAD HEAT' : `${winCar.year} ${winCar.make} ${winCar.model}`}
+          </span>
+          {marginLine && (
+            <span style={{ fontFamily: MONO, fontSize: 13, color: DIM, letterSpacing: '0.1em', textTransform: 'uppercase' }}>
+              {marginLine}
+            </span>
+          )}
+        </div>
+
+        {/* Comparison table */}
+        <div style={{ marginBottom: 24 }}>
+          <div style={{ display: 'grid', gridTemplateColumns: '30% 35% 35%', borderBottom: '1px solid rgba(245,245,240,0.15)', paddingBottom: 8 }}>
+            <div />
+            <div style={{ fontFamily: MONO, fontSize: 12, color: '#DC2626', letterSpacing: '0.1em', textTransform: 'uppercase' }}>LANE 01</div>
+            <div style={{ fontFamily: MONO, fontSize: 12, color: '#F5F5F0', letterSpacing: '0.1em', textTransform: 'uppercase' }}>LANE 02</div>
+          </div>
+          <div style={{ display: 'grid', gridTemplateColumns: '30% 35% 35%' }}>
+            {rows.flatMap((row, i) => {
+              const w    = mWin(row.va, row.vb, row.mode)
+              const fmtA = row.va != null ? row.fmt(row.va) : null
+              const fmtB = row.vb != null ? row.fmt(row.vb) : null
+              return [
+                <div key={`l${i}`} style={rowBorder}>
+                  <span style={{ fontFamily: MONO, fontSize: 12, color: 'rgba(245,245,240,0.5)', letterSpacing: '0.1em', textTransform: 'uppercase' }}>{row.label}</span>
+                </div>,
+                <div key={`a${i}`} style={{ ...rowBorder, paddingLeft: 8 }}>
+                  {renderCell(fmtA, row.suffA ?? null, w === 'a', '220,38,38')}
+                </div>,
+                <div key={`b${i}`} style={{ ...rowBorder, paddingLeft: 8 }}>
+                  {renderCell(fmtB, row.suffB ?? null, w === 'b', '245,245,240')}
+                </div>,
+              ]
+            })}
+          </div>
+        </div>
+
+        {/* Config strip */}
+        <div style={{ textAlign: 'center', padding: '12px 0', borderTop: '1px solid rgba(245,245,240,0.08)', marginBottom: 16 }}>
           <span style={{ fontFamily: MONO, fontSize: 11, color: DIM, letterSpacing: '0.1em', textTransform: 'uppercase' }}>
-            [ CONTENT ]
+            {configText}
           </span>
         </div>
 
         {/* Actions placeholder */}
-        <div style={{
-          height: 60, display: 'flex', alignItems: 'center', justifyContent: 'center',
-          border: '1px solid rgba(245,245,240,0.08)',
-        }}>
+        <div style={{ height: 60, display: 'flex', alignItems: 'center', justifyContent: 'center', border: '1px solid rgba(245,245,240,0.08)' }}>
           <span style={{ fontFamily: MONO, fontSize: 11, color: DIM, letterSpacing: '0.1em', textTransform: 'uppercase' }}>
             [ ACTIONS ]
           </span>
@@ -819,7 +930,15 @@ export default function RaceSetup() {
 
       {/* ── Race complete modal ── */}
       {hasRace && (
-        <RaceCompleteModal open={modalOpen} onClose={() => setModalOpen(false)} />
+        <RaceCompleteModal
+          open={modalOpen}
+          onClose={() => setModalOpen(false)}
+          raceData={raceData}
+          milestones={milestones}
+          distIdx={distIdx}
+          startIdx={startIdx}
+          surfIdx={surfIdx}
+        />
       )}
 
       {/* ── Bottom HUD ── */}
