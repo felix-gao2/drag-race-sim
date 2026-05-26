@@ -450,7 +450,7 @@ export default function CarPanel({
 
   // derive live values from tick
   const speedVal = tick ? Math.round(side === 'a' ? tick.speed_a_mph : tick.speed_b_mph) : 0
-  const etVal    = tick ? (side === 'a' ? tick.time_s : tick.time_s).toFixed(2) : '0.00'
+  const etVal    = tick ? tick.time_s.toFixed(2) : '0.00'
   const rpmVal   = estimateRPM(speedVal, selectedCar)
   const maxRpm   = maxRpmFor(selectedCar)
 
