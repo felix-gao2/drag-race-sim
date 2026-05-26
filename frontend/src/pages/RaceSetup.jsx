@@ -789,14 +789,20 @@ export default function RaceSetup() {
   const hasRace = (raceState === 'racing' || raceState === 'done') && raceData
 
   const currentTickFull = raceData ? raceData.telemetry[Math.min(frame, raceData.telemetry.length - 1)] : null
-  const prevTickFull    = raceData && frame > 0 ? raceData.telemetry[frame - 1] : null
-  function calcGForce(curr, prev, side) {
-    if (!curr || !prev) return 0
-    const delta = side === 'a' ? curr.speed_a_mph - prev.speed_a_mph : curr.speed_b_mph - prev.speed_b_mph
-    return Math.max(0, (delta * 1.467) / (0.05 * 32.174))
+
+  function calcGForce(telemetry, f, side) {
+    if (!telemetry || f < 1) return 0
+    const key = side === 'a' ? 'speed_a_mph' : 'speed_b_mph'
+    let sum = 0, count = 0
+    for (let i = Math.max(1, f - 2); i <= f; i++) {
+      sum += Math.max(0, ((telemetry[i][key] - telemetry[i - 1][key]) * 1.467) / (0.05 * 32.174))
+      count++
+    }
+    return count > 0 ? sum / count : 0
   }
-  const gForceA = calcGForce(currentTickFull, prevTickFull, 'a')
-  const gForceB = calcGForce(currentTickFull, prevTickFull, 'b')
+  const clampedFrame = raceData ? Math.min(frame, raceData.telemetry.length - 1) : 0
+  const gForceA = calcGForce(raceData?.telemetry, clampedFrame, 'a')
+  const gForceB = calcGForce(raceData?.telemetry, clampedFrame, 'b')
   const winnerA = raceData?.winner_id != null && raceData.winner_id === raceData?.car_a?.id
   const winnerB = raceData?.winner_id != null && raceData.winner_id === raceData?.car_b?.id
 
