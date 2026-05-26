@@ -180,6 +180,93 @@ function SpeedParam({ label, value, onClick }) {
   )
 }
 
+// ── Race Complete Modal ───────────────────────────────────────────────────────
+
+function RaceCompleteModal({ open, onClose }) {
+  const [closeHov, setCloseHov] = useState(false)
+
+  useEffect(() => {
+    if (!open) return
+    function onKey(e) { if (e.key === 'Escape') onClose() }
+    window.addEventListener('keydown', onKey)
+    return () => window.removeEventListener('keydown', onKey)
+  }, [open, onClose])
+
+  return (
+    <div
+      onClick={onClose}
+      style={{
+        position: 'fixed', inset: 0, zIndex: 1000,
+        background: 'rgba(0,0,0,0.88)',
+        backdropFilter: 'blur(4px)',
+        display: open ? 'flex' : 'none',
+        alignItems: 'center', justifyContent: 'center',
+      }}
+    >
+      <div
+        onClick={e => e.stopPropagation()}
+        style={{
+          position: 'relative',
+          maxWidth: 720, width: '100%',
+          maxHeight: '85vh', overflowY: 'auto',
+          padding: 40,
+          background: '#000000',
+          border: '1px solid #DC2626',
+          boxSizing: 'border-box',
+        }}
+      >
+        {/* Corner brackets */}
+        <div style={{ position: 'absolute', top: 0, left: 0, width: 12, height: 12, borderTop: '1px solid #DC2626', borderLeft: '1px solid #DC2626', pointerEvents: 'none' }} />
+        <div style={{ position: 'absolute', top: 0, right: 0, width: 12, height: 12, borderTop: '1px solid #DC2626', borderRight: '1px solid #DC2626', pointerEvents: 'none' }} />
+        <div style={{ position: 'absolute', bottom: 0, left: 0, width: 12, height: 12, borderBottom: '1px solid #DC2626', borderLeft: '1px solid #DC2626', pointerEvents: 'none' }} />
+        <div style={{ position: 'absolute', bottom: 0, right: 0, width: 12, height: 12, borderBottom: '1px solid #DC2626', borderRight: '1px solid #DC2626', pointerEvents: 'none' }} />
+
+        {/* Header */}
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 32 }}>
+          <span style={{ fontFamily: DISPLAY, fontSize: 22, color: ACCENT, letterSpacing: '0.04em', textTransform: 'uppercase', display: 'flex', alignItems: 'center' }}>
+            {'> RACE COMPLETE'}
+            <span className="blink" style={{ marginLeft: 2 }}>_</span>
+          </span>
+          <span
+            onMouseEnter={() => setCloseHov(true)}
+            onMouseLeave={() => setCloseHov(false)}
+            onClick={onClose}
+            style={{
+              fontFamily: MONO, fontSize: 11,
+              color: closeHov ? ACCENT : DIM,
+              letterSpacing: '0.14em', textTransform: 'uppercase',
+              cursor: 'pointer', transition: 'color 0.1s', userSelect: 'none',
+            }}
+          >
+            [X CLOSE]
+          </span>
+        </div>
+
+        {/* Content placeholder */}
+        <div style={{
+          height: 200, display: 'flex', alignItems: 'center', justifyContent: 'center',
+          border: '1px solid rgba(245,245,240,0.08)',
+          marginBottom: 16,
+        }}>
+          <span style={{ fontFamily: MONO, fontSize: 11, color: DIM, letterSpacing: '0.1em', textTransform: 'uppercase' }}>
+            [ CONTENT ]
+          </span>
+        </div>
+
+        {/* Actions placeholder */}
+        <div style={{
+          height: 60, display: 'flex', alignItems: 'center', justifyContent: 'center',
+          border: '1px solid rgba(245,245,240,0.08)',
+        }}>
+          <span style={{ fontFamily: MONO, fontSize: 11, color: DIM, letterSpacing: '0.1em', textTransform: 'uppercase' }}>
+            [ ACTIONS ]
+          </span>
+        </div>
+      </div>
+    </div>
+  )
+}
+
 const DIVIDER = (
   <div style={{ display: 'flex', alignItems: 'center' }}>
     <div style={{ width: 32 }} />
@@ -357,8 +444,15 @@ export default function RaceSetup() {
   const [paused,    setPaused]    = useState(false)
   const [speedIdx,  setSpeedIdx]  = useState(3)
   const [error,     setError]     = useState(null)
+  const [modalOpen, setModalOpen] = useState(false)
 
   const ready = carA !== null && carB !== null
+
+  useEffect(() => {
+    if (raceState !== 'done') return
+    const tid = setTimeout(() => setModalOpen(true), 800)
+    return () => clearTimeout(tid)
+  }, [raceState])
 
   const milestones = useMemo(() => {
     if (!raceData || raceState === 'idle' || raceState === 'loading') return INIT_MILESTONES
@@ -410,6 +504,7 @@ export default function RaceSetup() {
     setFrame(0)
     setError(null)
     setPaused(false)
+    setModalOpen(false)
   }
 
   function handleCarAChange(car) { setCarA(car); if (!car) resetRace() }
@@ -721,6 +816,11 @@ export default function RaceSetup() {
           distIdx={distIdx}
         />
       </div>
+
+      {/* ── Race complete modal ── */}
+      {hasRace && (
+        <RaceCompleteModal open={modalOpen} onClose={() => setModalOpen(false)} />
+      )}
 
       {/* ── Bottom HUD ── */}
       {(() => {
