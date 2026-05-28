@@ -9,74 +9,119 @@ function carLabel(car) {
   return `${car.year} ${car.make} ${car.model}`
 }
 
-// ── Lane ─────────────────────────────────────────────────────────────────────
+// ── DriveStrip ────────────────────────────────────────────────────────────────
 
-function Lane({ side, car, distFt, done }) {
+const OUTER_LINE  = 'rgba(245,245,240,0.06)'
+const DIVIDER_CLR = 'rgba(245,245,240,0.12)'
+
+function LaneLabel({ side, car, done }) {
   const accent = ACCENT[side]
-  const pct = Math.max(2, Math.min((distFt / 1320) * 100, 97))
-
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
-      <div style={{
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'space-between',
+    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+      <span style={{
+        fontFamily: 'var(--font-display)',
+        fontWeight: 700,
+        fontSize: '0.8rem',
+        letterSpacing: '0.1em',
+        textTransform: 'uppercase',
+        color: accent,
       }}>
+        {carLabel(car)}
+      </span>
+      {done && (
         <span style={{
-          fontFamily: 'var(--font-display)',
-          fontWeight: 700,
-          fontSize: '0.8rem',
+          fontFamily: 'var(--font-mono)',
+          fontSize: '0.65rem',
           letterSpacing: '0.1em',
-          textTransform: 'uppercase',
           color: accent,
         }}>
-          {carLabel(car)}
+          FINISHED
         </span>
-        {done && (
-          <span style={{
-            fontFamily: 'var(--font-mono)',
-            fontSize: '0.65rem',
-            letterSpacing: '0.1em',
-            color: accent,
-          }}>
-            FINISHED
-          </span>
-        )}
+      )}
+    </div>
+  )
+}
+
+function DriveStrip({ distAFt, distBFt }) {
+  const pctA = Math.max(2, Math.min((distAFt / 1320) * 100, 97))
+  const pctB = Math.max(2, Math.min((distBFt / 1320) * 100, 97))
+
+  return (
+    <div style={{
+      position: 'relative',
+      height: '8rem',
+      background: '#000000',
+      overflow: 'hidden',
+    }}>
+      {/* outer boundary — top edge */}
+      <div style={{
+        position: 'absolute', top: 0, left: 0, right: 0,
+        height: 1, background: OUTER_LINE,
+      }} />
+      {/* outer boundary — bottom edge */}
+      <div style={{
+        position: 'absolute', bottom: 0, left: 0, right: 0,
+        height: 1, background: OUTER_LINE,
+      }} />
+      {/* center divider — dashed 8px/8px */}
+      <div style={{
+        position: 'absolute', top: '50%', left: 0, right: 0,
+        height: 1,
+        backgroundImage: `repeating-linear-gradient(90deg, ${DIVIDER_CLR} 0px, ${DIVIDER_CLR} 8px, transparent 8px, transparent 16px)`,
+      }} />
+      {/* start line */}
+      <div style={{
+        position: 'absolute', left: 0, top: 0, bottom: 0,
+        width: 2, background: 'rgba(245,245,240,0.1)',
+      }} />
+      {/* finish line */}
+      <div style={{
+        position: 'absolute', right: 0, top: 0, bottom: 0,
+        width: 3, background: 'var(--color-yellow)',
+      }} />
+
+      {/* car A — LANE 01 (top half, centered at 25%) */}
+      <div style={{
+        position: 'absolute',
+        left: `${pctA}%`,
+        top: '25%',
+        transform: 'translate(-50%, -50%)',
+        width: '3.5rem',
+        height: '2rem',
+        background: ACCENT.a,
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        fontFamily: 'var(--font-display)',
+        fontWeight: 900,
+        fontSize: '0.85rem',
+        color: '#0B0B0B',
+        transition: 'left 0.05s linear',
+        letterSpacing: '0.05em',
+      }}>
+        A
       </div>
 
+      {/* car B — LANE 02 (bottom half, centered at 75%) */}
       <div style={{
-        height: '3.5rem',
-        background: 'var(--color-surface-2)',
-        border: `1px solid ${done ? accent : 'var(--color-border)'}`,
-        position: 'relative',
-        overflow: 'hidden',
-        transition: 'border-color 0.3s',
+        position: 'absolute',
+        left: `${pctB}%`,
+        top: '75%',
+        transform: 'translate(-50%, -50%)',
+        width: '3.5rem',
+        height: '2rem',
+        background: ACCENT.b,
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        fontFamily: 'var(--font-display)',
+        fontWeight: 900,
+        fontSize: '0.85rem',
+        color: '#0B0B0B',
+        transition: 'left 0.05s linear',
+        letterSpacing: '0.05em',
       }}>
-        {/* start line */}
-        <div style={{ position: 'absolute', left: 0, top: 0, bottom: 0, width: '2px', background: 'var(--color-border)' }} />
-        {/* finish line */}
-        <div style={{ position: 'absolute', right: 0, top: 0, bottom: 0, width: '3px', background: 'var(--color-yellow)' }} />
-        {/* car rect */}
-        <div style={{
-          position: 'absolute',
-          left: `${pct}%`,
-          top: '50%',
-          transform: 'translate(-50%, -50%)',
-          width: '3.5rem',
-          height: '2rem',
-          background: accent,
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          fontFamily: 'var(--font-display)',
-          fontWeight: 900,
-          fontSize: '0.85rem',
-          color: '#0B0B0B',
-          transition: 'left 0.05s linear',
-          letterSpacing: '0.05em',
-        }}>
-          {side.toUpperCase()}
-        </div>
+        B
       </div>
     </div>
   )
@@ -335,9 +380,10 @@ export default function RaceView() {
       gap: '1.25rem',
     }}>
       {/* track */}
-      <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
-        <Lane side="a" car={car_a} distFt={tick.dist_a_ft} done={aDone} />
-        <Lane side="b" car={car_b} distFt={tick.dist_b_ft} done={bDone} />
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
+        <LaneLabel side="a" car={car_a} done={aDone} />
+        <DriveStrip distAFt={tick.dist_a_ft} distBFt={tick.dist_b_ft} />
+        <LaneLabel side="b" car={car_b} done={bDone} />
       </div>
 
       {/* time counter */}
