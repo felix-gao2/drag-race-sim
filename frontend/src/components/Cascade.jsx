@@ -6,26 +6,83 @@ const TEXT = '#F5F5F0'
 const DIM  = 'rgba(245,245,240,0.35)'
 
 function TerminalSelect({ label, value, options, disabled, onChange, accentColor, getLabel }) {
-  const [open, setOpen] = useState(false)
-  const [hov,  setHov]  = useState(false)
-  const ref = useRef(null)
+  const [open,        setOpen]        = useState(false)
+  const [hov,         setHov]         = useState(false)
+  const [query,       setQuery]       = useState('')
+  const [highlighted, setHighlighted] = useState(-1)
+  const ref       = useRef(null)
+  const searchRef = useRef(null)
+  const listRef   = useRef(null)
 
+  const isRed           = accentColor === '#DC2626'
+  const dimBorder       = isRed ? 'rgba(220,38,38,0.5)'  : 'rgba(245,245,240,0.5)'
+  const fullBorder      = isRed ? '#DC2626'               : '#F5F5F0'
+  const hoverBg         = isRed ? 'rgba(220,38,38,0.15)' : 'rgba(245,245,240,0.08)'
+  const searchUnderline = isRed ? 'rgba(220,38,38,0.4)'  : 'rgba(245,245,240,0.4)'
+  const active          = open || hov
+
+  const displayValue = value != null ? (getLabel ? getLabel(value) : String(value)) : null
+
+  const filtered = options.filter(opt => {
+    const lbl = getLabel ? getLabel(opt) : String(opt)
+    return lbl.toLowerCase().includes(query.toLowerCase())
+  })
+
+  // autofocus search on open
+  useEffect(() => {
+    if (open && searchRef.current) searchRef.current.focus()
+  }, [open])
+
+  // click-outside: close + clear filter, keep prior value
   useEffect(() => {
     if (!open) return
     function handler(e) {
-      if (ref.current && !ref.current.contains(e.target)) setOpen(false)
+      if (ref.current && !ref.current.contains(e.target)) {
+        setOpen(false)
+        setQuery('')
+        setHighlighted(-1)
+      }
     }
     document.addEventListener('mousedown', handler)
     return () => document.removeEventListener('mousedown', handler)
   }, [open])
 
-  const isRed      = accentColor === '#DC2626'
-  const dimBorder  = isRed ? 'rgba(220,38,38,0.5)' : 'rgba(245,245,240,0.5)'
-  const fullBorder = isRed ? '#DC2626' : '#F5F5F0'
-  const hoverBg    = isRed ? 'rgba(220,38,38,0.15)' : 'rgba(245,245,240,0.08)'
-  const active     = open || hov
+  // reset highlight when query changes
+  useEffect(() => { setHighlighted(-1) }, [query])
 
-  const displayValue = value != null ? (getLabel ? getLabel(value) : String(value)) : null
+  // scroll highlighted row into view
+  useEffect(() => {
+    if (highlighted < 0 || !listRef.current) return
+    const rows = listRef.current.querySelectorAll('[data-opt]')
+    rows[highlighted]?.scrollIntoView({ block: 'nearest' })
+  }, [highlighted])
+
+  function handleToggle() {
+    if (!open) { setQuery(''); setHighlighted(-1) }
+    setOpen(o => !o)
+  }
+
+  function selectOpt(opt) {
+    onChange(opt)
+    setOpen(false)
+    setQuery('')
+    setHighlighted(-1)
+  }
+
+  function handleKeyDown(e) {
+    if (e.key === 'Escape') {
+      setOpen(false); setQuery(''); setHighlighted(-1)
+    } else if (e.key === 'ArrowDown') {
+      e.preventDefault()
+      setHighlighted(h => Math.min(h + 1, filtered.length - 1))
+    } else if (e.key === 'ArrowUp') {
+      e.preventDefault()
+      setHighlighted(h => Math.max(h - 1, 0))
+    } else if (e.key === 'Enter') {
+      e.preventDefault()
+      if (highlighted >= 0 && filtered[highlighted] != null) selectOpt(filtered[highlighted])
+    }
+  }
 
   return (
     <div
@@ -48,7 +105,7 @@ function TerminalSelect({ label, value, options, disabled, onChange, accentColor
       </span>
 
       <div
-        onClick={() => setOpen(o => !o)}
+        onClick={handleToggle}
         onMouseEnter={() => setHov(true)}
         onMouseLeave={() => setHov(false)}
         style={{
@@ -90,36 +147,81 @@ function TerminalSelect({ label, value, options, disabled, onChange, accentColor
           background: '#060606',
           border: '0.5px solid rgba(245,245,240,0.18)',
           zIndex: 200,
-          maxHeight: 180,
-          overflowY: 'auto',
+          display: 'flex',
+          flexDirection: 'column',
+          maxHeight: 360,
         }}>
-          {options.map((opt, i) => {
-            const label = getLabel ? getLabel(opt) : String(opt)
-            const selected = getLabel
-              ? (value != null && getLabel(value) === label)
-              : opt === value
-            return (
-              <div
-                key={i}
-                onClick={() => { onChange(opt); setOpen(false) }}
-                style={{
-                  padding: '12px 14px',
-                  fontFamily: MONO, fontSize: 14,
-                  color: selected ? accentColor : TEXT,
-                  cursor: 'pointer',
-                  letterSpacing: '0.08em',
-                  textTransform: 'uppercase',
-                  borderBottom: i < options.length - 1
-                    ? '1px solid rgba(245,245,240,0.05)'
-                    : 'none',
-                }}
-                onMouseEnter={e => e.currentTarget.style.background = hoverBg}
-                onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
-              >
-                {label}
+          {/* search input pinned at top */}
+          <div style={{
+            flexShrink: 0,
+            borderBottom: `1px solid ${searchUnderline}`,
+            padding: '0 14px',
+          }}>
+            <input
+              ref={searchRef}
+              className="ts-search"
+              value={query}
+              onChange={e => setQuery(e.target.value)}
+              onKeyDown={handleKeyDown}
+              placeholder="SEARCH_"
+              style={{
+                display: 'block',
+                width: '100%',
+                background: 'transparent',
+                border: 'none',
+                fontFamily: MONO,
+                fontSize: 14,
+                color: '#F5F5F0',
+                letterSpacing: '0.08em',
+                padding: '10px 0',
+                caretColor: accentColor,
+              }}
+            />
+          </div>
+
+          {/* scrollable option list */}
+          <div ref={listRef} style={{ overflowY: 'auto', flex: 1 }}>
+            {filtered.length === 0 ? (
+              <div style={{
+                padding: '12px 14px',
+                fontFamily: MONO, fontSize: 13,
+                color: 'rgba(245,245,240,0.3)',
+                letterSpacing: '0.08em',
+                textTransform: 'uppercase',
+                userSelect: 'none',
+              }}>
+                NO MATCH
               </div>
-            )
-          })}
+            ) : filtered.map((opt, i) => {
+              const lbl      = getLabel ? getLabel(opt) : String(opt)
+              const selected = getLabel
+                ? (value != null && getLabel(value) === lbl)
+                : opt === value
+              const isHigh   = i === highlighted
+              return (
+                <div
+                  key={i}
+                  data-opt
+                  onClick={() => selectOpt(opt)}
+                  onMouseEnter={() => setHighlighted(i)}
+                  style={{
+                    padding: '12px 14px',
+                    fontFamily: MONO, fontSize: 14,
+                    color: selected ? accentColor : TEXT,
+                    cursor: 'pointer',
+                    letterSpacing: '0.08em',
+                    textTransform: 'uppercase',
+                    background: isHigh ? hoverBg : 'transparent',
+                    borderBottom: i < filtered.length - 1
+                      ? '1px solid rgba(245,245,240,0.05)'
+                      : 'none',
+                  }}
+                >
+                  {lbl}
+                </div>
+              )
+            })}
+          </div>
         </div>
       )}
     </div>

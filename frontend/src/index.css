@@ -70,3 +70,12 @@ body::before {
 .rec-pulse {
   animation: sysBlink 2s ease-in-out infinite;
 }
+
+.ts-search::placeholder {
+  color: rgba(245, 245, 240, 0.3);
+  letter-spacing: 0.08em;
+}
+
+.ts-search:focus {
+  outline: none;
+}
