@@ -74,11 +74,18 @@ function DriveStrip({ distAFt, distBFt }) {
         position: 'absolute', left: 0, top: 0, bottom: 0,
         width: 2, background: 'rgba(245,245,240,0.1)',
       }} />
-      {/* finish line */}
-      <div style={{
-        position: 'absolute', right: 0, top: 0, bottom: 0,
-        width: 3, background: 'var(--color-yellow)',
-      }} />
+      {/* checkered finish band — 1px leading edge + 20px (2×10px cells) checker */}
+      <div style={{ position: 'absolute', right: 0, top: 0, bottom: 0, width: 21 }}>
+        <div style={{
+          position: 'absolute', left: 0, top: 0, bottom: 0,
+          width: 1, background: 'rgba(245,245,240,0.8)',
+        }} />
+        <div style={{
+          position: 'absolute', left: 1, top: 0, bottom: 0, right: 0,
+          backgroundImage: 'repeating-conic-gradient(rgba(245,245,240,0.7) 0% 25%, transparent 0% 50%)',
+          backgroundSize: '20px 20px',
+        }} />
+      </div>
 
       {/* car A — LANE 01 (top half, centered at 25%) */}
       <div style={{
