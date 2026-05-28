@@ -633,6 +633,51 @@ function TimelineScrubber({ telemetry, frame, onScrub }) {
   )
 }
 
+// ── Christmas Tree ────────────────────────────────────────────────────────────
+
+function ChristmasTree({ litCount }) {
+  const BULB = 26
+  const GAP  = 5
+  const RED  = '#DC2626'
+
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+      <div style={{
+        border: '1px solid rgba(245,245,240,0.25)',
+        padding: '8px 14px',
+        display: 'flex', flexDirection: 'column',
+        alignItems: 'center', gap: `${GAP}px`,
+      }}>
+        {[1, 2, 3, 4].map(n => {
+          const lit      = n <= litCount
+          const isLaunch = n === 4
+          return (
+            <div key={n} style={{
+              width: BULB, height: BULB,
+              borderRadius: '50%',
+              background: lit ? RED : 'transparent',
+              border: (lit && isLaunch)
+                ? '1px solid rgba(245,245,240,0.9)'
+                : lit
+                  ? `1px solid ${RED}`
+                  : '1px solid rgba(220,38,38,0.25)',
+              transition: 'background 0.06s',
+            }} />
+          )
+        })}
+      </div>
+      <span style={{
+        marginTop: 6,
+        fontFamily: MONO, fontSize: 11,
+        letterSpacing: '0.12em', textTransform: 'uppercase',
+        color: 'rgba(245,245,240,0.5)',
+      }}>
+        {litCount >= 4 ? 'GO' : 'STAGED'}
+      </span>
+    </div>
+  )
+}
+
 const INIT_MILESTONES = {
   a: { sixty: null, hundred: null, sixtyFt: null, threethirtyFt: null, eighth: null, eighthSpeed: null, trap: null, et: null, half: null, halfSpeed: null },
   b: { sixty: null, hundred: null, sixtyFt: null, threethirtyFt: null, eighth: null, eighthSpeed: null, trap: null, et: null, half: null, halfSpeed: null },
@@ -655,6 +700,8 @@ export default function RaceSetup() {
   const [error,     setError]     = useState(null)
   const [modalOpen, setModalOpen] = useState(false)
   const [shareId,   setShareId]   = useState(null)
+  const [litCount,    setLitCount]    = useState(0)
+  const [treeFading,  setTreeFading]  = useState(false)
 
   // Load shared race from URL slug on mount
   useEffect(() => {
@@ -670,6 +717,21 @@ export default function RaceSetup() {
   const ready    = carA !== null && carB !== null
   const sameCar  = ready && carA.id === carB.id
   const canStart = ready && !sameCar
+
+  // countdown sequence: fires when raceState flips to 'countdown'
+  useEffect(() => {
+    if (raceState !== 'countdown') return
+    setLitCount(1)
+    setTreeFading(false)
+    const t1 = setTimeout(() => setLitCount(2), 350)
+    const t2 = setTimeout(() => setLitCount(3), 700)
+    const t3 = setTimeout(() => {
+      setLitCount(4)
+      setRaceState('racing')
+      setTreeFading(true)
+    }, 1050)
+    return () => { clearTimeout(t1); clearTimeout(t2); clearTimeout(t3) }
+  }, [raceState])
 
   useEffect(() => {
     if (raceState !== 'done') return
@@ -730,6 +792,8 @@ export default function RaceSetup() {
     setPaused(false)
     setModalOpen(false)
     setShareId(null)
+    setLitCount(0)
+    setTreeFading(false)
     window.history.replaceState(null, '', '/race')
   }
 
@@ -752,8 +816,8 @@ export default function RaceSetup() {
       setShareId(slug)
       setRaceData(data)
       setFrame(0)
-      setRaceState('racing')
       setPaused(false)
+      setRaceState('countdown')
     } catch {
       setError('Failed to start race. Is the server running?')
       setRaceState('idle')
@@ -766,6 +830,8 @@ export default function RaceSetup() {
     setFrame(0)
     setError(null)
     setPaused(false)
+    setLitCount(0)
+    setTreeFading(false)
   }
 
   function handlePlayPause() {
@@ -926,6 +992,24 @@ export default function RaceSetup() {
         ))}
         <span style={{ position: 'absolute', right: 6, bottom: 14, fontFamily: MONO, fontSize: 8, color: 'rgba(245,245,240,0.2)', letterSpacing: '0.08em', textTransform: 'uppercase' }}>1/4 MILE</span>
 
+        {/* Christmas tree overlay */}
+        {(raceState === 'countdown' || treeFading) && (
+          <div
+            onTransitionEnd={() => { if (treeFading) setTreeFading(false) }}
+            style={{
+              position: 'absolute',
+              left: '50%', top: '50%',
+              transform: 'translate(-50%, -50%)',
+              zIndex: 20,
+              pointerEvents: 'none',
+              opacity: treeFading ? 0 : 1,
+              transition: treeFading ? 'opacity 0.3s ease-out' : 'none',
+            }}
+          >
+            <ChristmasTree litCount={litCount} />
+          </div>
+        )}
+
         {/* Lane A car */}
         {(() => {
           const live = raceData && frame < raceData.telemetry.length
@@ -1008,7 +1092,7 @@ export default function RaceSetup() {
               {sameCar ? 'SAME CAR' : error}
             </span>
           )}
-          {raceState === 'racing' || raceState === 'loading' ? (
+          {raceState === 'racing' || raceState === 'loading' || raceState === 'countdown' ? (
             <span style={{ fontFamily: DISPLAY, fontSize: 22, letterSpacing: '0.04em', textTransform: 'uppercase', color: DIM, opacity: 0.5, display: 'flex', alignItems: 'center', userSelect: 'none' }}>
               {'>'} {raceState === 'loading' ? 'LOADING...' : 'RACING...'}
             </span>
