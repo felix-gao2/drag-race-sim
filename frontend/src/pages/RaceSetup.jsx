@@ -702,6 +702,8 @@ export default function RaceSetup() {
   const [shareId,   setShareId]   = useState(null)
   const [litCount,    setLitCount]    = useState(0)
   const [treeFading,  setTreeFading]  = useState(false)
+  const [slowMoRate,  setSlowMoRate]  = useState(null)
+  const slowMoTimerRef = useRef(null)
 
   // Load shared race from URL slug on mount
   useEffect(() => {
@@ -766,10 +768,23 @@ export default function RaceSetup() {
     return m
   }, [raceData, raceState, frame])
 
-  // animation loop — respects pause and speed
+  const winnerCrossFrame = useMemo(() => {
+    if (!raceData) return null
+    const wId = raceData.winner_id
+    const isWinnerA = wId === raceData.car_a?.id
+    const distKey = wId ? (isWinnerA ? 'dist_a_ft' : 'dist_b_ft') : null
+    for (let i = 0; i < raceData.telemetry.length; i++) {
+      const t = raceData.telemetry[i]
+      if (distKey ? t[distKey] >= 1320 : (t.dist_a_ft >= 1320 || t.dist_b_ft >= 1320)) return i
+    }
+    return null
+  }, [raceData])
+
+  // animation loop — respects pause, speed, and slow-mo override
   useEffect(() => {
     if (raceState !== 'racing' || !raceData || paused) return
-    const interval = Math.round(50 / SPEED_RATES[speedIdx])
+    const effectiveRate = slowMoRate !== null ? slowMoRate : SPEED_RATES[speedIdx]
+    const interval = Math.round(50 / effectiveRate)
     const id = setInterval(() => {
       setFrame(f => {
         const next = f + 1
@@ -778,13 +793,29 @@ export default function RaceSetup() {
           setRaceState('done')
           return f
         }
+        if (next === winnerCrossFrame && slowMoRate === null && raceData.margin_sec < 0.4) {
+          setSlowMoRate(0.25)
+          slowMoTimerRef.current = setTimeout(() => {
+            slowMoTimerRef.current = null
+            setSlowMoRate(null)
+          }, 600)
+        }
         return next
       })
     }, interval)
     return () => clearInterval(id)
-  }, [raceState, raceData, paused, speedIdx])
+  }, [raceState, raceData, paused, speedIdx, slowMoRate, winnerCrossFrame])
+
+  function clearSlowMo() {
+    if (slowMoTimerRef.current) {
+      clearTimeout(slowMoTimerRef.current)
+      slowMoTimerRef.current = null
+    }
+    setSlowMoRate(null)
+  }
 
   function resetRace() {
+    clearSlowMo()
     setRaceState('idle')
     setRaceData(null)
     setFrame(0)
@@ -825,6 +856,7 @@ export default function RaceSetup() {
   }
 
   function handleRaceAgain() {
+    clearSlowMo()
     setRaceState('idle')
     setRaceData(null)
     setFrame(0)
@@ -845,22 +877,26 @@ export default function RaceSetup() {
   }
 
   function handleRestart() {
+    clearSlowMo()
     setFrame(0)
     setPaused(true)
     if (raceState === 'done') setRaceState('racing')
   }
 
   function handlePrev() {
+    clearSlowMo()
     setFrame(f => Math.max(0, f - 1))
   }
 
   function handleNext() {
     if (!raceData) return
+    clearSlowMo()
     setFrame(f => Math.min(f + 1, raceData.telemetry.length - 1))
   }
 
   function handleScrub(targetFrame) {
     if (!raceData) return
+    clearSlowMo()
     const clamped = Math.max(0, Math.min(targetFrame, raceData.telemetry.length - 1))
     setFrame(clamped)
     if (raceState === 'done' && clamped < raceData.telemetry.length - 1 && !paused) {
