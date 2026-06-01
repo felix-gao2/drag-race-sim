@@ -450,16 +450,70 @@ function RaceCompleteModal({ open, onClose, onNewRace, raceData, milestones, dis
             window.open(`https://reddit.com/submit?url=${encodeURIComponent(shareUrl)}&title=${encodeURIComponent(redditTitle)}`, '_blank')
           }
 
+          function handleDownload() {
+            const COL1 = 14, COL2 = 15
+            const pad = (label, va, vb) =>
+              `${label.padEnd(COL1)}${(va ?? '—').padEnd(COL2)}${vb ?? '—'}`
+            const fmt = (v, dec, unit) => v != null ? `${v.toFixed(dec)} ${unit}` : '—'
+            const fmtEt = (et, speed) =>
+              et != null ? (speed != null ? `${et.toFixed(2)} @${speed}` : `${et.toFixed(2)} S`) : '—'
+
+            const a = milestones?.a
+            const b = milestones?.b
+            const SEP = '='.repeat(44)
+            const DIV = '-'.repeat(40)
+
+            const slipRows = [
+              pad('0-60 MPH',  fmt(a?.sixty, 2, 'S'),        fmt(b?.sixty, 2, 'S')),
+              pad('0-100 MPH', fmt(a?.hundred, 2, 'S'),       fmt(b?.hundred, 2, 'S')),
+              pad('60 FT',     fmt(a?.sixtyFt, 3, 'S'),       fmt(b?.sixtyFt, 3, 'S')),
+              pad('330 FT',    fmt(a?.threethirtyFt, 3, 'S'), fmt(b?.threethirtyFt, 3, 'S')),
+              pad('1/8 MILE',  fmtEt(a?.eighth, a?.eighthSpeed), fmtEt(b?.eighth, b?.eighthSpeed)),
+              ...(distIdx !== 1 ? [pad('1/4 MILE',
+                fmtEt(a?.et, a?.trap != null ? Math.round(a.trap) : null),
+                fmtEt(b?.et, b?.trap != null ? Math.round(b.trap) : null))] : []),
+              pad('TRAP',      fmt(a?.trap,  1, 'MPH'), fmt(b?.trap,  1, 'MPH')),
+              pad('FUEL',      fmt(fuelA, 3, 'GAL'),    fmt(fuelB, 3, 'GAL')),
+            ]
+
+            const winnerLine = deadHeat
+              ? 'DEAD HEAT'
+              : winCar
+                ? `${winCar.year} ${winCar.make} ${winCar.model}${marginLine ? ` (${marginLine})` : ''}`
+                : 'UNKNOWN'
+
+            const text = [
+              'DRAG RACE SIM // TIMESLIP',
+              SEP,
+              configText,
+              DIV,
+              pad('', 'LANE 01', 'LANE 02'),
+              ...slipRows,
+              DIV,
+              `WINNER: ${winnerLine}`,
+              SEP,
+            ].join('\n')
+
+            const blob = new Blob([text], { type: 'text/plain' })
+            const url  = URL.createObjectURL(blob)
+            const el   = document.createElement('a')
+            el.href     = url
+            el.download = `timeslip-${shareId ?? 'race'}.txt`
+            el.click()
+            URL.revokeObjectURL(url)
+          }
+
           return (
             <div style={{ marginBottom: 32 }}>
               <span style={{ fontFamily: DISPLAY, fontSize: 14, color: ACCENT, letterSpacing: '0.04em', textTransform: 'uppercase', display: 'flex', alignItems: 'center', marginBottom: 12 }}>
                 {'> SHARE'}
                 <span className="blink" style={{ marginLeft: 2 }}>_</span>
               </span>
-              <div style={{ display: 'flex', gap: 12 }}>
+              <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap' }}>
                 <ModalBtn label={copied ? '✓ COPIED' : 'COPY LINK_'} onClick={handleCopy} copied={copied} />
                 <ModalBtn label="TWITTER" onClick={handleTwitter} />
                 <ModalBtn label="REDDIT"  onClick={handleReddit} />
+                <ModalBtn label="DOWNLOAD SLIP_" onClick={handleDownload} />
               </div>
             </div>
           )
